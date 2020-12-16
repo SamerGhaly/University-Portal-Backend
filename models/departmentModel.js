@@ -6,6 +6,10 @@ const departmentSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Faculty',
   },
+  headOfDepartment: {
+    ref: 'Member',
+    type: mongoose.Schema.Types.ObjectId,
+  },
 })
 
 departmentSchema.virtual('membersPerDepartment', {
