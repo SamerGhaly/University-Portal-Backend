@@ -10,5 +10,5 @@ const courseAssignmentSchema=new mongoose.Schema({
         ref:'Member'
     }
 })
-const Model=mongoose.model('courseAssignmentSchema',courseAssignmentSchema)
+const Model=mongoose.model('CourseAssignment',courseAssignmentSchema)
 module.exports=Model
