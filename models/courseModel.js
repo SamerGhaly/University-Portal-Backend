@@ -7,6 +7,10 @@ const courseSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Member',
   },
+  instructor: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Member',
+  },
   department: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Department',

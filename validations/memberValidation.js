@@ -8,11 +8,11 @@ const validateLogin = (req, res, next) => {
     password: Joi.string().required(),
   })
 
-  const checkValidSchema = loginSchema.validate(req.body)
-  if (checkValidSchema.error) {
-    return res.json({
-      code: validationError,
-      message: checkValidSchema.error.details[0],
+  const checkSchema = loginSchema.validate(req.body)
+  if (checkSchema.error) {
+    return res.status(400).json({
+      code: checkSchema,
+      message: checkSchema.error.details[0],
     })
   }
   next()
@@ -21,12 +21,34 @@ const validateLogin = (req, res, next) => {
 const validateAddMember = (req, res, next) => {
   const addMemberSchema = Joi.object({
     name: Joi.string().required(),
-    email: Joi.string(),
+    email: Joi.string().required(),
+    // office: Joi.string().required(), //To be adjusted to real objectId
+    salary: Joi.string().required(),
+    // department: Joi.string(),
+    dayoff: Joi.string().required(),
+    type: Joi.string().required(),
+    birthdate: Joi.date(),
   })
   const checkSchema = addMemberSchema.validate(req.body)
   if (checkSchema.error) {
     return res.status(400).json({
-      message: 'Wrong Body',
+      code: validationError,
+      message: checkSchema.error.details[0],
+    })
+  }
+  next()
+}
+
+const validateActivateAccount = (req, res, next) => {
+  const activateAccountSchema = Joi.object({
+    memberId: Joi.string().length(24).required(),
+    newPassword: Joi.string().required(),
+  })
+  const checkSchema = activateAccountSchema.validate(req.body)
+  if (checkSchema.error) {
+    return res.status(400).json({
+      code: validationError,
+      message: checkSchema.error.details[0],
     })
   }
   next()
@@ -35,4 +57,5 @@ const validateAddMember = (req, res, next) => {
 module.exports = {
   validateLogin,
   validateAddMember,
+  validateActivateAccount,
 }
