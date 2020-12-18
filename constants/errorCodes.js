@@ -7,4 +7,7 @@ module.exports = {
   catchError: '006',
   memberAlreadyActivated: '007',
   unauthorized: '008',
+  cannotEditFields: '009',
+  hrDayOff: '010',
+  passwordsNotIdentical: '011',
 }

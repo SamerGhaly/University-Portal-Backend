@@ -1,6 +1,7 @@
 require('dotenv').config()
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
+const mongoose = require('mongoose')
 
 const MemberModel = require('../models/memberModel')
 const {
@@ -9,7 +10,12 @@ const {
   emailAlreadyExists,
   catchError,
   memberAlreadyActivated,
+  unauthorized,
+  cannotEditFields,
+  hrDayOff,
+  passwordsNotIdentical,
 } = require('../constants/errorCodes')
+const { memberRoles } = require('../constants/constants')
 
 const login = async (req, res) => {
   try {
@@ -71,6 +77,12 @@ const addMember = async (req, res) => {
   let customId
   if (member.type === 'hr') {
     const countHR = await MemberModel.countDocuments({ type: 'hr' })
+    if (member.dayoff !== 'Saturday') {
+      return res.json({
+        code: hrDayOff,
+        message: 'HR dayoff must be Saturday',
+      })
+    }
     member.dayoff = 'Saturday'
     customId = 'hr-' + (countHR + 1)
   } else {
@@ -122,4 +134,125 @@ const activateAccount = async (req, res) => {
   }
 }
 
-module.exports = { addMember, login, activateAccount }
+const updateMember = async (req, res) => {
+  try {
+    const userType = req.member.type
+    const userId = req.member.memberId
+    const memberFound = await MemberModel.findById(req.body.memberId)
+    if (!memberFound) {
+      return res.status(404).json({
+        code: userNotFound,
+        message: 'Member Not Found',
+      })
+    }
+    // Can update name,email,salary,department,birthdate,office
+    if (userType === memberRoles.HR) {
+      if (req.body.name) memberFound.name = req.body.name
+      if (req.body.department) memberFound.department = req.body.department
+      if (req.body.salary) memberFound.salary = req.body.salary
+      if (req.body.type) memberFound.type = req.body.type
+      if (req.body.gender) memberFound.gener = req.body.gender
+    }
+    // Can update name,email,salary,department,birthdate,office
+    else {
+      if (memberFound._id.toString() !== userId) {
+        return res.status(403).json({
+          code: unauthorized,
+          message: 'You are not authorized to change other members details',
+        })
+      }
+      if (
+        req.body.name ||
+        req.body.salary ||
+        req.body.department ||
+        req.body.type ||
+        req.body.gender
+      ) {
+        return res.status(400).json({
+          code: cannotEditFields,
+          message: 'You cannot edit name, department or salary',
+        })
+      }
+    }
+    if (req.body.email) memberFound.email = req.body.email
+    if (req.body.birthdate) memberFound.birthdate = req.body.birthdate
+    if (req.body.office) {
+      //Check for office capacity !!! Waiting Samer
+      memberFound.office = req.body.office
+    }
+    await MemberModel.findByIdAndUpdate(memberFound._id, memberFound)
+    return res.json({
+      message: 'Member Updated Successfully',
+    })
+  } catch (err) {
+    console.log(err)
+    return res.json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
+const viewMember = async (req, res) => {
+  try {
+    const memberFound = await MemberModel.findById(req.body.memberId)
+    if (!memberFound) {
+      return res.status(404).json({
+        code: userNotFound,
+        message: 'User Not Found',
+      })
+    }
+    memberFound.password = undefined
+    return res.json({
+      data: memberFound,
+    })
+  } catch (err) {
+    console.log(err)
+    return res.json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
+const resetPassword = async (req, res) => {
+  try {
+    const memberFound = await MemberModel.findById(req.body.memberId)
+    if (!memberFound) {
+      return res.status(404).json({
+        code: userNotFound,
+        message: 'User Not Found',
+      })
+    }
+    const checkPass = await bcrypt.compareSync(
+      req.body.oldPassword,
+      memberFound.password
+    )
+    if (!checkPass) {
+      return res.status(400).json({
+        code: passwordsNotIdentical,
+        message: 'Old Password is wrong!',
+      })
+    }
+    memberFound.password = await bcrypt.hashSync(req.body.newPassword)
+    await MemberModel.findByIdAndUpdate(memberFound._id, memberFound)
+    return res.json({
+      message: 'Password Changed Successfuly',
+    })
+  } catch (err) {
+    console.log(err)
+    return res.json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
+module.exports = {
+  addMember,
+  login,
+  activateAccount,
+  updateMember,
+  viewMember,
+  resetPassword,
+}
