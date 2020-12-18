@@ -4,5 +4,10 @@ const memberRoles = {
   instructor: 'instructor',
   ta: 'teaching assistant',
 }
-
-module.exports = { memberRoles }
+const roomTypes={
+    HALL: "hall",
+    LAB :"lab",
+    TUTURIAL:"tuturial",
+    OFFICE:"office"
+}
+module.exports = { memberRoles ,roomTypes }
