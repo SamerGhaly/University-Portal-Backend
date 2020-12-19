@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs')
 const mongoose = require('mongoose')
 const AttendanceRecordModel = require('../models/attendanceRecordModel')
 const MemberModel = require('../models/memberModel')
+const RoomModel = require('../models/roomModel')
 
 const {
   userNotFound,
@@ -18,8 +19,15 @@ const {
   signInError,
   signOutError,
   hrCannotAddRecToThemselves,
+  roomDoesnotExist,
+  roomIsFull,
+  roomNotOffice,
 } = require('../constants/errorCodes')
-const { memberRoles, attendanceRecordTypes } = require('../constants/constants')
+const {
+  memberRoles,
+  attendanceRecordTypes,
+  roomTypes,
+} = require('../constants/constants')
 const attendanceRecordModel = require('../models/attendanceRecordModel')
 
 const login = async (req, res) => {
@@ -78,35 +86,60 @@ const addMember = async (req, res) => {
     })
   }
   //Check if office has capacity
-
+  const officeFound = await RoomModel.findById(req.body.office)
+  if (!officeFound) {
+    return res.status(404).json({
+      code: roomDoesnotExist,
+      message: 'Room Does Not Exist',
+    })
+  }
+  if (officeFound.type !== roomTypes.OFFICE) {
+    return res.status(400).json({
+      code: roomNotOffice,
+      message: 'Room is not an office',
+    })
+  }
+  const officeCapacity = await MemberModel.countDocuments({
+    office: req.body.office,
+  })
+  if (officeCapacity === officeFound.capacity) {
+    return res.json({
+      code: roomIsFull,
+      message: 'Room is Already Full',
+    })
+  }
   let customId
   if (member.type === 'hr') {
-    const countHR = await MemberModel.countDocuments({ type: 'hr' })
-    if (member.dayoff !== 'Saturday') {
-      return res.json({
-        code: hrDayOff,
-        message: 'HR dayoff must be Saturday',
-      })
-    }
-    member.dayoff = 'Saturday'
-    customId = 'hr-' + (countHR + 1)
-  } else {
-    const countAcademic = await MemberModel.countDocuments({
-      type: { $ne: 'hr' },
+    const lastHr = await MemberModel.findOne({ type: 'hr' }, null, {
+      sort: { customId: -1 },
     })
-    customId = 'ac-' + (countAcademic + 1)
+    console.log(lastHr)
+    //   if (member.dayoff !== 'saturday') {
+    //     return res.json({
+    //       code: hrDayOff,
+    //       message: 'HR dayoff must be Saturday',
+    //     })
+    //   }
+    //   member.dayoff = 'saturday'
+    //   customId = 'hr-' + (countHR + 1)
   }
-  member.password = await bcrypt.hashSync('123456', Number(process.env.SALT))
-  member.activated = false
-  member.customId = customId
-  const createdMember = await MemberModel.create(member)
+  // else {
+  //   const countAcademic = await MemberModel.countDocuments({
+  //     type: { $ne: 'hr' },
+  //   })
+  //   customId = 'ac-' + (countAcademic + 1)
+  // }
+  // member.password = await bcrypt.hashSync('123456', Number(process.env.SALT))
+  // member.activated = false
+  // member.customId = customId
+  // const createdMember = await MemberModel.create(member)
   return res.json({
     message: 'Member Added',
-    data: createdMember,
+    // data: createdMember,
   })
 }
 
-const activateAccount = async (req, res) => {
+const resetPassword = async (req, res) => {
   try {
     const memberFound = await MemberModel.findById(req.body.memberId)
     if (!memberFound) {
@@ -210,39 +243,6 @@ const viewMember = async (req, res) => {
     memberFound.password = undefined
     return res.json({
       data: memberFound,
-    })
-  } catch (err) {
-    console.log(err)
-    return res.json({
-      message: 'catch error',
-      code: catchError,
-    })
-  }
-}
-
-const resetPassword = async (req, res) => {
-  try {
-    const memberFound = await MemberModel.findById(req.body.memberId)
-    if (!memberFound) {
-      return res.status(404).json({
-        code: userNotFound,
-        message: 'User Not Found',
-      })
-    }
-    const checkPass = await bcrypt.compareSync(
-      req.body.oldPassword,
-      memberFound.password
-    )
-    if (!checkPass) {
-      return res.status(400).json({
-        code: passwordsNotIdentical,
-        message: 'Old Password is wrong!',
-      })
-    }
-    memberFound.password = await bcrypt.hashSync(req.body.newPassword)
-    await MemberModel.findByIdAndUpdate(memberFound._id, memberFound)
-    return res.json({
-      message: 'Password Changed Successfuly',
     })
   } catch (err) {
     console.log(err)
@@ -422,7 +422,6 @@ const addMissingSign = async (req, res) => {
 module.exports = {
   addMember,
   login,
-  activateAccount,
   updateMember,
   viewMember,
   resetPassword,

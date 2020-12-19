@@ -13,4 +13,7 @@ module.exports = {
   signInError: '012',
   signOutError: '013',
   hrCannotAddRecToThemselves: '014',
+  roomDoesnotExist: '100',
+  roomIsFull: '101',
+  roomNotOffice: '102',
 }

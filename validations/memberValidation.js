@@ -40,7 +40,7 @@ const validateAddMember = (req, res, next) => {
   next()
 }
 
-const validateActivateAccount = (req, res, next) => {
+const validateResetPassword = (req, res, next) => {
   const activateAccountSchema = Joi.object({
     memberId: Joi.string().length(24).required(),
     newPassword: Joi.string().required(),
@@ -90,21 +90,21 @@ const validateViewMember = (req, res, next) => {
   next()
 }
 
-const validateResetPassword = (req, res, next) => {
-  const validateResetPasswordSchema = Joi.object({
-    memberId: Joi.string().required(),
-    oldPassword: Joi.string().required(),
-    newPassword: Joi.string().required(),
-  })
-  const checkSchema = validateResetPasswordSchema.validate(req.body)
-  if (checkSchema.error) {
-    return res.status(400).json({
-      code: validationError,
-      message: checkSchema.error.details[0],
-    })
-  }
-  next()
-}
+// const validateResetPassword = (req, res, next) => {
+//   const validateResetPasswordSchema = Joi.object({
+//     memberId: Joi.string().required(),
+//     oldPassword: Joi.string().required(),
+//     newPassword: Joi.string().required(),
+//   })
+//   const checkSchema = validateResetPasswordSchema.validate(req.body)
+//   if (checkSchema.error) {
+//     return res.status(400).json({
+//       code: validationError,
+//       message: checkSchema.error.details[0],
+//     })
+//   }
+//   next()
+// }
 
 const validateSignInOut = (req, res, next) => {
   const signSchema = Joi.object({
@@ -140,7 +140,7 @@ const validateMissingSign = (req, res, next) => {
 module.exports = {
   validateLogin,
   validateAddMember,
-  validateActivateAccount,
+  // validateActivateAccount,
   validateUpdateMember,
   validateViewMember,
   validateResetPassword,

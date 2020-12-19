@@ -1,7 +1,10 @@
 const mongoose = require('mongoose')
 
 const roomSchema = new mongoose.Schema({
-  name: String,
+  name: {
+    type:String ,
+    unique:true
+  },
   type: String,
   capacity: Number,
 })

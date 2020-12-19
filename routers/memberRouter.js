@@ -5,7 +5,6 @@ const {
   validateAddMember,
   validateUpdateMember,
   validateLogin,
-  validateActivateAccount,
   validateViewMember,
   validateResetPassword,
   validateSignInOut,
@@ -14,10 +13,9 @@ const {
 const {
   addMember,
   login,
-  activateAccount,
+  resetPassword,
   updateMember,
   viewMember,
-  resetPassword,
   signIn,
   signOut,
   addMissingSign,
@@ -39,7 +37,6 @@ router.post(
 router.post('/addMember', validateAddMember, verifyToken, verifyHR, addMember)
 router.put('/updateMember', validateUpdateMember, verifyToken, updateMember)
 router.post('/viewMember', validateViewMember, verifyToken, viewMember)
-router.post('/resetPassword', validateResetPassword, verifyToken, resetPassword)
-router.post('/activateAccount', validateActivateAccount, activateAccount)
+router.post('/resetPassword', validateResetPassword, resetPassword)
 
 module.exports = router
