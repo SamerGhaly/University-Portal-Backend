@@ -10,6 +10,7 @@ const memberSchema = new mongoose.Schema({
   salary: Number,
   birthdate: Date,
   activated: Boolean,
+  gender: String,
   department: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Department',
