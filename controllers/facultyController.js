@@ -1,6 +1,7 @@
 const { IdnotFound } = require("../constants/errorCodes");
 const Faculty = require("../models/facultyModel");
 const Department = require("../models/departmentModel");
+
 const addFaculty = async (req, res) => {
   await Faculty.create(req.body);
   return res.json({
