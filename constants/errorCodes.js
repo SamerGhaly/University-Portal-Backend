@@ -10,4 +10,5 @@ module.exports = {
   cannotEditFields: '009',
   hrDayOff: '010',
   passwordsNotIdentical: '011',
+  roomDoesnotExist:'100'
 }
