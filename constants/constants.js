@@ -5,4 +5,9 @@ const memberRoles = {
   TA: 'teaching assistant',
 }
 
-module.exports = { memberRoles }
+const attendanceRecordTypes = {
+  SIGN_IN: 'sign in',
+  SIGN_OUT: 'sign out',
+}
+
+module.exports = { memberRoles, attendanceRecordTypes }

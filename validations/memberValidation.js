@@ -22,9 +22,9 @@ const validateAddMember = (req, res, next) => {
   const addMemberSchema = Joi.object({
     name: Joi.string().required(),
     email: Joi.string().required(),
-    // office: Joi.string().required(), //To be adjusted to real objectId
+    office: Joi.string().required(), //To be adjusted to real objectId
     salary: Joi.string().required(),
-    // department: Joi.string(),
+    department: Joi.string(),
     dayoff: Joi.string().required(),
     type: Joi.string().required(),
     birthdate: Joi.date(),
@@ -106,6 +106,37 @@ const validateResetPassword = (req, res, next) => {
   next()
 }
 
+const validateSignInOut = (req, res, next) => {
+  const signSchema = Joi.object({
+    memberId: Joi.string().length(24).required(),
+  })
+  const checkSchema = signSchema.validate(req.body)
+  if (checkSchema.error) {
+    return res.status(400).json({
+      code: validationError,
+      message: checkSchema.error.details[0],
+    })
+  }
+  next()
+}
+
+const validateMissingSign = (req, res, next) => {
+  const signSchema = Joi.object({
+    memberId: Joi.string().length(24).required(),
+    date: Joi.date().required(),
+    time: Joi.string().required(),
+    type: Joi.string().valid('signin', 'signout').required(),
+  })
+  const checkSchema = signSchema.validate(req.body)
+  if (checkSchema.error) {
+    return res.status(400).json({
+      code: validationError,
+      message: checkSchema.error.details[0],
+    })
+  }
+  next()
+}
+
 module.exports = {
   validateLogin,
   validateAddMember,
@@ -113,4 +144,6 @@ module.exports = {
   validateUpdateMember,
   validateViewMember,
   validateResetPassword,
+  validateSignInOut,
+  validateMissingSign,
 }

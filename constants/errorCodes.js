@@ -10,4 +10,7 @@ module.exports = {
   cannotEditFields: '009',
   hrDayOff: '010',
   passwordsNotIdentical: '011',
+  signInError: '012',
+  signOutError: '013',
+  hrCannotAddRecToThemselves: '014',
 }
