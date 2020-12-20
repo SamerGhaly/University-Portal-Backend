@@ -1,19 +1,26 @@
-const connectDB = require('./configurations/DBconfig')
+require("dotenv").config();
+const connectDB = require("./configurations/DBconfig");
 
 const express = require('express')
 const app = express()
 const memberRoutes = require('./routers/memberRouter')
 const roomRoutes = require('./routers/roomRouter')
 const courseRoutes=require('./routers/courseRouter')
+const facultyRoutes = require("./routers/facultyRouter");
+const departmentRoutes = require("../milestone-1-team-64/routers/departmentRouter");
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+connectDB();
 
-connectDB()
+
+app.use("/members", memberRoutes);
 
 app.use('/members', memberRoutes)
 app.use('/room',roomRoutes)
 app.use('/course',courseRoutes)
+app.use("/faculties", facultyRoutes);
+app.use("/departments", departmentRoutes);
 
 app.listen(5000, () => {
-  console.log('Server is up and running on port 5000')
-})
+  console.log("Server is up and running on port 5000");
+});

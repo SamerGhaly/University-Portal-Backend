@@ -10,12 +10,12 @@ const departmentSchema = new mongoose.Schema({
     ref: 'Member',
     type: mongoose.Schema.Types.ObjectId,
   },
-  courses: [
-    {
-      ref: 'Course',
-      type: mongoose.Schema.Types.ObjectId,
-    },
-  ],
+  // courses: [
+  //   {
+  //     ref: 'Course',
+  //     type: mongoose.Schema.Types.ObjectId,
+  //   },
+  // ],
 })
 
 departmentSchema.virtual('membersPerDepartment', {
@@ -24,11 +24,11 @@ departmentSchema.virtual('membersPerDepartment', {
   foreignField: 'department',
 })
 
-// departmentSchema.virtual('coursesPerDepartment', {
-//   ref: 'Course',
-//   localField: '_id',
-//   foreignField: 'department',
-// })
+departmentSchema.virtual('coursesPerDepartment', {
+  ref: 'Course',
+  localField: '_id',
+  foreignField: 'department',
+})
 
 departmentSchema.set('toObject', { virtuals: true })
 departmentSchema.set('toJSON', { virtuals: true })

@@ -10,5 +10,11 @@ module.exports = {
   cannotEditFields: '009',
   hrDayOff: '010',
   passwordsNotIdentical: '011',
-  roomDoesnotExist:'100'
+  roomDoesnotExist:'100',
+  IdnotFound: "201",
+  departmentDoesnotExist: "101",
+  slotNumberNotValid:'102',
+  entryAlreadyExist:'103',
+  entryNotExist :'104' ,
+  notInstructor:'105'
 }
