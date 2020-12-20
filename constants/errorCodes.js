@@ -14,6 +14,12 @@ module.exports = {
   signOutError: '013',
   hrCannotAddRecToThemselves: '014',
   monthAndYearRequired: '015',
+  AssignTaOnly: '016',
+  differentDepartments: '017',
+  assignmentAlreadyThere: '018',
+  mustBeTaFirst: '019',
+  coordinatorAlreadyAssignment: '020',
+  assignmentDoesNotExist: '021',
   roomDoesnotExist: '100',
   roomIsFull: '101',
   roomNotOffice: '102',
@@ -22,4 +28,5 @@ module.exports = {
   entryAlreadyExist: '103',
   entryNotExist: '104',
   notInstructor: '105',
+  courseDoesNotExist: '106',
 }

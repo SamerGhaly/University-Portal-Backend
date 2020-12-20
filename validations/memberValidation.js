@@ -174,11 +174,42 @@ const validateDeleteMember = (req, res, next) => {
   next()
 }
 
-const validateAssignMemberToCourse = (req, res, next) => {
+const validateAssignTaToCourse = (req, res, next) => {
   const assignMemberCourseSchema = Joi.object({
-    memberId: Joi.string().length(24).required(),
-    courseId: Joi.string().length(24).required(),
-    role: Joi.string().valid(memberRoles.TA, memberRoles.INSTRUCTOR).required(),
+    member: Joi.string().length(24).required(),
+    course: Joi.string().length(24).required(),
+    // role: Joi.string().valid(memberRoles.TA, memberRoles.INSTRUCTOR).required(),
+  })
+  const checkSchema = assignMemberCourseSchema.validate(req.body)
+  if (checkSchema.error) {
+    return res.status(400).json({
+      code: validationError,
+      message: checkSchema.error.details[0],
+    })
+  }
+  next()
+}
+
+const validateUpdateAssignTaToCourse = (req, res, next) => {
+  const assignMemberCourseSchema = Joi.object({
+    member: Joi.string().length(24).required(),
+    oldCourse: Joi.string().length(24).required(),
+    newCourse: Joi.string().length(24).required(),
+  })
+  const checkSchema = assignMemberCourseSchema.validate(req.body)
+  if (checkSchema.error) {
+    return res.status(400).json({
+      code: validationError,
+      message: checkSchema.error.details[0],
+    })
+  }
+  next()
+}
+
+const validateRemoveTaFromCourse = (req, res, next) => {
+  const assignMemberCourseSchema = Joi.object({
+    member: Joi.string().length(24).required(),
+    course: Joi.string().length(24).required(),
   })
   const checkSchema = assignMemberCourseSchema.validate(req.body)
   if (checkSchema.error) {
@@ -192,8 +223,8 @@ const validateAssignMemberToCourse = (req, res, next) => {
 
 const validateAssignCoordinator = (req, res, next) => {
   const assignCoordinatorSchema = Joi.object({
-    memberId: Joi.string().length(24).required(),
-    courseId: Joi.string().length(24).required(),
+    member: Joi.string().length(24).required(),
+    course: Joi.string().length(24).required(),
   })
   const checkSchema = assignCoordinatorSchema.validate(req.body)
   if (checkSchema.error) {
@@ -214,6 +245,8 @@ module.exports = {
   validateSignInOut,
   validateMissingSign,
   validateDeleteMember,
-  validateAssignMemberToCourse,
+  validateAssignTaToCourse,
   validateAssignCoordinator,
+  validateUpdateAssignTaToCourse,
+  validateRemoveTaFromCourse,
 }

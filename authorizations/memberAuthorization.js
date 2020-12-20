@@ -25,7 +25,7 @@ const verifyInstructor = (req, res, next) => {
   if (req.member.type !== memberRoles.INSTRUCTOR) {
     return res.status(403).json({
       code: unauthorized,
-      message: 'Unauthorized to perform HOD actions',
+      message: 'Unauthorized to perform Instructor actions',
     })
   }
   next()
