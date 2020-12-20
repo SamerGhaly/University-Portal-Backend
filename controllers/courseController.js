@@ -125,11 +125,16 @@ const assignCourseInstructor=async(req,res)=>{
         const x= await Department.find().populate('coursesPerDepartment')
         res.send((x))
    //   department of hod is department  of course
-          const isCourseInDepartment=await member.findById(req.member.memberId,'department').populate('department',{
-            select: 'coursesPerDepartment',
-            
-          }).populate('coursesPerDepartment')
-      const 
+          const isCourseInDepartment=
+          await member
+          .findById(req.member.memberId,'department')
+          .populate('department','coursesPerDepartment')
+          .populate('coursesPerDepartment',{match:{_id:req.body.courseId}})
+      if(!isCourseInDepartment) 
+      return res.status(500).json({
+        message: 'course id Not In Department',
+        code: courseNotInDepartment,
+      })
       courseAss=CourseAssignment({
           role:memberRoles.INSTRUCTOR,
           course:req.body.courseId,

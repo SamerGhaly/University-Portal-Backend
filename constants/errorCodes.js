@@ -16,5 +16,6 @@ module.exports = {
   slotNumberNotValid:'102',
   entryAlreadyExist:'103',
   entryNotExist :'104' ,
-  notInstructor:'105'
+  notInstructor:'105',
+  courseNotInDepartment: '106',
 }
