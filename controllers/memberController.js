@@ -5,7 +5,8 @@ const mongoose = require('mongoose')
 const AttendanceRecordModel = require('../models/attendanceRecordModel')
 const MemberModel = require('../models/memberModel')
 const RoomModel = require('../models/roomModel')
-
+const DepartmentModel = require('../models/departmentModel')
+const Course
 const {
   userNotFound,
   unActivatedAccount,
@@ -14,21 +15,22 @@ const {
   memberAlreadyActivated,
   unauthorized,
   cannotEditFields,
-  hrDayOff,
-  passwordsNotIdentical,
-  signInError,
-  signOutError,
+  dayOffError,
   hrCannotAddRecToThemselves,
   roomDoesnotExist,
   roomIsFull,
   roomNotOffice,
+  IdnotFound,
 } = require('../constants/errorCodes')
 const {
   memberRoles,
   attendanceRecordTypes,
   roomTypes,
+  weekDays,
 } = require('../constants/constants')
 const attendanceRecordModel = require('../models/attendanceRecordModel')
+const { required } = require('joi')
+const departmentModel = require('../models/departmentModel')
 
 const login = async (req, res) => {
   try {
@@ -108,34 +110,46 @@ const addMember = async (req, res) => {
       message: 'Room is Already Full',
     })
   }
+  const depFound = await DepartmentModel.findById(req.body.department)
+  if (!depFound) {
+    return res.status(404).json({
+      code: IdnotFound,
+      message: 'Department Does Not Exist!',
+    })
+  }
   let customId
   if (member.type === 'hr') {
     const lastHr = await MemberModel.findOne({ type: 'hr' }, null, {
       sort: { customId: -1 },
     })
-    console.log(lastHr)
-    //   if (member.dayoff !== 'saturday') {
-    //     return res.json({
-    //       code: hrDayOff,
-    //       message: 'HR dayoff must be Saturday',
-    //     })
-    //   }
-    //   member.dayoff = 'saturday'
-    //   customId = 'hr-' + (countHR + 1)
+    const lastHRCustomId = lastHr.customId.split('-')
+    const newHrId = Number(lastHRCustomId[1]) + 1
+    customId = 'hr-' + newHrId
+    if (member.dayoff !== weekDays.SATURDAY) {
+      return res.json({
+        code: dayOffError,
+        message: 'HR dayoff must be Saturday',
+      })
+    }
+  } else {
+    const lastAc = await MemberModel.findOne(
+      {
+        type: { $ne: 'hr' },
+      },
+      null,
+      { sort: { customId: -1 } }
+    )
+    const lastAcCustomId = lastAc.customId.split('-')
+    const newAcId = Number(lastAcCustomId[1]) + 1
+    customId = 'ac-' + newAcId
   }
-  // else {
-  //   const countAcademic = await MemberModel.countDocuments({
-  //     type: { $ne: 'hr' },
-  //   })
-  //   customId = 'ac-' + (countAcademic + 1)
-  // }
-  // member.password = await bcrypt.hashSync('123456', Number(process.env.SALT))
-  // member.activated = false
-  // member.customId = customId
-  // const createdMember = await MemberModel.create(member)
+  member.password = await bcrypt.hashSync('123456', Number(process.env.SALT))
+  member.activated = false
+  member.customId = customId
+  const createdMember = await MemberModel.create(member)
   return res.json({
     message: 'Member Added',
-    // data: createdMember,
+    data: createdMember,
   })
 }
 
@@ -186,7 +200,6 @@ const updateMember = async (req, res) => {
     // Can update name,email,salary,department,birthdate,office
     if (userType === memberRoles.HR) {
       if (req.body.name) memberFound.name = req.body.name
-      if (req.body.department) memberFound.department = req.body.department
       if (req.body.salary) memberFound.salary = req.body.salary
       if (req.body.type) memberFound.type = req.body.type
       if (req.body.gender) memberFound.gener = req.body.gender
@@ -204,18 +217,42 @@ const updateMember = async (req, res) => {
         req.body.salary ||
         req.body.department ||
         req.body.type ||
-        req.body.gender
+        req.body.gender ||
+        req.body.office
       ) {
         return res.status(400).json({
           code: cannotEditFields,
-          message: 'You cannot edit name, department or salary',
+          message:
+            'You cannot edit name, department,office,type,gender or salary',
         })
       }
     }
     if (req.body.email) memberFound.email = req.body.email
     if (req.body.birthdate) memberFound.birthdate = req.body.birthdate
+    if (req.body.department) {
+      const depFound = await DepartmentModel.findById(req.body.department)
+      if (!depFound) {
+        return res.status(404).json({
+          code: IdnotFound,
+          message: 'Department Not Found',
+        })
+      }
+      memberFound.department = req.body.department
+    }
     if (req.body.office) {
-      //Check for office capacity !!! Waiting Samer
+      const officeFound = await RoomModel.findById(req.body.office)
+      if (!officeFound) {
+        return res.status(404).json({
+          code: roomDoesnotExist,
+          message: 'Room Does Not Exist',
+        })
+      }
+      if (officeFound.type !== roomTypes.OFFICE) {
+        return res.status(400).json({
+          code: roomNotOffice,
+          message: 'Room is not an office',
+        })
+      }
       memberFound.office = req.body.office
     }
     await MemberModel.findByIdAndUpdate(memberFound._id, memberFound)
@@ -400,6 +437,7 @@ const addMissingSign = async (req, res) => {
       timeArr[1],
       0
     )
+    console.log(newDate.toDateString())
     const type = req.body.type
     const newSign = {
       type,
@@ -419,6 +457,41 @@ const addMissingSign = async (req, res) => {
   }
 }
 
+const deleteMember = async (req, res) => {
+  try {
+    const memberFound = await MemberModel.findById(req.body.memberId)
+    if (!memberFound) {
+      return res.status(404).json({
+        code: userNotFound,
+        message: 'Member Not Found',
+      })
+    }
+    await MemberModel.findByIdAndDelete({ _id: req.body.memberId })
+    return res.json({
+      message: 'Member Deleted Successfully',
+    })
+  } catch (err) {
+    console.log(err)
+    return res.json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
+const assignMemberToCourse = async(req, res) => {
+  try {
+    const memberFound = await MemberModel.findById(req.body.memberId)
+    const course = await course
+  }catch (err) {
+    console.log(err)
+    return res.json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
 module.exports = {
   addMember,
   login,
@@ -428,4 +501,5 @@ module.exports = {
   signIn,
   signOut,
   addMissingSign,
+  deleteMember,
 }

@@ -9,6 +9,7 @@ const {
   validateResetPassword,
   validateSignInOut,
   validateMissingSign,
+  validateDeleteMember,
 } = require('../validations/memberValidation')
 const {
   addMember,
@@ -19,6 +20,7 @@ const {
   signIn,
   signOut,
   addMissingSign,
+  deleteMember,
 } = require('../controllers/memberController')
 
 const verifyToken = require('../authorizations/verifyToken')
@@ -35,6 +37,13 @@ router.post(
   addMissingSign
 )
 router.post('/addMember', validateAddMember, verifyToken, verifyHR, addMember)
+router.delete(
+  '/deleteMember',
+  validateDeleteMember,
+  verifyToken,
+  verifyHR,
+  deleteMember
+)
 router.put('/updateMember', validateUpdateMember, verifyToken, updateMember)
 router.post('/viewMember', validateViewMember, verifyToken, viewMember)
 router.post('/resetPassword', validateResetPassword, resetPassword)
