@@ -10,12 +10,6 @@ const departmentSchema = new mongoose.Schema({
     ref: 'Member',
     type: mongoose.Schema.Types.ObjectId,
   },
-  // courses: [
-  //   {
-  //     ref: 'Course',
-  //     type: mongoose.Schema.Types.ObjectId,
-  //   },
-  // ],
 })
 
 departmentSchema.virtual('membersPerDepartment', {

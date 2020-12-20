@@ -1,12 +1,12 @@
-const { IdnotFound } = require("../constants/errorCodes");
-const Faculty = require("../models/facultyModel");
-const Department = require("../models/departmentModel");
+const { IdnotFound } = require('../constants/errorCodes')
+const Faculty = require('../models/facultyModel')
+const Department = require('../models/departmentModel')
 const addFaculty = async (req, res) => {
-  await Faculty.create(req.body);
+  await Faculty.create(req.body)
   return res.json({
-    message: "faculty added successfully",
-  });
-};
+    message: 'faculty added successfully',
+  })
+}
 const updateFaculty = async (req, res) => {
   await Faculty.findByIdAndUpdate(
     req.body.id,
@@ -15,28 +15,28 @@ const updateFaculty = async (req, res) => {
       if (err) {
         return res.json({
           code: IdnotFound,
-          message: "IdNotFound",
-        });
+          message: 'IdNotFound',
+        })
       } else {
         return res.json({
-          message: "faculty updated successfully",
-        });
+          message: 'faculty updated successfully',
+        })
       }
     }
-  );
-};
+  )
+}
 const deleteFaculty = async (req, res) => {
   await Faculty.findByIdAndDelete(req.body.id, function (err) {
     if (err) {
       return res.json({
         code: IdnotFound,
-        message: "IdNotFound",
-      });
+        message: 'IdNotFound',
+      })
     } else {
       return res.json({
-        message: "faculty deleted successfully",
-      });
+        message: 'faculty deleted successfully',
+      })
     }
-  });
-};
-module.exports = { addFaculty, updateFaculty, deleteFaculty };
+  })
+}
+module.exports = { addFaculty, updateFaculty, deleteFaculty }

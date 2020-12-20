@@ -4,6 +4,9 @@ const bcrypt = require('bcryptjs')
 const mongoose = require('mongoose')
 const AttendanceRecordModel = require('../models/attendanceRecordModel')
 const MemberModel = require('../models/memberModel')
+const RoomModel = require('../models/roomModel')
+const DepartmentModel = require('../models/departmentModel')
+const CourseModel = require('../models/courseModel')
 
 const {
   userNotFound,
@@ -13,14 +16,22 @@ const {
   memberAlreadyActivated,
   unauthorized,
   cannotEditFields,
-  hrDayOff,
-  passwordsNotIdentical,
-  signInError,
-  signOutError,
+  dayOffError,
   hrCannotAddRecToThemselves,
+  roomDoesnotExist,
+  roomIsFull,
+  roomNotOffice,
+  IdnotFound,
 } = require('../constants/errorCodes')
-const { memberRoles, attendanceRecordTypes } = require('../constants/constants')
+const {
+  memberRoles,
+  attendanceRecordTypes,
+  roomTypes,
+  weekDays,
+} = require('../constants/constants')
 const attendanceRecordModel = require('../models/attendanceRecordModel')
+const { required } = require('joi')
+const departmentModel = require('../models/departmentModel')
 
 const login = async (req, res) => {
   try {
@@ -68,45 +79,117 @@ const login = async (req, res) => {
 }
 
 const addMember = async (req, res) => {
-  const member = req.body
-  //Check if email is unique
-  const checkMemberFound = await MemberModel.findOne({ email: member.email })
-  if (checkMemberFound) {
-    return res.json({
-      code: emailAlreadyExists,
-      message: 'Email already Exists',
-    })
-  }
-  //Check if office has capacity
+  try{
+    console.log(1)
 
-  let customId
-  if (member.type === 'hr') {
-    const countHR = await MemberModel.countDocuments({ type: 'hr' })
-    if (member.dayoff !== 'Saturday') {
+    const member = req.body
+    //Check if email is unique
+    const checkMemberFound = await MemberModel.findOne({ email: member.email })
+    if (checkMemberFound) {
       return res.json({
-        code: hrDayOff,
-        message: 'HR dayoff must be Saturday',
+        code: emailAlreadyExists,
+        message: 'Email already Exists',
       })
     }
-    member.dayoff = 'Saturday'
-    customId = 'hr-' + (countHR + 1)
-  } else {
-    const countAcademic = await MemberModel.countDocuments({
-      type: { $ne: 'hr' },
+    //Check if office has capacity
+    console.log(2)
+
+    const officeFound = await RoomModel.findById(req.body.office)
+    if (!officeFound) {
+      return res.status(404).json({
+        code: roomDoesnotExist,
+        message: 'Room Does Not Exist',
+      })
+    }
+    if (officeFound.type !== roomTypes.OFFICE) {
+      return res.status(400).json({
+        code: roomNotOffice,
+        message: 'Room is not an office',
+      })
+    }
+    console.log(3)
+
+        const officeCapacity = await MemberModel.countDocuments({
+      office: req.body.office,
     })
-    customId = 'ac-' + (countAcademic + 1)
+    if (officeCapacity === officeFound.capacity) {
+      return res.json({
+        code: roomIsFull,
+        message: 'Room is Already Full',
+      })
+    }
+    console.log(4)
+
+    let customId
+    if (member.type === 'hr') {
+      const lastHr = await MemberModel.findOne({ type: 'hr' }, null, {
+        sort: { customId: -1 },
+      })
+      console.log("HR",lastHr);
+      if(lastHr){
+        const lastHRCustomId = lastHr.customId.split('-')
+        const newHrId = Number(lastHRCustomId[1]) + 1
+        customId = 'hr-' + newHrId
+      }else{
+        customId = 'hr-1'
+      }
+      
+      if (member.dayoff !== weekDays.SATURDAY) {
+        return res.json({
+          code: dayOffError,
+          message: 'HR dayoff must be Saturday',
+        })
+      }
+    } else {
+      console.log(5)
+
+      const lastAc = await MemberModel.findOne(
+        {
+          type: { $ne: 'hr' },
+        },
+        null,
+        { sort: { customId: -1 } }
+      )
+      console.log(lastAc);
+      if(lastAc){
+        const lastAcCustomId = lastAc.customId.split('-')
+        const newAcId = Number(lastAcCustomId[1]) + 1
+        customId = 'ac-' + newAcId
+      }else{
+        customId = 'ac-1'
+      }
+      console.log(7);
+      const depFound = await DepartmentModel.findById(req.body.department)
+      console.log(depFound);
+      if (!depFound) {
+        return res.status(404).json({
+          code: IdnotFound,
+          message: 'Department Does Not Exist!',
+        })
+      }
+    }
+    console.log(6, process.env.SALT);
+    member.password = await bcrypt.hashSync('123456', 10)
+    console.log(member);
+    member.activated = false
+    member.customId = customId
+    console.log("HERE",member);
+    const createdMember = await MemberModel.create(member)
+    return res.json({
+      message: 'Member Added',
+      data: createdMember,
+    })
+  }catch (err) {
+    console.log(err)
+    return res.json({
+      message: 'catch error',
+      code: catchError,
+    })
   }
-  member.password = await bcrypt.hashSync('123456', Number(process.env.SALT))
-  member.activated = false
-  member.customId = customId
-  const createdMember = await MemberModel.create(member)
-  return res.json({
-    message: 'Member Added',
-    data: createdMember,
-  })
+
 }
 
-const activateAccount = async (req, res) => {
+const resetPassword = async (req, res) => {
   try {
     const memberFound = await MemberModel.findById(req.body.memberId)
     if (!memberFound) {
@@ -124,7 +207,7 @@ const activateAccount = async (req, res) => {
     memberFound.activated = true
     memberFound.password = await bcrypt.hashSync(
       req.body.newPassword,
-      Number(process.env.SALT)
+      10
     )
     await memberFound.save()
     return res.json({
@@ -153,7 +236,6 @@ const updateMember = async (req, res) => {
     // Can update name,email,salary,department,birthdate,office
     if (userType === memberRoles.HR) {
       if (req.body.name) memberFound.name = req.body.name
-      if (req.body.department) memberFound.department = req.body.department
       if (req.body.salary) memberFound.salary = req.body.salary
       if (req.body.type) memberFound.type = req.body.type
       if (req.body.gender) memberFound.gener = req.body.gender
@@ -171,18 +253,42 @@ const updateMember = async (req, res) => {
         req.body.salary ||
         req.body.department ||
         req.body.type ||
-        req.body.gender
+        req.body.gender ||
+        req.body.office
       ) {
         return res.status(400).json({
           code: cannotEditFields,
-          message: 'You cannot edit name, department or salary',
+          message:
+            'You cannot edit name, department,office,type,gender or salary',
         })
       }
     }
     if (req.body.email) memberFound.email = req.body.email
     if (req.body.birthdate) memberFound.birthdate = req.body.birthdate
+    if (req.body.department) {
+      const depFound = await DepartmentModel.findById(req.body.department)
+      if (!depFound) {
+        return res.status(404).json({
+          code: IdnotFound,
+          message: 'Department Not Found',
+        })
+      }
+      memberFound.department = req.body.department
+    }
     if (req.body.office) {
-      //Check for office capacity !!! Waiting Samer
+      const officeFound = await RoomModel.findById(req.body.office)
+      if (!officeFound) {
+        return res.status(404).json({
+          code: roomDoesnotExist,
+          message: 'Room Does Not Exist',
+        })
+      }
+      if (officeFound.type !== roomTypes.OFFICE) {
+        return res.status(400).json({
+          code: roomNotOffice,
+          message: 'Room is not an office',
+        })
+      }
       memberFound.office = req.body.office
     }
     await MemberModel.findByIdAndUpdate(memberFound._id, memberFound)
@@ -210,39 +316,6 @@ const viewMember = async (req, res) => {
     memberFound.password = undefined
     return res.json({
       data: memberFound,
-    })
-  } catch (err) {
-    console.log(err)
-    return res.json({
-      message: 'catch error',
-      code: catchError,
-    })
-  }
-}
-
-const resetPassword = async (req, res) => {
-  try {
-    const memberFound = await MemberModel.findById(req.body.memberId)
-    if (!memberFound) {
-      return res.status(404).json({
-        code: userNotFound,
-        message: 'User Not Found',
-      })
-    }
-    const checkPass = await bcrypt.compareSync(
-      req.body.oldPassword,
-      memberFound.password
-    )
-    if (!checkPass) {
-      return res.status(400).json({
-        code: passwordsNotIdentical,
-        message: 'Old Password is wrong!',
-      })
-    }
-    memberFound.password = await bcrypt.hashSync(req.body.newPassword)
-    await MemberModel.findByIdAndUpdate(memberFound._id, memberFound)
-    return res.json({
-      message: 'Password Changed Successfuly',
     })
   } catch (err) {
     console.log(err)
@@ -400,6 +473,7 @@ const addMissingSign = async (req, res) => {
       timeArr[1],
       0
     )
+    console.log(newDate.toDateString())
     const type = req.body.type
     const newSign = {
       type,
@@ -419,14 +493,36 @@ const addMissingSign = async (req, res) => {
   }
 }
 
+const deleteMember = async (req, res) => {
+  try {
+    const memberFound = await MemberModel.findById(req.body.memberId)
+    if (!memberFound) {
+      return res.status(404).json({
+        code: userNotFound,
+        message: 'Member Not Found',
+      })
+    }
+    await MemberModel.findByIdAndDelete({ _id: req.body.memberId })
+    return res.json({
+      message: 'Member Deleted Successfully',
+    })
+  } catch (err) {
+    console.log(err)
+    return res.json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
 module.exports = {
   addMember,
   login,
-  activateAccount,
   updateMember,
   viewMember,
   resetPassword,
   signIn,
   signOut,
   addMissingSign,
+  deleteMember,
 }

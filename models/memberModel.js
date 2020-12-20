@@ -1,4 +1,6 @@
+const { required } = require('joi')
 const mongoose = require('mongoose')
+const AttendanceRecordModel = require('./attendanceRecordModel')
 
 const memberSchema = new mongoose.Schema({
   name: String,
@@ -31,6 +33,10 @@ memberSchema.virtual('schedule', {
   ref: 'Schedule',
   localField: '_id',
   foreignField: 'member',
+})
+
+memberSchema.post('findOneAndDelete', async (doc) => {
+  await AttendanceRecordModel.deleteMany({ member: doc._id })
 })
 
 memberSchema.set('toObject', { virtuals: true })

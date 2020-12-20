@@ -2,9 +2,9 @@ const Course=require("../models/courseModel")
 const CourseAssignment=require("../models/courseAssignment")
 const Member=require('../models/memberModel')
 const Department=require("../models/departmentModel")
-const {notInstructor,departmentDoesnotExist,entryAlreadyExist,catchError,entryNotExist}=require("../constants/errorCodes")
+const {courseNotFound,notInstructor,departmentDoesnotExist,entryAlreadyExist,catchError,entryNotExist}=require("../constants/errorCodes")
 const {memberRoles}=require("../constants/constants")
-const { findById } = require('../models/courseModel')
+const { find } = require('../models/courseModel')
 const addCourse=async (req,res)=>{
     try{ 
         const isthereDepartment=await Department.findById(req.body.departmentId)
@@ -116,32 +116,60 @@ const deleteCourse=async (req,res)=>{
 const assignCourseInstructor=async(req,res)=>{
   try{
    //   check member is instructor
-      const member=await Member.find({_id:req.body.instructorId,type:memberRoles.INSTRUCTOR})
+      const member=await Member.findOne({_id:req.body.instructorId,type:memberRoles.INSTRUCTOR})
         if(!member)
-        return res.status(500).json({
+        return res.status(404).json({
             message: ' not Instructor',
             code: notInstructor,
           })
-        const x= await Department.find().populate('coursesPerDepartment')
-        res.send((x))
+
+          const course=await Course.findById(req.body.courseId)
+          if(!course)
+          return res.status(404).json({
+              message: 'No A Course',
+              code: courseNotFound,
+            })
+
+        // const x= await Department.find().populate('coursesPerDepartment')
+        // res.send((x))
    //   department of hod is department  of course
           const isCourseInDepartment=
-          await member
-          .findById(req.member.memberId,'department')
-          .populate('department','coursesPerDepartment')
-          .populate('coursesPerDepartment',{match:{_id:req.body.courseId}})
-      if(!isCourseInDepartment) 
-      return res.status(500).json({
+          await Member
+          .findById(req.member.memberId)
+          .populate({
+              path:'department',
+              populate:{
+                  path:'coursesPerDepartment',
+                  match:{_id:req.body.courseId}
+              }
+          })
+      if(isCourseInDepartment.department.coursesPerDepartment.length==0) 
+      return res.status(400).json({
         message: 'course id Not In Department',
         code: courseNotInDepartment,
       })
+      console.log(isCourseInDepartment.department);
       courseAss=CourseAssignment({
           role:memberRoles.INSTRUCTOR,
           course:req.body.courseId,
           member:req.body.instructorId
       })
+      const repeatedItem=await CourseAssignment.findOne({
+        role:memberRoles.INSTRUCTOR,
+        course:req.body.courseId,
+        member:req.body.instructorId
+      })
+      console.log(repeatedItem)
+      if(repeatedItem)
+      return res.status(400).json({
+        message: 'entry is Already Exist',
+        code: entryAlreadyExist,
+      })
+
      await courseAss.save();
-    
+    return res.json({
+        message:'Instuctor Assigned To Course Successfully'
+    })
 }catch (err) {
     console.log(err)
     return res.status(500).json({

@@ -8,12 +8,14 @@ module.exports = {
   memberAlreadyActivated: '007',
   unauthorized: '008',
   cannotEditFields: '009',
-  hrDayOff: '010',
+  dayOffError: '010',
   passwordsNotIdentical: '011',
   signInError: '012',
   signOutError: '013',
   hrCannotAddRecToThemselves: '014',
+  monthAndYearRequired: '015',
   roomDoesnotExist:'100',
+  roomNotOffice: '102',
   IdnotFound: "201",
   departmentDoesnotExist: "101",
   slotNumberNotValid:'102',
@@ -21,4 +23,6 @@ module.exports = {
   entryNotExist :'104' ,
   notInstructor:'105',
   courseNotInDepartment: '106',
+  courseNotFound:'107',
+  
 }
