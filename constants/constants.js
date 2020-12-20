@@ -10,4 +10,10 @@ const roomTypes={
     TUTURIAL:"tuturial",
     OFFICE:"office"
 }
-module.exports = { memberRoles ,roomTypes }
+
+const attendanceRecordTypes = {
+  SIGN_IN: 'sign in',
+  SIGN_OUT: 'sign out',
+}
+
+module.exports = { memberRoles, attendanceRecordTypes,roomTypes }

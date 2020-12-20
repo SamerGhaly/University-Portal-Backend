@@ -2,8 +2,9 @@ require('dotenv').config()
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const mongoose = require('mongoose')
-
+const AttendanceRecordModel = require('../models/attendanceRecordModel')
 const MemberModel = require('../models/memberModel')
+
 const {
   userNotFound,
   unActivatedAccount,
@@ -14,8 +15,12 @@ const {
   cannotEditFields,
   hrDayOff,
   passwordsNotIdentical,
+  signInError,
+  signOutError,
+  hrCannotAddRecToThemselves,
 } = require('../constants/errorCodes')
-const { memberRoles } = require('../constants/constants')
+const { memberRoles, attendanceRecordTypes } = require('../constants/constants')
+const attendanceRecordModel = require('../models/attendanceRecordModel')
 
 const login = async (req, res) => {
   try {
@@ -248,6 +253,172 @@ const resetPassword = async (req, res) => {
   }
 }
 
+const signIn = async (req, res) => {
+  try {
+    const memberId = req.body.memberId
+    const checkMember = await MemberModel.findById(memberId)
+    if (!checkMember) {
+      return res.status(404).json({
+        code: userNotFound,
+        message: 'User Not Found',
+      })
+    }
+    let currentDate = new Date()
+    currentDate = new Date(
+      currentDate.setTime(currentDate.getTime() + 2 * 60 * 60 * 1000)
+    )
+    // const start = new Date(
+    //   currentDate.getFullYear(),
+    //   currentDate.getMonth(),
+    //   currentDate.getDate(),
+    //   9,
+    //   0,
+    //   0
+    // )
+
+    // const end = new Date(
+    //   currentDate.getFullYear(),
+    //   currentDate.getMonth(),
+    //   currentDate.getDate(),
+    //   21,
+    //   0,
+    //   0
+    // )
+
+    // if (currentDate < start || currentDate > end) {
+    //   return res.json({
+    //     code: cannotSignInNow,
+    //     message: 'Signing in is only allowed between 7 am and 7 pm',
+    //   })
+    // }
+
+    // const checkLastAction = await attendanceRecordModel.findOne(
+    //   { member: memberId },
+    //   null,
+    //   { sort: { date: -1 } }
+    // )
+    // if (
+    //   checkLastAction &&
+    //   checkLastAction.type === attendanceRecordTypes.SIGN_IN
+    // ) {
+    //   return res.json({
+    //     code: signInError,
+    //     message: 'Cannot Sign in again before siging out',
+    //   })
+    // }
+
+    const newSignIn = {
+      type: attendanceRecordTypes.SIGN_IN,
+      date: currentDate,
+      member: memberId,
+    }
+    await AttendanceRecordModel.create(newSignIn)
+    return res.json({
+      message: 'Signed In successfully',
+    })
+  } catch (err) {
+    console.log(err)
+    return res.json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
+const signOut = async (req, res) => {
+  try {
+    const memberId = req.body.memberId
+    const checkMember = await MemberModel.findById(memberId)
+    if (!checkMember) {
+      return res.status(404).json({
+        code: userNotFound,
+        message: 'User Not Found',
+      })
+    }
+    let currentDate = new Date()
+    currentDate = new Date(
+      currentDate.setTime(currentDate.getTime() + 2 * 60 * 60 * 1000)
+    )
+    // const checkLastAction = await attendanceRecordModel.findOne(
+    //   { member: memberId },
+    //   null,
+    //   { sort: { date: -1 } }
+    // )
+    // if (
+    //   checkLastAction &&
+    //   checkLastAction.type === attendanceRecordTypes.SIGN_OUT
+    // ) {
+    //   return res.json({
+    //     code: signOutError,
+    //     message: 'Cannot Sign out again before siging in',
+    //   })
+    // }
+    const newSignOut = {
+      type: attendanceRecordTypes.SIGN_OUT,
+      date: currentDate,
+      member: memberId,
+    }
+    await AttendanceRecordModel.create(newSignOut)
+    return res.json({
+      message: 'Signed Out successfully',
+    })
+  } catch (err) {
+    console.log(err)
+    return res.json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
+const addMissingSign = async (req, res) => {
+  try {
+    const memberId = req.body.memberId
+    const userId = req.member.memberId //from token
+    if (memberId === userId.toString()) {
+      return res.status(403).json({
+        code: hrCannotAddRecToThemselves,
+        message: 'HR cannot add attendance records to themselves',
+      })
+    }
+    const checkMember = await MemberModel.findById(memberId)
+    if (!checkMember) {
+      return res.status(404).json({
+        message: 'User Not Found',
+        code: userNotFound,
+      })
+    }
+    const dateArr = req.body.date.split('-')
+    const timeArr = req.body.time.split(':')
+    console.log(dateArr)
+    console.log(timeArr)
+    const newDate = new Date(
+      dateArr[0],
+      Number(dateArr[1]) - 1,
+      dateArr[2],
+      Number(timeArr[0]) + 2,
+      timeArr[1],
+      0
+    )
+    const type = req.body.type
+    const newSign = {
+      type,
+      member: memberId,
+      date: newDate,
+    }
+    await AttendanceRecordModel.create(newSign)
+    return res.json({
+      message: 'Missing sign added successfully',
+    })
+  } catch (err) {
+    console.log(err)
+    return res.json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
 module.exports = {
   addMember,
   login,
@@ -255,4 +426,7 @@ module.exports = {
   updateMember,
   viewMember,
   resetPassword,
+  signIn,
+  signOut,
+  addMissingSign,
 }
