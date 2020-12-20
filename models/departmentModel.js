@@ -21,7 +21,7 @@ departmentSchema.virtual('membersPerDepartment', {
 departmentSchema.virtual('coursesPerDepartment', {
   ref: 'Course',
   localField: '_id',
-  foreignField: 'departments',
+  foreignField: 'department',
 })
 
 departmentSchema.set('toObject', { virtuals: true })

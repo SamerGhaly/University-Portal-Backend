@@ -6,7 +6,8 @@ const AttendanceRecordModel = require('../models/attendanceRecordModel')
 const MemberModel = require('../models/memberModel')
 const RoomModel = require('../models/roomModel')
 const DepartmentModel = require('../models/departmentModel')
-const Course
+const CourseModel = require('../models/courseModel')
+
 const {
   userNotFound,
   unActivatedAccount,
@@ -471,19 +472,6 @@ const deleteMember = async (req, res) => {
       message: 'Member Deleted Successfully',
     })
   } catch (err) {
-    console.log(err)
-    return res.json({
-      message: 'catch error',
-      code: catchError,
-    })
-  }
-}
-
-const assignMemberToCourse = async(req, res) => {
-  try {
-    const memberFound = await MemberModel.findById(req.body.memberId)
-    const course = await course
-  }catch (err) {
     console.log(err)
     return res.json({
       message: 'catch error',

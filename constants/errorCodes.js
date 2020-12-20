@@ -18,4 +18,8 @@ module.exports = {
   roomIsFull: '101',
   roomNotOffice: '102',
   IdnotFound: '201',
+  slotNumberNotValid: '102',
+  entryAlreadyExist: '103',
+  entryNotExist: '104',
+  notInstructor: '105',
 }
