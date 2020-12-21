@@ -24,5 +24,5 @@ module.exports = {
   notInstructor:'105',
   courseNotInDepartment: '106',
   courseNotFound:'107',
-  
+  noDepartment:'108' ,
 }

@@ -17,7 +17,8 @@ departmentSchema.virtual('membersPerDepartment', {
   localField: '_id',
   foreignField: 'department',
 })
-
+//userSchema.virtual('fullName').
+ // get(function() { return `${this.firstName} ${this.lastName}`; })
 departmentSchema.virtual('coursesPerDepartment', {
   ref: 'Course',
   localField: '_id',

@@ -50,4 +50,29 @@ const validateCourseInstructor=(req,res,next)=>{
       })
       next()
 }
-module.exports={validateCourse,validateCourseU,validateCourseInstructor}
+const validateCourseInstructorU=(req,res,next)=>{
+    const courseSchema=Joi.object({
+        courseId:Joi.string().length(24).required(),
+        instructorIdAdded:Joi.string().length(24).required(),
+        instructorIdDeleted:Joi.string().length(24).required(),
+
+    })
+    const checkSchema=courseSchema.validate(req.body)
+    if(checkSchema.error) return res.status(400).json({
+        code: checkSchema,
+        message: checkSchema.error.details[0],
+      })
+      next()
+}
+const validateMemberPerCourse=(req,res,next)=>{
+    const courseSchema=Joi.object({
+        courseId:Joi.string().length(24).required(),
+    })
+    const checkSchema=courseSchema.validate(req.body)
+    if(checkSchema.error) return res.status(400).json({
+        code: checkSchema,
+        message: checkSchema.error.details[0],
+      })
+      next()
+}
+module.exports={validateMemberPerCourse,validateCourse,validateCourseU,validateCourseInstructor,validateCourseInstructorU}
