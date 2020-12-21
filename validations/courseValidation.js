@@ -1,4 +1,3 @@
-const { invalid } = require('joi')
 const Joi=require("joi")
 const {slotNumberNotValid}=require('../constants/constants')
 const validateCourse=(req,res,next)=>{

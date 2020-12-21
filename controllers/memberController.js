@@ -30,6 +30,7 @@ const {
   mustBeTaFirst,
   coordinatorAlreadyAssignment,
   assignmentDoesNotExist,
+  instructorNotInCourse,
 } = require('../constants/errorCodes')
 const {
   memberRoles,
@@ -191,10 +192,7 @@ const resetPassword = async (req, res) => {
       })
     }
     memberFound.activated = true
-    memberFound.password = await bcrypt.hashSync(
-      req.body.newPassword,
-      Number(process.env.SALT)
-    )
+    memberFound.password = await bcrypt.hashSync(req.body.newPassword, 10)
     await memberFound.save()
     return res.json({
       message: 'Account Activated Successfully',
@@ -449,8 +447,7 @@ const addMissingSign = async (req, res) => {
     }
     const dateArr = req.body.date.split('-')
     const timeArr = req.body.time.split(':')
-    console.log(dateArr)
-    console.log(timeArr)
+
     const newDate = new Date(
       dateArr[0],
       Number(dateArr[1]) - 1,
@@ -459,7 +456,6 @@ const addMissingSign = async (req, res) => {
       timeArr[1],
       0
     )
-    console.log(newDate.toDateString())
     const type = req.body.type
     const newSign = {
       type,
@@ -524,11 +520,7 @@ const assignTaToCourse = async (req, res) => {
         message: 'Course Not Found',
       })
     }
-    console.log(courseFound.department)
-    console.log(memberFound.department)
     const instructorFound = await MemberModel.findById(instructorId)
-
-    //Check instructor teaches the course
 
     if (!courseFound.department.includes(instructorFound.department)) {
       return res.status(400).json({
@@ -552,10 +544,18 @@ const assignTaToCourse = async (req, res) => {
         message: 'This assignment is already there',
       })
     }
+    const checkInstructorInCourse = await courseAssignmentModel.findOne({
+      member: instructorId,
+      course: req.body.course,
+    })
+    if (!checkInstructorInCourse) {
+      return res.json({
+        code: instructorNotInCourse,
+        message: 'Instructor Does Not Teach Course',
+      })
+    }
     const assign = req.body
-    console.log(assign)
     assign.role = memberRoles.TA
-    console.log(assign)
     await courseAssignmentModel.create(assign)
     return res.json({
       message: 'Course Assignment created successfully',
@@ -596,7 +596,16 @@ const assignCoorinatorToCourse = async (req, res) => {
     const instructorFound = await MemberModel.findById(instructorId)
 
     //Check instructor teaches the course
-
+    const checkCourseInstructor = await courseAssignmentModel.findOne({
+      course: req.body.course,
+      member: instructorId,
+    })
+    if (!checkCourseInstructor) {
+      return res.json({
+        code: instructorNotInCourse,
+        message: 'Instructor Does Not Teach Course',
+      })
+    }
     if (!courseFound.department.includes(instructorFound.department)) {
       return res.status(400).json({
         code: differentDepartments,
@@ -625,10 +634,11 @@ const assignCoorinatorToCourse = async (req, res) => {
         message: 'This assignment is already there',
       })
     }
-    const checkAnotherCoordinator = await courseAssignmentModel.find({
+    const checkAnotherCoordinator = await courseAssignmentModel.findOne({
       course: req.body.course,
       role: memberRoles.COORDINATOR,
     })
+    console.log(checkAnotherCoordinator)
     if (checkAnotherCoordinator) {
       return res.json({
         code: coordinatorAlreadyAssignment,
@@ -660,7 +670,6 @@ const updateTaAssignment = async (req, res) => {
       course: oldCourse,
       role: memberRoles.TA,
     })
-    console.log(checkOldAssign)
     if (!checkOldAssign) {
       return res.json({
         code: assignmentDoesNotExist,

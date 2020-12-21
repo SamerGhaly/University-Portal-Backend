@@ -45,7 +45,7 @@ router.post(
   verifyHR,
   addMissingSign
 )
-router.post('/addMember', validateAddMember, verifyToken, verifyHR, addMember)
+router.post('/addMember', validateAddMember, addMember)
 router.delete(
   '/deleteMember',
   validateDeleteMember,

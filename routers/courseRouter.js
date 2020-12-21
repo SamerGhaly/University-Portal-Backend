@@ -11,5 +11,5 @@ const { verifyHR } = require('../authorizations/memberAuthorization')
 router.post('/addCourse',validateCourse,addCourse)
 router.put('/updateCourse',validateCourseU,updateCourse)
 router.delete('/deleteCourse',validateCourseU,deleteCourse)
-router.post('/assignCourseInstructor',validateCourseInstructor,assignCourseInstructor)
+router.post('/assignCourseInstructor',validateCourseInstructor,verifyToken,assignCourseInstructor)
 module.exports=router
