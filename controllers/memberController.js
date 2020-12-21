@@ -7,6 +7,7 @@ const MemberModel = require('../models/memberModel')
 const RoomModel = require('../models/roomModel')
 const DepartmentModel = require('../models/departmentModel')
 const CourseModel = require('../models/courseModel')
+const courseAssignmentModel = require('../models/courseAssignment')
 
 const {
   userNotFound,
@@ -22,6 +23,14 @@ const {
   roomIsFull,
   roomNotOffice,
   IdnotFound,
+  AssignTaOnly,
+  differentDepartments,
+  courseDoesNotExist,
+  assignmentAlreadyThere,
+  mustBeTaFirst,
+  coordinatorAlreadyAssignment,
+  assignmentDoesNotExist,
+  instructorNotInCourse,
 } = require('../constants/errorCodes')
 const {
   memberRoles,
@@ -30,7 +39,6 @@ const {
   weekDays,
 } = require('../constants/constants')
 const attendanceRecordModel = require('../models/attendanceRecordModel')
-const { required } = require('joi')
 const departmentModel = require('../models/departmentModel')
 
 const login = async (req, res) => {
@@ -79,9 +87,7 @@ const login = async (req, res) => {
 }
 
 const addMember = async (req, res) => {
-  try{
-    console.log(1)
-
+  try {
     const member = req.body
     //Check if email is unique
     const checkMemberFound = await MemberModel.findOne({ email: member.email })
@@ -92,8 +98,6 @@ const addMember = async (req, res) => {
       })
     }
     //Check if office has capacity
-    console.log(2)
-
     const officeFound = await RoomModel.findById(req.body.office)
     if (!officeFound) {
       return res.status(404).json({
@@ -107,9 +111,7 @@ const addMember = async (req, res) => {
         message: 'Room is not an office',
       })
     }
-    console.log(3)
-
-        const officeCapacity = await MemberModel.countDocuments({
+    const officeCapacity = await MemberModel.countDocuments({
       office: req.body.office,
     })
     if (officeCapacity === officeFound.capacity) {
@@ -118,31 +120,24 @@ const addMember = async (req, res) => {
         message: 'Room is Already Full',
       })
     }
-    console.log(4)
 
     let customId
     if (member.type === 'hr') {
       const lastHr = await MemberModel.findOne({ type: 'hr' }, null, {
         sort: { customId: -1 },
       })
-      console.log("HR",lastHr);
-      if(lastHr){
+      if (lastHr) {
         const lastHRCustomId = lastHr.customId.split('-')
         const newHrId = Number(lastHRCustomId[1]) + 1
         customId = 'hr-' + newHrId
-      }else{
-        customId = 'hr-1'
-      }
-      
-      if (member.dayoff !== weekDays.SATURDAY) {
-        return res.json({
-          code: dayOffError,
-          message: 'HR dayoff must be Saturday',
-        })
-      }
+        if (member.dayoff !== weekDays.SATURDAY) {
+          return res.json({
+            code: dayOffError,
+            message: 'HR dayoff must be Saturday',
+          })
+        }
+      } else customId = 'hr-1'
     } else {
-      console.log(5)
-
       const lastAc = await MemberModel.findOne(
         {
           type: { $ne: 'hr' },
@@ -150,17 +145,13 @@ const addMember = async (req, res) => {
         null,
         { sort: { customId: -1 } }
       )
-      console.log(lastAc);
-      if(lastAc){
+      if (lastAc) {
         const lastAcCustomId = lastAc.customId.split('-')
         const newAcId = Number(lastAcCustomId[1]) + 1
         customId = 'ac-' + newAcId
-      }else{
-        customId = 'ac-1'
-      }
-      console.log(7);
+      } else customId = 'ac-1'
+
       const depFound = await DepartmentModel.findById(req.body.department)
-      console.log(depFound);
       if (!depFound) {
         return res.status(404).json({
           code: IdnotFound,
@@ -168,25 +159,21 @@ const addMember = async (req, res) => {
         })
       }
     }
-    console.log(6, process.env.SALT);
-    member.password = await bcrypt.hashSync('123456', 10)
-    console.log(member);
+    member.password = await bcrypt.hashSync('123456', Number(process.env.SALT))
     member.activated = false
     member.customId = customId
-    console.log("HERE",member);
     const createdMember = await MemberModel.create(member)
     return res.json({
       message: 'Member Added',
       data: createdMember,
     })
-  }catch (err) {
+  } catch (err) {
     console.log(err)
     return res.json({
       message: 'catch error',
       code: catchError,
     })
   }
-
 }
 
 const resetPassword = async (req, res) => {
@@ -205,10 +192,7 @@ const resetPassword = async (req, res) => {
       })
     }
     memberFound.activated = true
-    memberFound.password = await bcrypt.hashSync(
-      req.body.newPassword,
-      10
-    )
+    memberFound.password = await bcrypt.hashSync(req.body.newPassword, 10)
     await memberFound.save()
     return res.json({
       message: 'Account Activated Successfully',
@@ -463,8 +447,7 @@ const addMissingSign = async (req, res) => {
     }
     const dateArr = req.body.date.split('-')
     const timeArr = req.body.time.split(':')
-    console.log(dateArr)
-    console.log(timeArr)
+
     const newDate = new Date(
       dateArr[0],
       Number(dateArr[1]) - 1,
@@ -473,7 +456,6 @@ const addMissingSign = async (req, res) => {
       timeArr[1],
       0
     )
-    console.log(newDate.toDateString())
     const type = req.body.type
     const newSign = {
       type,
@@ -515,6 +497,216 @@ const deleteMember = async (req, res) => {
   }
 }
 
+const assignTaToCourse = async (req, res) => {
+  try {
+    const instructorId = req.member.memberId
+    const memberFound = await MemberModel.findById(req.body.member)
+    if (!memberFound) {
+      return res.status(404).json({
+        code: userNotFound,
+        message: 'User Not Found',
+      })
+    }
+    if (memberFound.type !== memberRoles.TA) {
+      return res.status(400).json({
+        code: AssignTaOnly,
+        message: 'Only TAs can be assigned',
+      })
+    }
+    const courseFound = await CourseModel.findById(req.body.course)
+    if (!courseFound) {
+      return res.status(404).json({
+        code: courseDoesNotExist,
+        message: 'Course Not Found',
+      })
+    }
+    const instructorFound = await MemberModel.findById(instructorId)
+
+    if (!courseFound.department.includes(instructorFound.department)) {
+      return res.status(400).json({
+        code: differentDepartments,
+        message: 'Course And Instructor must be in the same department',
+      })
+    }
+    if (!courseFound.department.includes(memberFound.department)) {
+      return res.status(400).json({
+        code: differentDepartments,
+        message: 'Course And Ta must be in the same department',
+      })
+    }
+    const assignFound = await courseAssignmentModel.findOne({
+      member: req.body.member,
+      course: req.body.course,
+    })
+    if (assignFound) {
+      return res.status(400).json({
+        code: assignmentAlreadyThere,
+        message: 'This assignment is already there',
+      })
+    }
+    const checkInstructorInCourse = await courseAssignmentModel.findOne({
+      member: instructorId,
+      course: req.body.course,
+    })
+    if (!checkInstructorInCourse) {
+      return res.json({
+        code: instructorNotInCourse,
+        message: 'Instructor Does Not Teach Course',
+      })
+    }
+    const assign = req.body
+    assign.role = memberRoles.TA
+    await courseAssignmentModel.create(assign)
+    return res.json({
+      message: 'Course Assignment created successfully',
+    })
+  } catch (err) {
+    console.log(err)
+    return res.json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
+const assignCoorinatorToCourse = async (req, res) => {
+  try {
+    const instructorId = req.member.memberId
+    const memberFound = await MemberModel.findById(req.body.member)
+    if (!memberFound) {
+      return res.status(404).json({
+        code: userNotFound,
+        message: 'User Not Found',
+      })
+    }
+    if (memberFound.type !== memberRoles.TA) {
+      return res.status(400).json({
+        code: AssignTaOnly,
+        message: 'Only TAs can be assigned',
+      })
+    }
+    const courseFound = await CourseModel.findById(req.body.course)
+    if (!courseFound) {
+      return res.status(404).json({
+        code: courseDoesNotExist,
+        message: 'Course Not Found',
+      })
+    }
+
+    const instructorFound = await MemberModel.findById(instructorId)
+
+    //Check instructor teaches the course
+    const checkCourseInstructor = await courseAssignmentModel.findOne({
+      course: req.body.course,
+      member: instructorId,
+    })
+    if (!checkCourseInstructor) {
+      return res.json({
+        code: instructorNotInCourse,
+        message: 'Instructor Does Not Teach Course',
+      })
+    }
+    if (!courseFound.department.includes(instructorFound.department)) {
+      return res.status(400).json({
+        code: differentDepartments,
+        message: 'Course And Instructor must be in the same department',
+      })
+    }
+    if (!courseFound.department.includes(memberFound.department)) {
+      return res.status(400).json({
+        code: differentDepartments,
+        message: 'Course And Ta must be in the same department',
+      })
+    }
+    const assignFound = await courseAssignmentModel.findOne({
+      member: req.body.member,
+      course: req.body.course,
+    })
+    if (!assignFound) {
+      return res.status(404).json({
+        code: mustBeTaFirst,
+        message: 'Coordinator must be assigned as TA first',
+      })
+    }
+    if (assignFound.role === memberRoles.COORDINATOR) {
+      return res.status(400).json({
+        code: assignmentAlreadyThere,
+        message: 'This assignment is already there',
+      })
+    }
+    const checkAnotherCoordinator = await courseAssignmentModel.findOne({
+      course: req.body.course,
+      role: memberRoles.COORDINATOR,
+    })
+    console.log(checkAnotherCoordinator)
+    if (checkAnotherCoordinator) {
+      return res.json({
+        code: coordinatorAlreadyAssignment,
+        message: 'Course already has coordinator',
+      })
+    }
+    const assign = req.body
+    assign.role = memberRoles.COORDINATOR
+    await courseAssignmentModel.findByIdAndUpdate(assignFound._id, assign)
+    return res.json({
+      message: 'Course Assignment created successfully',
+    })
+  } catch (err) {
+    console.log(err)
+    return res.json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
+const updateTaAssignment = async (req, res) => {
+  try {
+    const memberId = req.body.member
+    const oldCourse = req.body.oldCourse
+    const newCourse = req.body.newCourse
+    const checkOldAssign = await courseAssignmentModel.findOne({
+      member: memberId,
+      course: oldCourse,
+      role: memberRoles.TA,
+    })
+    if (!checkOldAssign) {
+      return res.json({
+        code: assignmentDoesNotExist,
+        message: 'Assignment Does Not Exist',
+      })
+    }
+    const checkNewCourse = await CourseModel.findById(newCourse)
+    if (!checkNewCourse) {
+      return res.json({
+        code: courseDoesNotExist,
+        message: 'Course Does Not Exist',
+      })
+    }
+    const checkMember = await MemberModel.findById(memberId)
+    if (!checkNewCourse.department.includes(checkMember.department)) {
+      return res.json({
+        code: differentDepartments,
+        message: 'Ta and Course must be in the same department',
+      })
+    }
+    checkOldAssign.course = newCourse
+    await courseAssignmentModel.findByIdAndUpdate(
+      checkOldAssign._id,
+      checkOldAssign
+    )
+    return res.json({
+      message: 'Course Assignment Updated Successfully',
+    })
+  } catch (err) {
+    console.log(err)
+    return res.json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
 module.exports = {
   addMember,
   login,
@@ -525,4 +717,7 @@ module.exports = {
   signOut,
   addMissingSign,
   deleteMember,
+  assignTaToCourse,
+  updateTaAssignment,
+  assignCoorinatorToCourse,
 }

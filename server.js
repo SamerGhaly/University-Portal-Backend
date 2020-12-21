@@ -9,6 +9,7 @@ const departmentRoutes = require('../milestone-1-team-64/routers/departmentRoute
 const roomRoutes = require('./routers/roomRouter')
 const courseRoutes = require('./routers/courseRouter')
 const attendanceRoutes = require('./routers/attendanceRecordRouter')
+const slotAssignmentRoutes = require('./routers/slotAssignmentRouter')
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -25,6 +26,8 @@ app.use('/room', roomRoutes)
 app.use('/faculties', facultyRoutes)
 app.use('/departments', departmentRoutes)
 app.use('/attendance', attendanceRoutes)
+app.use('/slotAssignment', slotAssignmentRoutes)
+
 app.listen(5000, () => {
   console.log('Server is up and running on port 5000')
 })

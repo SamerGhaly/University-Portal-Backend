@@ -5,19 +5,17 @@ const memberRoles = {
   TA: 'teaching assistant',
   COORDINATOR: 'coordinator',
 }
-const roomTypes={
-    HALL: "hall",
-    LAB :"lab",
-    TUTURIAL:"tutorial",
-    OFFICE:"office"
+const roomTypes = {
+  HALL: 'hall',
+  LAB: 'lab',
+  TUTORIAL: 'tutorial',
+  OFFICE: 'office',
 }
 
 const attendanceRecordTypes = {
   SIGN_IN: 'sign in',
   SIGN_OUT: 'sign out',
 }
-
-
 
 const gender = {
   MALE: 'male',
@@ -49,6 +47,12 @@ const months = {
   DECEMBER: 'december',
 }
 
+const slotTypes = {
+  TUTORIAL: 'tutorial',
+  LECTURE: 'lecture',
+  LAB: 'lab',
+}
+
 module.exports = {
   memberRoles,
   attendanceRecordTypes,
@@ -56,4 +60,5 @@ module.exports = {
   gender,
   weekDays,
   months,
+  slotTypes,
 }
