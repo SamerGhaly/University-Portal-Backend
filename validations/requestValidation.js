@@ -173,6 +173,20 @@ const validateCancelMaternityLeavesRequest = (req, res, next) => {
   next()
 }
 
+const validateCancelChangeDayOffRequest = (req, res, next) => {
+  const cancelChangeDayOffRequestSchema = Joi.object({
+    requestId: Joi.string().required(),
+  })
+  const checkSchema = cancelChangeDayOffRequestSchema.validate(req.body)
+  if (checkSchema.error) {
+    return res.json({
+      code: validationError,
+      message: checkSchema.error.details[0],
+    })
+  }
+  next()
+}
+
 module.exports = {
   validateChangeDayOffRequest,
   validateAcceptDayOffRequest,
@@ -185,4 +199,5 @@ module.exports = {
   validateRejectMaternityLeavesRequest,
   validateCancelSickLeavesRequest,
   validateCancelMaternityLeavesRequest,
+  validateCancelChangeDayOffRequest
 }

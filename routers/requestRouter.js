@@ -54,6 +54,12 @@ const {
 const {
   cancelMaternityLeaveRequest,
 } = require('../controllers/requestController')
+const {
+  validateCancelChangeDayOffRequest,
+} = require('../validations/requestValidation')
+const {
+  cancelChangeDayOffRequest,
+} = require('../controllers/requestController')
 
 router.post(
   '/changeDayOff',
@@ -122,4 +128,10 @@ router.post(
   cancelMaternityLeaveRequest
 )
 
+router.post(
+  '/cancelChangeDayOffRequest',
+  validateCancelChangeDayOffRequest,
+  verifyToken,
+  cancelChangeDayOffRequest
+)
 module.exports = router

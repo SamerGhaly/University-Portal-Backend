@@ -503,7 +503,62 @@ const cancelMaternityLeaveRequest = async (req, res) => {
     })
   }
 }
+const cancelChangeDayOffRequest = async (req, res) => {
+  try {
+    const send = req.member.memberId
+    const findrequest = await Request.findById(req.body.requestId)
 
+    if (findrequest) {
+      if (send.toString() === findrequest.member.toString()) {
+        if (findrequest.status === requestType.PENDING) {
+          Request.findByIdAndDelete(req.body.requestId, function (err) {
+            if (err) {
+              return res.json({
+                code: databaseerror,
+                message: 'database error',
+              })
+            } else {
+              return res.json({
+                message: 'Request Cancelled',
+              })
+            }
+          })
+        }
+        if (
+          findrequest.status === requestType.ACCEPT ||
+          findrequest.status === requestType.REJECT
+        ) {
+          Request.findByIdAndDelete(req.body.requestId, function (err) {
+            if (err) {
+              return res.status(500).json({
+                code: databaseerror,
+                message: 'database error',
+              })
+            } else {
+              return res.json({
+                message: 'Request Cancelled',
+              })
+            }
+          })
+        }
+      } else {
+        return res.json({
+          message: 'Not Same Member',
+        })
+      }
+    } else {
+      return res.json({
+        message: 'Wrong RequestId',
+      })
+    }
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
 module.exports = {
   changeDayOffRequest,
   acceptDayOffRequest,
@@ -516,4 +571,5 @@ module.exports = {
   rejectMaternityLeaveRequest,
   cancelSickLeaveRequest,
   cancelMaternityLeaveRequest,
+  cancelChangeDayOffRequest,
 }
