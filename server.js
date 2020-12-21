@@ -1,26 +1,35 @@
-require("dotenv").config();
-const connectDB = require("./configurations/DBconfig");
+require('dotenv').config()
+const connectDB = require('./configurations/DBconfig')
 
-const express = require("express");
-const app = express();
-const memberRoutes = require("./routers/memberRouter");
-const facultyRoutes = require("./routers/facultyRouter");
-const departmentRoutes = require("../milestone-1-team-64/routers/departmentRouter");
-const scheduleModel = require("./models/scheduleModel");
-const scheduleRouter = require("./routers/scheduleRouter");
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+const express = require('express')
+const app = express()
+const memberRoutes = require('./routers/memberRouter')
+const facultyRoutes = require('./routers/facultyRouter')
+const departmentRoutes = require('./routers/departmentRouter')
+const roomRoutes = require('./routers/roomRouter')
+const scheduleModel = require('./models/scheduleModel')
+const scheduleRouter = require('./routers/scheduleRouter')
+const requestRouter = require('./routers/requestRouter')
 
-connectDB();
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 
-app.use("/members", memberRoutes);
+connectDB()
 
-app.use("/faculties", facultyRoutes);
+app.use('/members', memberRoutes)
 
-app.use("/departments", departmentRoutes);
+app.use('/faculties', facultyRoutes)
 
-app.use("/schedules", scheduleRouter);
+app.use('/departments', departmentRoutes)
+
+//app.use('/schedules', scheduleRouter)
+
+app.use('/members', memberRoutes)
+
+app.use('/room', roomRoutes)
+
+app.use('/request', requestRouter)
 
 app.listen(5000, () => {
-  console.log("Server is up and running on port 5000");
-});
+  console.log('Server is up and running on port 5000')
+})

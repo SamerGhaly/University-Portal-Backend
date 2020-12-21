@@ -3,6 +3,28 @@ const memberRoles = {
   HOD: 'head of department',
   INSTRUCTOR: 'instructor',
   TA: 'teaching assistant',
+  CO: 'course Coordinator',
+}
+const roomTypes = {
+  HALL: 'hall',
+  LAB: 'lab',
+  TUTURIAL: 'tuturial',
+  OFFICE: 'office',
 }
 
-module.exports = { memberRoles }
+const weekDays = {
+  FRIDAY: 'friday',
+  SATURDAY: 'saturday',
+  SUNDAY: 'sunday',
+  MONDAY: 'monday',
+  TUESDAY: 'tuesday',
+  WEDNESDAY: 'wednesday',
+  THURSDAY: 'thursday',
+}
+const requestType = {
+  ACCEPT: 'accept',
+  REJECT: 'reject',
+  PENDING: 'pending',
+}
+
+module.exports = { memberRoles, roomTypes, weekDays, requestType }

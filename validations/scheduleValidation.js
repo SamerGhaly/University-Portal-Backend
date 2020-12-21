@@ -3,7 +3,6 @@ const { validationError } = require("../constants/errorCodes");
 
 const validateAddCourseSlot = (req, res, next) => {
   const addCourseSlotSchema = Joi.object({
-    member: Joi.string(),
     course: Joi.string().required(),
     room: Joi.string().required(),
     slot: Joi.number().integer().min(1).max(5).required(),

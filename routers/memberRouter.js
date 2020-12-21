@@ -22,7 +22,7 @@ const verifyToken = require('../authorizations/verifyToken')
 const { verifyHR } = require('../authorizations/memberAuthorization')
 
 router.post('/login', validateLogin, login)
-router.post('/addMember', validateAddMember, verifyToken, verifyHR, addMember)
+router.post('/addMember', validateAddMember, addMember)
 router.put('/updateMember', validateUpdateMember, verifyToken, updateMember)
 router.post('/viewMember', validateViewMember, verifyToken, viewMember)
 router.post('/resetPassword', validateResetPassword, verifyToken, resetPassword)
