@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const scheduleSchema = new mongoose.Schema({
+const slotAssignmentSchema = new mongoose.Schema({
   member: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Member",
@@ -18,4 +18,4 @@ const scheduleSchema = new mongoose.Schema({
   type: String,
 });
 
-module.exports = mongoose.model("Schedule", scheduleSchema);
+module.exports = mongoose.model('SlotAssignment', slotAssignmentSchema)

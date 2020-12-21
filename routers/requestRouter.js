@@ -1,5 +1,6 @@
 const express = require('express')
 const router = express.Router()
+const verifyToken = require('../authorizations/verifyToken')
 
 const {
   validateChangeDayOffRequest,
@@ -54,43 +55,70 @@ const {
   cancelMaternityLeaveRequest,
 } = require('../controllers/requestController')
 
-router.post('/changeDayOff', validateChangeDayOffRequest, changeDayOffRequest)
-router.post('/acceptDayOff', validateAcceptDayOffRequest, acceptDayOffRequest)
-router.post('/rejectDayOff', validateRejectDayOffRequest, rejectDayOffRequest)
-router.post('/sickLeave', validateSickLeavesRequest, sickLeaveRequest)
+router.post(
+  '/changeDayOff',
+  validateChangeDayOffRequest,
+  verifyToken,
+  changeDayOffRequest
+)
+router.post(
+  '/acceptDayOff',
+  validateAcceptDayOffRequest,
+  verifyToken,
+  acceptDayOffRequest
+)
+router.post(
+  '/rejectDayOff',
+  validateRejectDayOffRequest,
+  verifyToken,
+  rejectDayOffRequest
+)
+router.post(
+  '/sickLeave',
+  validateSickLeavesRequest,
+  verifyToken,
+  sickLeaveRequest
+)
 router.post(
   '/maternityLeave',
   validateMaternityLeavesRequest,
+  verifyToken,
   maternityLeaveRequest
 )
 router.post(
   '/acceptSickLeave',
   validateAcceptSickLeavesRequest,
+  verifyToken,
   acceptSickLeaveRequest
 )
 router.post(
   '/rejectSickLeave',
   validateRejectSickLeavesRequest,
+  verifyToken,
   rejectSickLeaveRequest
 )
 router.post(
   '/acceptMaternityLeave',
   validateAcceptMaternityLeavesRequest,
+  verifyToken,
   acceptMaternityLeaveRequest
 )
 router.post(
   '/rejectMaternityLeave',
   validateRejectMaternityLeavesRequest,
+  verifyToken,
   rejectMaternityLeaveRequest
 )
 router.post(
   '/cancelSickLeaveRequest',
   validateCancelMaternityLeavesRequest,
+  verifyToken,
   cancelSickLeaveRequest
 )
 router.post(
   '/cancelMaternityLeaveRequest',
   validateCancelSickLeavesRequest,
+  verifyToken,
   cancelMaternityLeaveRequest
 )
 

@@ -9,7 +9,7 @@ const { findById } = require('../models/changeDayOffRequest')
 
 const changeDayOffRequest = (req, res) => {
   if (
-    Member.findOne({ _id: req.body.member }, function (err, foundMember) {
+    Member.findOne({ _id: req.member.memberId }, function (err, foundMember) {
       if (!foundMember) {
         return res.json({
           code: databaseerror,
@@ -17,6 +17,7 @@ const changeDayOffRequest = (req, res) => {
         })
       } else {
         const newrequest = req.body
+        newrequest.member = req.member.memberId
         newrequest.status = requestType.PENDING
         Request.create(newrequest)
         return res.json({
@@ -28,70 +29,101 @@ const changeDayOffRequest = (req, res) => {
 }
 
 const acceptDayOffRequest = async (req, res) => {
-  const request = await Request.findById(req.body.requestId)
-  if (request) {
-    Member.findByIdAndUpdate(
-      request.member,
-      { dayoff: request.newDayOff },
-      function (err) {
-        if (err) {
-          return res.json({
-            code: databaseerror,
-            message: 'databaseerror',
-          })
-        } else {
-          Request.findByIdAndUpdate(
-            req.body.requestId,
-            { status: requestType.ACCEPT },
-            function (err) {
-              if (err) {
-                return res.json({
-                  code: databaseerror,
-                  message: 'databaseerror',
-                })
-              } else {
-                return res.json({
-                  message: 'Request accepted ',
-                })
-              }
+  console.log(req.member.memberId)
+  try {
+    const request = await Request.findById(req.body.requestId)
+    const user = await Member.findById(request.member)
+    const hod = await Member.findById(req.member.memberId)
+    console.log(memberid)
+    console.log(hod)
+    if (hod.department.toString() === user.department.toString()) {
+      if (request) {
+        Member.findByIdAndUpdate(
+          request.member,
+          { dayoff: request.newDayOff },
+          function (err) {
+            if (err) {
+              return res.json({
+                code: databaseerror,
+                message: 'databaseerror',
+              })
+            } else {
+              Request.findByIdAndUpdate(
+                req.body.requestId,
+                { status: requestType.ACCEPT },
+                function (err) {
+                  if (err) {
+                    return res.json({
+                      code: databaseerror,
+                      message: 'databaseerror',
+                    })
+                  }
+                }
+              )
+              return res.json({
+                message: 'Request accepted anad DayOff updated successfully',
+              })
             }
-          )
-          return res.json({
-            message: 'Request accepted anad DayOff updated successfully',
-          })
-        }
+          }
+        )
+      } else {
+        return res.json({
+          code: databaseerror,
+          message: 'database error',
+        })
       }
-    )
-  } else {
-    return res.json({
-      code: databaseerror,
-      message: 'database error',
+    } else {
+      return res.json({
+        message: 'Not Same Department',
+      })
+    }
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
     })
   }
 }
 
 const rejectDayOffRequest = async (req, res) => {
-  const request = await Request.findById(req.body.requestId)
-  if (request) {
-    Request.findByIdAndUpdate(
-      req.body.requestId,
-      { status: requestType.REJECT },
-      function (err) {
-        if (err) {
-          return res.json({
-            code: databaseerror,
-            message: 'database error',
-          })
-        } else {
-          return res.json({
-            message: 'Request rejected',
-          })
-        }
+  try {
+    const request = await Request.findById(req.body.requestId)
+    const user = await Member.findById(request.member)
+    const hod = await Member.findById(req.member.memberId)
+    if (hod.department.toString() === user.department.toString()) {
+      if (request) {
+        Request.findByIdAndUpdate(
+          req.body.requestId,
+          { status: requestType.REJECT },
+          function (err) {
+            if (err) {
+              return res.json({
+                code: databaseerror,
+                message: 'database error',
+              })
+            } else {
+              return res.json({
+                message: 'Request rejected',
+              })
+            }
+          }
+        )
+      } else {
+        return res.json({
+          message: 'No Request Found',
+        })
       }
-    )
-  } else {
-    return res.json({
-      message: 'No Request Found',
+    } else {
+      return res.json({
+        message: 'Not Same Department',
+      })
+    }
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
     })
   }
 }
@@ -106,6 +138,7 @@ const sickLeaveRequest = async (req, res) => {
       if (dateSubmitted <= limitday) {
         console.log(dateSubmitted.getDate())
         const newrequest = req.body
+        newrequest.member = req.member.memberId
         newrequest.status = requestType.PENDING
         sickRequest.create(newrequest)
         return res.json({
@@ -132,12 +165,13 @@ const sickLeaveRequest = async (req, res) => {
 const maternityLeaveRequest = async (req, res) => {
   const reqdatefrom = new Date(req.body.from)
   const reqdateto = new Date(req.body.to)
-  const member = await Member.findById(req.body.member)
+  const member = await Member.findById(req.member.memberId)
   try {
     if (reqdatefrom < reqdateto) {
       // console.log(member.gender)
       if (member.gender === 'female') {
         const newrequest = req.body
+        newrequest.member = req.member.memberId
         newrequest.status = requestType.PENDING
         await maternityRequest.create(newrequest)
         return res.json({
@@ -164,27 +198,36 @@ const maternityLeaveRequest = async (req, res) => {
 
 const acceptSickLeaveRequest = async (req, res) => {
   try {
+    const request = await Request.findById(req.body.requestId)
+    const user = await Member.findById(request.member)
+    const hod = await Member.findById(req.member.memberId)
     const exist = await sickRequest.findById(req.body.requestId)
-    if (exist) {
-      sickRequest.findByIdAndUpdate(
-        req.body.requestId,
-        { status: requestType.ACCEPT },
-        function (err) {
-          if (err) {
-            return res.json({
-              code: databaseerror,
-              message: 'database error',
-            })
-          } else {
-            return res.json({
-              message: 'Request accepetd',
-            })
+    if (hod.department.toString() === user.department.toString()) {
+      if (exist) {
+        sickRequest.findByIdAndUpdate(
+          req.body.requestId,
+          { status: requestType.ACCEPT },
+          function (err) {
+            if (err) {
+              return res.json({
+                code: databaseerror,
+                message: 'database error',
+              })
+            } else {
+              return res.json({
+                message: 'Request accepetd',
+              })
+            }
           }
-        }
-      )
+        )
+      } else {
+        return res.json({
+          message: 'No Request Found',
+        })
+      }
     } else {
       return res.json({
-        message: 'No Request Found',
+        message: 'Not Same Department',
       })
     }
   } catch (err) {
@@ -198,27 +241,36 @@ const acceptSickLeaveRequest = async (req, res) => {
 
 const rejectSickLeaveRequest = async (req, res) => {
   try {
+    const request = await Request.findById(req.body.requestId)
+    const user = await Member.findById(request.member)
+    const hod = await Member.findById(req.member.memberId)
     const exist = await sickRequest.findById(req.body.requestId)
-    if (exist) {
-      sickRequest.findByIdAndUpdate(
-        req.body.requestId,
-        { status: requestType.REJECT },
-        function (err) {
-          if (err) {
-            return res.json({
-              code: databaseerror,
-              message: 'database error',
-            })
-          } else {
-            return res.json({
-              message: 'Request rejected',
-            })
+    if (hod.department.toString() === user.department.toString()) {
+      if (exist) {
+        sickRequest.findByIdAndUpdate(
+          req.body.requestId,
+          { status: requestType.REJECT },
+          function (err) {
+            if (err) {
+              return res.json({
+                code: databaseerror,
+                message: 'database error',
+              })
+            } else {
+              return res.json({
+                message: 'Request rejected',
+              })
+            }
           }
-        }
-      )
+        )
+      } else {
+        return res.json({
+          message: 'No Request Found',
+        })
+      }
     } else {
       return res.json({
-        message: 'No Request Found',
+        message: 'Not Same Department',
       })
     }
   } catch (err) {
@@ -232,27 +284,36 @@ const rejectSickLeaveRequest = async (req, res) => {
 
 const acceptMaternityLeaveRequest = async (req, res) => {
   try {
+    const request = await Request.findById(req.body.requestId)
+    const user = await Member.findById(request.member)
+    const hod = await Member.findById(req.member.memberId)
     const exist = await maternityRequest.findById(req.body.requestId)
-    if (exist) {
-      maternityRequest.findByIdAndUpdate(
-        req.body.requestId,
-        { status: requestType.ACCEPT },
-        function (err) {
-          if (err) {
-            return res.json({
-              code: databaseerror,
-              message: 'database error',
-            })
-          } else {
-            return res.json({
-              message: 'Request accepetd',
-            })
+    if (hod.department.toString() === user.department.toString()) {
+      if (exist) {
+        maternityRequest.findByIdAndUpdate(
+          req.body.requestId,
+          { status: requestType.ACCEPT },
+          function (err) {
+            if (err) {
+              return res.json({
+                code: databaseerror,
+                message: 'database error',
+              })
+            } else {
+              return res.json({
+                message: 'Request accepetd',
+              })
+            }
           }
-        }
-      )
+        )
+      } else {
+        return res.json({
+          message: 'No Request Found',
+        })
+      }
     } else {
       return res.json({
-        message: 'No Request Found',
+        message: 'Not Same Department',
       })
     }
   } catch (err) {
@@ -266,27 +327,36 @@ const acceptMaternityLeaveRequest = async (req, res) => {
 
 const rejectMaternityLeaveRequest = async (req, res) => {
   try {
+    const request = await Request.findById(req.body.requestId)
+    const user = await Member.findById(request.member)
+    const hod = await Member.findById(req.member.memberId)
     const exist = await maternityRequest.findById(req.body.requestId)
-    if (exist) {
-      maternityRequest.findByIdAndUpdate(
-        req.body.requestId,
-        { status: requestType.REJECT },
-        function (err) {
-          if (err) {
-            return res.json({
-              code: databaseerror,
-              message: 'database error',
-            })
-          } else {
-            return res.json({
-              message: 'Request rejected',
-            })
+    if (hod.department.toString() === user.department.toString()) {
+      if (exist) {
+        maternityRequest.findByIdAndUpdate(
+          req.body.requestId,
+          { status: requestType.REJECT },
+          function (err) {
+            if (err) {
+              return res.json({
+                code: databaseerror,
+                message: 'database error',
+              })
+            } else {
+              return res.json({
+                message: 'Request rejected',
+              })
+            }
           }
-        }
-      )
+        )
+      } else {
+        return res.json({
+          message: 'No Request Found',
+        })
+      }
     } else {
       return res.json({
-        message: 'No Request Found',
+        message: 'Not Same Department',
       })
     }
   } catch (err) {
@@ -300,48 +370,61 @@ const rejectMaternityLeaveRequest = async (req, res) => {
 
 const cancelSickLeaveRequest = async (req, res) => {
   try {
+    const send = req.member.memberId
     const findrequest = await sickRequest.findById(req.body.requestId)
     const ourDay = new Date()
     console.log(ourDay)
     console.log(findrequest.from)
-    if (findrequest.status === requestType.PENDING) {
-      sickRequest.findByIdAndDelete(req.body.requestId, function (err) {
-        if (err) {
-          return res.json({
-            code: databaseerror,
-            message: 'database error',
-          })
-        } else {
-          return res.json({
-            message: 'Request Cancelled',
+    if (findrequest) {
+      if (send.toString() === findrequest.member.toString()) {
+        if (findrequest.status === requestType.PENDING) {
+          sickRequest.findByIdAndDelete(req.body.requestId, function (err) {
+            if (err) {
+              return res.json({
+                code: databaseerror,
+                message: 'database error',
+              })
+            } else {
+              return res.json({
+                message: 'Request Cancelled',
+              })
+            }
           })
         }
-      })
-    }
-    if (
-      findrequest.status === requestType.ACCEPT ||
-      findrequest.status === requestType.REJECT
-    ) {
-      console.log('here')
-      if (findrequest.from > ourDay) {
-        console.log('here2')
-        sickRequest.findByIdAndDelete(req.body.requestId, function (err) {
-          if (err) {
-            return res.status(500).json({
-              code: databaseerror,
-              message: 'database error',
+        if (
+          findrequest.status === requestType.ACCEPT ||
+          findrequest.status === requestType.REJECT
+        ) {
+          console.log('here')
+          if (findrequest.from > ourDay) {
+            console.log('here2')
+            sickRequest.findByIdAndDelete(req.body.requestId, function (err) {
+              if (err) {
+                return res.status(500).json({
+                  code: databaseerror,
+                  message: 'database error',
+                })
+              } else {
+                return res.json({
+                  message: 'Request Cancelled',
+                })
+              }
             })
           } else {
             return res.json({
-              message: 'Request Cancelled',
+              message: 'Request Date already passed',
             })
           }
-        })
+        }
       } else {
         return res.json({
-          message: 'Request Date already passed',
+          message: 'Not Same Member',
         })
       }
+    } else {
+      return res.json({
+        message: 'Wrong RequestId',
+      })
     }
   } catch (err) {
     console.log(err)
@@ -354,44 +437,63 @@ const cancelSickLeaveRequest = async (req, res) => {
 
 const cancelMaternityLeaveRequest = async (req, res) => {
   try {
+    const send = req.member.memberId
     const findrequest = await maternityRequest.findById(req.body.requestId)
     const ourDay = new Date()
-    if (findrequest.status === requestType.PENDING) {
-      maternityRequest.findByIdAndDelete(req.body.requestId, function (err) {
-        if (err) {
-          return res.json({
-            code: databaseerror,
-            message: 'database error',
-          })
-        } else {
-          return res.json({
-            message: 'Request Cancelled',
-          })
+    if (findrequest) {
+      if (send.toString() === findrequest.member.toString()) {
+        if (findrequest.status === requestType.PENDING) {
+          maternityRequest.findByIdAndDelete(
+            req.body.requestId,
+            function (err) {
+              if (err) {
+                return res.json({
+                  code: databaseerror,
+                  message: 'database error',
+                })
+              } else {
+                return res.json({
+                  message: 'Request Cancelled',
+                })
+              }
+            }
+          )
         }
-      })
-    }
-    if (
-      findrequest.status === requestType.ACCEPT ||
-      findrequest.status === requestType.REJECT
-    ) {
-      if (findrequest.from > ourDay) {
-        maternityRequest.findByIdAndDelete(req.body.requestId, function (err) {
-          if (err) {
-            return res.status(500).json({
-              code: databaseerror,
-              message: 'database error',
-            })
+        if (
+          findrequest.status === requestType.ACCEPT ||
+          findrequest.status === requestType.REJECT
+        ) {
+          if (findrequest.from > ourDay) {
+            maternityRequest.findByIdAndDelete(
+              req.body.requestId,
+              function (err) {
+                if (err) {
+                  return res.status(500).json({
+                    code: databaseerror,
+                    message: 'database error',
+                  })
+                } else {
+                  return res.json({
+                    message: 'Request Cancelled',
+                  })
+                }
+              }
+            )
           } else {
             return res.json({
-              message: 'Request Cancelled',
+              message: 'Request Date already passed',
             })
           }
-        })
+        }
       } else {
         return res.json({
-          message: 'Request Date already passed',
+          message: 'Not Same Member',
         })
       }
+    } else {
+      return res.json({
+        message: 'Wrong RequestId',
+      })
     }
   } catch (err) {
     console.log(err)

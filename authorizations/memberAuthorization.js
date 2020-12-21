@@ -21,6 +21,24 @@ const verifyHOD = (req, res, next) => {
   next()
 }
 
+const verifyInstructor = (req, res, next) => {
+  if (req.member.type !== memberRoles.INSTRUCTOR) {
+    return res.status(403).json({
+      code: unauthorized,
+      message: 'Unauthorized to perform Instructor actions',
+    })
+  }
+  next()
+}
 
+const verifyTA = (req, res, next) => {
+  if (req.member.type !== memberRoles.TA) {
+    return res.status(403).json({
+      code: unauthorized,
+      message: 'Unauthorized to perform TA actions',
+    })
+  }
+  next()
+}
 
-module.exports = { verifyHR, verifyHOD }
+module.exports = { verifyHR, verifyHOD, verifyInstructor, verifyTA }

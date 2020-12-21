@@ -16,7 +16,6 @@ const validateChangeDayOffRequest = (req, res, next) => {
       )
       .required(),
     reason: Joi.string(),
-    member: Joi.string().required(),
   })
   const checkSchema = changeDayOffRequestSchema.validate(req.body)
   if (checkSchema.error) {
@@ -62,7 +61,6 @@ const validateSickLeavesRequest = (req, res, next) => {
     to: Joi.date().required(),
     comment: Joi.string(),
     document: Joi.array().items(Joi.string()).required(),
-    member: Joi.string().required(),
   })
   const checkSchema = sickLeavesRequestSchema.validate(req.body)
   if (checkSchema.error) {
@@ -80,7 +78,6 @@ const validateMaternityLeavesRequest = (req, res, next) => {
     to: Joi.date().required(),
     comment: Joi.string(),
     document: Joi.array().items(Joi.string()).required(),
-    member: Joi.string().required(),
   })
   const checkSchema = sickLeavesRequestSchema.validate(req.body)
   if (checkSchema.error) {
