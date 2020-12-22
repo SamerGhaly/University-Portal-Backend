@@ -5,23 +5,26 @@ const {
   memberNotAssignedToCourse,
   requestAlreadyMade,
   databaseerror,
+  requestDoesNotExist,
+  requestNotPending,
+  notCoordinator,
 } = require('../constants/errorCodes')
 
-const { requestType } = require('../constants/constants')
+const { requestType, memberRoles } = require('../constants/constants')
 const Request = require('../models/changeDayOffRequest')
 const sickRequest = require('../models/sickLeaveRequest')
 const maternityRequest = require('../models/maternityLeaveRequest')
 const Member = require('../models/memberModel')
 
 const SlotAssignmentModel = require('../models/slotAssignmentModel')
-const SLotLinkingModel = require('../models/slotLinkingRequest')
+const SlotLinkingModel = require('../models/slotLinkingRequest')
 const MemberModel = require('../models/memberModel')
 const CourseAssignmentModel = require('../models/courseAssignment')
-const slotLinkingRequest = require('../models/slotLinkingRequest')
+const { findById, findByIdAndUpdate } = require('../models/changeDayOffRequest')
 
 const sendSlotLinking = async (req, res) => {
   try {
-    const memberId = req.member.memberId //from token
+    const tokenId = req.member.memberId //from token
     //check is slot is found
     const slotFound = await SlotAssignmentModel.findById(req.body.slotId)
     if (!slotFound) {
@@ -32,9 +35,9 @@ const sendSlotLinking = async (req, res) => {
     }
 
     //Check SlotLinking request done before
-    const requestFound = await slotLinkingRequest.find({
-      slot: req.body.slot,
-      member: memberId,
+    const requestFound = await SlotLinkingModel.findOne({
+      slot: req.body.slotId,
+      member: tokenId,
     })
     if (requestFound) {
       return res.status(400).json({
@@ -53,7 +56,7 @@ const sendSlotLinking = async (req, res) => {
 
     //check member is in course
     const checkMemberInCourse = await CourseAssignmentModel.findOne({
-      member: memberId,
+      member: tokenId,
       course: slotFound.course,
     })
     if (!checkMemberInCourse) {
@@ -63,12 +66,70 @@ const sendSlotLinking = async (req, res) => {
       })
     }
 
-    await SLotLinkingModel.create({
+    await SlotLinkingModel.create({
       slot: slotFound._id,
-      member: memberId,
+      member: tokenId,
+      status: requestType.PENDING,
     })
     return res.json({
       message: 'Slot Linking Request Sent Successfully!',
+    })
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
+const acceptSlotLinkingRequest = async (req, res) => {
+  try {
+    const requestFound = await SlotLinkingModel.findById(
+      req.body.requestId
+    ).populate('slot')
+    if (!requestFound) {
+      return res.status(404).json({
+        code: requestDoesNotExist,
+        message: 'Request Does Not Exist',
+      })
+    }
+    if (requestFound.status !== requestType.PENDING) {
+      return res.status(400).json({
+        code: requestNotPending,
+        message: 'This request is not pending',
+      })
+    }
+    if (requestFound.slot.member) {
+      return res.status(400).json({
+        code: slotAlreadyAssigned,
+        message: 'Slot Already Assigned',
+      })
+    }
+    const tokenId = req.member.memberId
+    const courseAssignment = await CourseAssignmentModel.findOne({
+      member: tokenId,
+      course: requestFound.slot.course,
+      role: memberRoles.COORDINATOR,
+    })
+    if (!courseAssignment) {
+      return res.status(403).json({
+        code: notCoordinator,
+        message: 'Not a Coordinator',
+      })
+    }
+
+    // Add to slotAssignment
+    const newSlot = requestFound.slot
+    newSlot.member = requestFound.member
+    console.log(newSlot)
+    await SlotAssignmentModel.findByIdAndUpdate(requestFound.slot._id, {
+      $set: { member: requestFound.member },
+    })
+    requestFound.status = requestType.ACCEPT
+    await SlotLinkingModel.findByIdAndUpdate(req.body.requestId, requestFound)
+    return res.json({
+      message: 'Request was accepted successfully',
     })
   } catch (err) {
     console.log(err)
@@ -649,4 +710,5 @@ module.exports = {
   cancelMaternityLeaveRequest,
   cancelChangeDayOffRequest,
   sendSlotLinking,
+  acceptSlotLinkingRequest,
 }

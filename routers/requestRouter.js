@@ -1,17 +1,30 @@
 const express = require('express')
 const router = express.Router()
 const verifyToken = require('../authorizations/verifyToken')
+const { verifyTA } = require('../authorizations/memberAuthorization')
 
 const {
   validateSlotLinkingRequest,
+  validateAcceptRejectLinkingRequest,
 } = require('../validations/requestValidation')
-const { sendSlotLinking } = require('../controllers/requestController')
+const {
+  sendSlotLinking,
+  acceptSlotLinkingRequest,
+} = require('../controllers/requestController')
 
 router.post(
   '/sendSlotLinking',
   validateSlotLinkingRequest,
   verifyToken,
   sendSlotLinking
+)
+
+router.post(
+  '/acceptSlotLinking',
+  validateAcceptRejectLinkingRequest,
+  verifyToken,
+  verifyTA,
+  acceptSlotLinkingRequest
 )
 
 const {

@@ -9,6 +9,7 @@ const slotLinkingRequestSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Member',
   },
+  status: String,
 })
 
 module.exports = mongoose.model('SlotLinkingRequest', slotLinkingRequestSchema)
