@@ -52,7 +52,11 @@ const slotTypes = {
   LECTURE: 'lecture',
   LAB: 'lab',
 }
-
+const requestType = {
+  ACCEPT: 'accept',
+  REJECT: 'reject',
+  PENDING: 'pending',
+}
 module.exports = {
   memberRoles,
   attendanceRecordTypes,
@@ -61,4 +65,5 @@ module.exports = {
   weekDays,
   months,
   slotTypes,
+  requestType,
 }

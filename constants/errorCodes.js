@@ -43,4 +43,5 @@ module.exports = {
   courseNotInDepartment: '110',
   noDepartment: '111',
   IdnotFound: '201',
+  databaseerror: '202',
 }

@@ -38,6 +38,7 @@ const {
 } = require('../authorizations/memberAuthorization')
 
 router.post('/login', validateLogin, login)
+router.post('/addMember', validateAddMember, verifyToken, verifyHR, addMember)
 router.post('/signIn', validateSignInOut, signIn)
 router.post('/signOut', validateSignInOut, signOut)
 router.post(
