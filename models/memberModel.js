@@ -21,6 +21,7 @@ const memberSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Room',
   },
+  annualBalance: Number,
 })
 
 memberSchema.virtual('attendanceRecords', {

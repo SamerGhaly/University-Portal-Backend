@@ -1,17 +1,9 @@
 const mongoose = require('mongoose')
 
 const slotLinkingRequestSchema = new mongoose.Schema({
-  slot: Number,
-  day: String,
-  status: String,
-  comment: String,
-  course: {
+  slot: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Course',
-  },
-  room: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Room',
+    ref: 'SlotAssignment',
   },
   member: {
     type: mongoose.Schema.Types.ObjectId,

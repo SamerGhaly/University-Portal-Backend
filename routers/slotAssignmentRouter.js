@@ -6,12 +6,16 @@ const {
   updateSlot,
   deleteSlot,
   assignMemberToSlot,
+  updateMemberSlotAssignment,
+  deleteMemberSlotAssignment,
 } = require('../controllers/slotAssignmentController')
 const {
   validateAddSlot,
   validateUpdateSlot,
   validateDeleteSlot,
   validateAssignSlotToMember,
+  validateUpdateSlotAssignment,
+  validateDeleteSlotAssignment,
 } = require('../validations/slotAssignmentValidation')
 const {
   verifyTA,
@@ -42,6 +46,22 @@ router.post(
   verifyToken,
   verifyInstructor,
   assignMemberToSlot
+)
+
+router.put(
+  '/updateSlotMemberAssign',
+  validateUpdateSlotAssignment,
+  verifyToken,
+  verifyInstructor,
+  updateMemberSlotAssignment
+)
+
+router.delete(
+  '/deleteSlotMemberAssign',
+  validateDeleteSlotAssignment,
+  verifyToken,
+  verifyInstructor,
+  deleteMemberSlotAssignment
 )
 
 module.exports = router

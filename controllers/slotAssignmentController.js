@@ -11,6 +11,7 @@ const {
   slotAlreadyAssigned,
   memberNotAssignedToCourse,
   instructorNotInCourse,
+  slotNotAssigned,
 } = require('../constants/errorCodes')
 const CourseModel = require('../models/courseModel')
 const MemberModel = require('../models/memberModel')
@@ -249,7 +250,7 @@ const assignMemberToSlot = async (req, res) => {
       course: checkAssignedSlot.course,
     })
     if (!checkInstructorOnCourse) {
-      return res.json({
+      return res.status(403).json({
         code: instructorNotInCourse,
         message: 'Instructor Not On Course',
       })
@@ -260,7 +261,7 @@ const assignMemberToSlot = async (req, res) => {
     })
     console.log(checkSameCourse)
     if (!checkSameCourse) {
-      return res.json({
+      return res.status(400).json({
         code: memberNotAssignedToCourse,
         message: 'Memer Not Assigned To Course',
       })
@@ -282,10 +283,110 @@ const assignMemberToSlot = async (req, res) => {
   }
 }
 
+const updateMemberSlotAssignment = async (req, res) => {
+  try {
+    const slotAssignmentFound = await SlotAssignmentModel.findById(
+      req.body.assignmentId
+    )
+    if (!slotAssignmentFound) {
+      return res.status(404).json({
+        code: slotAssignmentNotFound,
+        message: 'Slot Assignment Does Not Exist',
+      })
+    }
+    const instructorId = req.member.memberId //from token
+    //check instructor on course
+    const checkInstructorOnCourse = await CourseAssignmentModel.findOne({
+      member: instructorId,
+      course: slotAssignmentFound.course,
+    })
+    if (!checkInstructorOnCourse) {
+      return res.status(403).json({
+        code: instructorNotInCourse,
+        message: 'Instructor Not In Course',
+      })
+    }
+
+    //check new member on course
+    const newMemberOnCourse = await CourseAssignmentModel.findOne({
+      member: req.body.newMemberId,
+      course: slotAssignmentFound.course,
+    })
+    if (!newMemberOnCourse) {
+      return res.status(400).json({
+        code: memberNotAssignedToCourse,
+        message: 'member not assigned to course',
+      })
+    }
+    slotAssignmentFound.member = req.body.newMemberId
+    await SlotAssignmentModel.findByIdAndUpdate(
+      slotAssignmentFound._id,
+      slotAssignmentFound
+    )
+    return res.json({
+      message: 'Slot Assignment Updated Successfully',
+    })
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
+const deleteMemberSlotAssignment = async (req, res) => {
+  try {
+    const slotAssignFound = await SlotAssignmentModel.findById(
+      req.body.assignmentId
+    )
+    if (!slotAssignFound) {
+      return res.status(404).json({
+        code: slotAssignmentNotFound,
+        message: 'Slot Asssignment Not Found',
+      })
+    }
+    if (!slotAssignFound.member) {
+      return res.status(404).json({
+        code: slotNotAssigned,
+        message: 'Slot Not Assigned TO Member',
+      })
+    }
+    const instructorId = req.member.memberId
+    //check instructor on course
+    const checkInstructorOnCourse = await CourseAssignmentModel.findOne({
+      member: instructorId,
+      course: slotAssignFound.course,
+    })
+    if (!checkInstructorOnCourse) {
+      return res.status(403).json({
+        code: instructorNotInCourse,
+        message: 'Instructor not on course',
+      })
+    }
+    const newSlot = slotAssignFound
+    newSlot.member = undefined
+    await SlotAssignmentModel.findByIdAndUpdate(slotAssignFound._id, {
+      $unset: { member: '' },
+    })
+    return res.json({
+      message: 'Member removed from slot',
+    })
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
 module.exports = {
   assignSlot,
   addSlot,
   updateSlot,
   deleteSlot,
   assignMemberToSlot,
+  updateMemberSlotAssignment,
+  deleteMemberSlotAssignment,
 }

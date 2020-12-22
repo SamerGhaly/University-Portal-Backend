@@ -87,9 +87,38 @@ const validateAssignSlotToMember = (req, res, next) => {
   next()
 }
 
+const validateUpdateSlotAssignment = (req, res, next) => {
+  const assignSlotSchema = Joi.object({
+    assignmentId: Joi.string().length(24).required(),
+    newMemberId: Joi.string().length(24).required(),
+  })
+  const checkSchema = assignSlotSchema.validate(req.body)
+  if (checkSchema.error)
+    return res.status(400).json({
+      code: checkSchema,
+      message: checkSchema.error.details[0],
+    })
+  next()
+}
+
+const validateDeleteSlotAssignment = (req, res, next) => {
+  const assignSlotSchema = Joi.object({
+    assignmentId: Joi.string().length(24).required(),
+  })
+  const checkSchema = assignSlotSchema.validate(req.body)
+  if (checkSchema.error)
+    return res.status(400).json({
+      code: checkSchema,
+      message: checkSchema.error.details[0],
+    })
+  next()
+}
+
 module.exports = {
   validateAddSlot,
   validateUpdateSlot,
   validateDeleteSlot,
   validateAssignSlotToMember,
+  validateUpdateSlotAssignment,
+  validateDeleteSlotAssignment,
 }

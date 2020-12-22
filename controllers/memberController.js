@@ -23,7 +23,7 @@ const {
   roomIsFull,
   roomNotOffice,
   IdnotFound,
-  AssignTaOnly,
+  notTA,
   differentDepartments,
   courseDoesNotExist,
   assignmentAlreadyThere,
@@ -501,18 +501,21 @@ const assignTaToCourse = async (req, res) => {
   try {
     const instructorId = req.member.memberId
     const memberFound = await MemberModel.findById(req.body.member)
+    //Check Member in DB
     if (!memberFound) {
       return res.status(404).json({
         code: userNotFound,
         message: 'User Not Found',
       })
     }
+    //check member is a TA
     if (memberFound.type !== memberRoles.TA) {
       return res.status(400).json({
-        code: AssignTaOnly,
+        code: notTA,
         message: 'Only TAs can be assigned',
       })
     }
+    // check Course is in DB
     const courseFound = await CourseModel.findById(req.body.course)
     if (!courseFound) {
       return res.status(404).json({
@@ -520,30 +523,37 @@ const assignTaToCourse = async (req, res) => {
         message: 'Course Not Found',
       })
     }
-    const instructorFound = await MemberModel.findById(instructorId)
 
+    const instructorFound = await MemberModel.findById(instructorId)
+    //Check instructor belongs to same department
     if (!courseFound.department.includes(instructorFound.department)) {
       return res.status(400).json({
         code: differentDepartments,
         message: 'Course And Instructor must be in the same department',
       })
     }
+
+    //Check course and TA must be in same department
     if (!courseFound.department.includes(memberFound.department)) {
       return res.status(400).json({
         code: differentDepartments,
         message: 'Course And Ta must be in the same department',
       })
     }
+
+    //Check if Ta is already assigned
     const assignFound = await courseAssignmentModel.findOne({
       member: req.body.member,
       course: req.body.course,
     })
+
     if (assignFound) {
       return res.status(400).json({
         code: assignmentAlreadyThere,
         message: 'This assignment is already there',
       })
     }
+    //Check the instructor is assigned to course
     const checkInstructorInCourse = await courseAssignmentModel.findOne({
       member: instructorId,
       course: req.body.course,
@@ -554,6 +564,7 @@ const assignTaToCourse = async (req, res) => {
         message: 'Instructor Does Not Teach Course',
       })
     }
+
     const assign = req.body
     assign.role = memberRoles.TA
     await courseAssignmentModel.create(assign)
@@ -581,7 +592,7 @@ const assignCoorinatorToCourse = async (req, res) => {
     }
     if (memberFound.type !== memberRoles.TA) {
       return res.status(400).json({
-        code: AssignTaOnly,
+        code: notTA,
         message: 'Only TAs can be assigned',
       })
     }
@@ -662,41 +673,101 @@ const assignCoorinatorToCourse = async (req, res) => {
 
 const updateTaAssignment = async (req, res) => {
   try {
-    const memberId = req.body.member
-    const oldCourse = req.body.oldCourse
-    const newCourse = req.body.newCourse
-    const checkOldAssign = await courseAssignmentModel.findOne({
-      member: memberId,
-      course: oldCourse,
-      role: memberRoles.TA,
-    })
+    const memberId = req.body.newMemberId
+    const checkOldAssign = await courseAssignmentModel.findById(
+      req.body.assignmentId
+    )
+    //Check if assignment exists
     if (!checkOldAssign) {
       return res.json({
         code: assignmentDoesNotExist,
         message: 'Assignment Does Not Exist',
       })
     }
-    const checkNewCourse = await CourseModel.findById(newCourse)
-    if (!checkNewCourse) {
+    const instructorId = await MemberModel.findById(req.member.memberId)
+
+    //check if instructor is assigned to course
+    const checkInstructorInCourse = await courseAssignmentModel.findOne({
+      course: checkOldAssign.course,
+      member: instructorId,
+    })
+
+    if (!checkInstructorInCourse) {
       return res.json({
-        code: courseDoesNotExist,
-        message: 'Course Does Not Exist',
+        code: instructorNotInCourse,
+        message: 'Instructor cannot edit course',
       })
     }
+
+    //Check if member exists
     const checkMember = await MemberModel.findById(memberId)
-    if (!checkNewCourse.department.includes(checkMember.department)) {
+    if (!checkMember) {
       return res.json({
-        code: differentDepartments,
-        message: 'Ta and Course must be in the same department',
+        code: userNotFound,
+        message: 'User Not Found',
       })
     }
-    checkOldAssign.course = newCourse
+    // check new member is a TA
+    if (checkMember.type !== memberRoles.TA) {
+      return res.json({
+        code: notTA,
+        message: 'Only TAs can be assigned by instructor',
+      })
+    }
+
+    checkOldAssign.member = memberId
     await courseAssignmentModel.findByIdAndUpdate(
       checkOldAssign._id,
       checkOldAssign
     )
     return res.json({
       message: 'Course Assignment Updated Successfully',
+    })
+  } catch (err) {
+    console.log(err)
+    return res.json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
+const removeTaAssignment = async (req, res) => {
+  try {
+    const checkAssignment = await courseAssignmentModel.findById(
+      req.body.assignmentId
+    )
+    if (!checkAssignment) {
+      return res.json({
+        code: assignmentDoesNotExist,
+        code: 'This Assignment Does Not Exist',
+      })
+    }
+    const instructorId = req.member.memberId //from token
+    //check instructor on course
+    const checkInstructorInCourse = await courseAssignmentModel.findOne({
+      member: instructorId,
+      course: checkAssignment.course,
+    })
+    if (!checkInstructorInCourse) {
+      return res.json({
+        code: instructorNotInCourse,
+        message: 'Only Instructors on this course can remove TAs',
+      })
+    }
+
+    if (
+      checkAssignment.role !== memberRoles.TA &&
+      checkAssignment.role !== memberRoles.COORDINATOR
+    ) {
+      return res.json({
+        code: notTA,
+        message: 'Only TAs or coordinators can be removed by instructor!',
+      })
+    }
+    await courseAssignmentModel.findByIdAndDelete(req.body.assignmentId)
+    return res.json({
+      message: 'Assignment Removed Successfully',
     })
   } catch (err) {
     console.log(err)
@@ -719,5 +790,6 @@ module.exports = {
   deleteMember,
   assignTaToCourse,
   updateTaAssignment,
+  removeTaAssignment,
   assignCoorinatorToCourse,
 }

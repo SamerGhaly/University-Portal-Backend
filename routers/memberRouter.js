@@ -13,6 +13,7 @@ const {
   validateAssignTaToCourse,
   validateAssignCoordinator,
   validateUpdateAssignTaToCourse,
+  validateRemoveTaFromCourse,
 } = require('../validations/memberValidation')
 const {
   addMember,
@@ -27,6 +28,7 @@ const {
   assignTaToCourse,
   assignCoorinatorToCourse,
   updateTaAssignment,
+  removeTaAssignment,
 } = require('../controllers/memberController')
 
 const verifyToken = require('../authorizations/verifyToken')
@@ -67,12 +69,19 @@ router.post(
   verifyInstructor,
   assignCoorinatorToCourse
 )
-router.post(
+router.put(
   '/updateTaAssignment',
   validateUpdateAssignTaToCourse,
   verifyToken,
   verifyInstructor,
   updateTaAssignment
+)
+router.delete(
+  '/removeTaAssignment',
+  validateRemoveTaFromCourse,
+  verifyToken,
+  verifyInstructor,
+  removeTaAssignment
 )
 router.put('/updateMember', validateUpdateMember, verifyToken, updateMember)
 router.post('/viewMember', validateViewMember, verifyToken, viewMember)
