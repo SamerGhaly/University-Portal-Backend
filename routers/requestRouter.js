@@ -6,11 +6,23 @@ const { verifyTA } = require('../authorizations/memberAuthorization')
 const {
   validateSlotLinkingRequest,
   validateAcceptRejectLinkingRequest,
+  validateReplcamentRequest,
 } = require('../validations/requestValidation')
 const {
   sendSlotLinking,
   acceptSlotLinkingRequest,
+  rejectSlotLinkingRequest,
+  cancelSlotLinkingRequest,
+  viewSlotLinkning,
+  sendReplacementRequest,
 } = require('../controllers/requestController')
+
+router.post(
+  '/sendReplacementRequest',
+  validateReplcamentRequest,
+  verifyToken,
+  sendReplacementRequest
+)
 
 router.post(
   '/sendSlotLinking',
@@ -26,6 +38,23 @@ router.post(
   verifyTA,
   acceptSlotLinkingRequest
 )
+
+router.post(
+  '/rejectSlotLinking',
+  validateAcceptRejectLinkingRequest,
+  verifyToken,
+  verifyTA,
+  rejectSlotLinkingRequest
+)
+
+router.post(
+  '/cancelSlotLinking',
+  validateAcceptRejectLinkingRequest,
+  verifyToken,
+  cancelSlotLinkingRequest
+)
+
+router.get('/viewSlotLinking', verifyToken, verifyTA, viewSlotLinkning)
 
 const {
   validateChangeDayOffRequest,

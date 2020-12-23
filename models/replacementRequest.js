@@ -1,11 +1,9 @@
 const mongoose = require('mongoose')
 
 const replacementRequestSchema = new mongoose.Schema({
-  slot: String,
-  day: String,
   comment: String,
+  reason: String,
   status: String,
-  requestType: String,
   member: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Member',
@@ -14,14 +12,11 @@ const replacementRequestSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Member',
   },
-  course: {
+  slot: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Course',
+    ref: 'SlotAssignment',
   },
-  room: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Room',
-  },
+  dateOfReplacement: Date,
 })
 
 module.exports = mongoose.model('ReplacementRequest', replacementRequestSchema)

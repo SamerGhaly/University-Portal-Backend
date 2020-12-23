@@ -211,6 +211,22 @@ const validateCancelChangeDayOffRequest = (req, res, next) => {
   }
   next()
 }
+const validateReplcamentRequest = (req, res, next) => {
+  const replacementSchema = Joi.object({
+    replacementMemberId: Joi.string().length(24).required(),
+    slotId: Joi.string().length(24).required(),
+    reason: Joi.string(),
+    dateOfReplacement: Joi.date().required(),
+  })
+  const checkSchema = replacementSchema.validate(req.body)
+  if (checkSchema.error) {
+    return res.json({
+      code: validationError,
+      message: checkSchema.error.details[0],
+    })
+  }
+  next()
+}
 
 module.exports = {
   validateChangeDayOffRequest,
@@ -227,4 +243,5 @@ module.exports = {
   validateCancelChangeDayOffRequest,
   validateSlotLinkingRequest,
   validateAcceptRejectLinkingRequest,
+  validateReplcamentRequest,
 }

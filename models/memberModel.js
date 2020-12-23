@@ -1,4 +1,3 @@
-const { required } = require('joi')
 const mongoose = require('mongoose')
 const AttendanceRecordModel = require('./attendanceRecordModel')
 
@@ -34,6 +33,12 @@ memberSchema.virtual('schedule', {
   ref: 'Schedule',
   localField: '_id',
   foreignField: 'member',
+})
+
+memberSchema.virtual('replacements', {
+  ref: 'ReplacementRequest',
+  localField: '_id',
+  foreignField: 'replacementMember',
 })
 
 memberSchema.post('findOneAndDelete', async (doc) => {

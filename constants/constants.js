@@ -32,6 +32,16 @@ const weekDays = {
   THURSDAY: 'thursday',
 }
 
+const weekDaysNumbers = {
+  0: weekDays.SUNDAY,
+  1: weekDays.MONDAY,
+  2: weekDays.TUESDAY,
+  3: weekDays.WEDNESDAY,
+  4: weekDays.THURSDAY,
+  5: weekDays.FRIDAY,
+  6: weekDays.SATURDAY,
+}
+
 const months = {
   JANUARY: 'january',
   FEBRUARY: 'february',
@@ -66,4 +76,5 @@ module.exports = {
   months,
   slotTypes,
   requestType,
+  weekDaysNumbers,
 }

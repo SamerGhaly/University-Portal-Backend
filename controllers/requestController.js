@@ -8,19 +8,30 @@ const {
   requestDoesNotExist,
   requestNotPending,
   notCoordinator,
+  cannotCancel,
+  slotNotAssignedToMember,
+  dateInThePast,
+  slotIsNotOnReplacementDay,
+  cannotSendReplacementOnFriday,
+  memberNotFree,
 } = require('../constants/errorCodes')
 
-const { requestType, memberRoles } = require('../constants/constants')
+const {
+  requestType,
+  memberRoles,
+  weekDaysNumbers,
+  weekDays,
+} = require('../constants/constants')
 const Request = require('../models/changeDayOffRequest')
 const sickRequest = require('../models/sickLeaveRequest')
 const maternityRequest = require('../models/maternityLeaveRequest')
 const Member = require('../models/memberModel')
-
+const replacment = require('../models/replacementRequest')
 const SlotAssignmentModel = require('../models/slotAssignmentModel')
 const SlotLinkingModel = require('../models/slotLinkingRequest')
 const MemberModel = require('../models/memberModel')
 const CourseAssignmentModel = require('../models/courseAssignment')
-const { findById, findByIdAndUpdate } = require('../models/changeDayOffRequest')
+const slotAssignmentModel = require('../models/slotAssignmentModel')
 
 const sendSlotLinking = async (req, res) => {
   try {
@@ -115,7 +126,7 @@ const acceptSlotLinkingRequest = async (req, res) => {
     if (!courseAssignment) {
       return res.status(403).json({
         code: notCoordinator,
-        message: 'Not a Coordinator',
+        message: 'Not a Coordinator on this course',
       })
     }
 
@@ -131,6 +142,103 @@ const acceptSlotLinkingRequest = async (req, res) => {
     return res.json({
       message: 'Request was accepted successfully',
     })
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
+const rejectSlotLinkingRequest = async (req, res) => {
+  try {
+    const requestFound = await SlotLinkingModel.findById(
+      req.body.requestId
+    ).populate('slot')
+    if (!requestFound) {
+      return res.status(404).json({
+        code: requestDoesNotExist,
+        message: 'Request Does Not Exist',
+      })
+    }
+    if (requestFound.status !== requestType.PENDING) {
+      return res.status(400).json({
+        code: requestNotPending,
+        message: 'Request is not pending',
+      })
+    }
+    //Check member who rejects is the course coordinator
+    const tokenId = req.member.memberId
+    console.log(tokenId, requestFound.slot)
+    const courseAssignment = await CourseAssignmentModel.findOne({
+      member: tokenId,
+      course: requestFound.slot.course,
+      role: memberRoles.COORDINATOR,
+    })
+    console.log(courseAssignment)
+
+    if (!courseAssignment) {
+      return res.status(403).json({
+        code: notCoordinator,
+        message: 'Not a Coordinator on this course',
+      })
+    }
+
+    await slotLinkingRequest.findByIdAndUpdate(req.body.requestId, {
+      $set: { status: requestType.REJECT },
+    })
+    return res.json({
+      message: 'Request is rejected successfully',
+    })
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
+const cancelSlotLinkingRequest = async (req, res) => {
+  try {
+    const requestFound = await SlotLinkingModel.findById(req.body.requestId)
+    if (!requestFound) {
+      return res.status(404).json({
+        code: requestDoesNotExist,
+        message: 'Request Does Not Exist',
+      })
+    }
+    const tokenId = req.member.memberId
+    if (tokenId !== requestFound.member.toString()) {
+      return res.status(403).json({
+        code: cannotCancel,
+        message: 'Not Authorized to cancel others requests',
+      })
+    }
+    if (requestFound.status !== requestType.PENDING) {
+      return res.status(400).json({
+        code: requestNotPending,
+        message: 'Request is not Pending',
+      })
+    }
+
+    await SlotLinkingModel.findByIdAndDelete(req.body.requestId)
+    return res.json({
+      message: 'Slot Linking Request is cancelled successfully',
+    })
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
+const viewSlotLinkning = async (req, res) => {
+  try {
+    const coordinatorId = req.member.memberId // from token
   } catch (err) {
     console.log(err)
     return res.status(500).json({
@@ -171,34 +279,33 @@ const acceptDayOffRequest = async (req, res) => {
     console.log(hod)
     if (hod.department.toString() === user.department.toString()) {
       if (request) {
-        Member.findByIdAndUpdate(
-          request.member,
-          { dayoff: request.newDayOff },
-          function (err) {
-            if (err) {
-              return res.json({
-                code: databaseerror,
-                message: 'databaseerror',
-              })
-            } else {
-              Request.findByIdAndUpdate(
-                req.body.requestId,
-                { status: requestType.ACCEPT },
-                function (err) {
-                  if (err) {
-                    return res.json({
-                      code: databaseerror,
-                      message: 'databaseerror',
-                    })
-                  }
-                }
-              )
-              return res.json({
-                message: 'Request accepted anad DayOff updated successfully',
-              })
+        Member.findByIdAndUpdate(request.member, function (err) {
+          if (err) {
+            return res.json({
+              code: databaseerror,
+              message: 'databaseerror',
+            })
+            {
+              dayoff: request.newDayOff
             }
+          } else {
+            Request.findByIdAndUpdate(
+              req.body.requestId,
+              { status: requestType.ACCEPT },
+              function (err) {
+                if (err) {
+                  return res.json({
+                    code: databaseerror,
+                    message: 'databaseerror',
+                  })
+                }
+              }
+            )
+            return res.json({
+              message: 'Request accepted anad DayOff updated successfully',
+            })
           }
-        )
+        })
       } else {
         return res.json({
           code: databaseerror,
@@ -696,6 +803,101 @@ const cancelChangeDayOffRequest = async (req, res) => {
   }
 }
 
+const sendReplacementRequest = async (req, res) => {
+  try {
+    const replacementId = req.body.replacementMemberId
+    const dateOfReplacement = new Date(req.body.dateOfReplacement)
+    const slotId = req.body.slotId
+    // Check if not found
+    const replacementMemberFound = await MemberModel.findById(replacementId)
+    if (!replacementMemberFound) {
+      return res.status(404).json({
+        code: userNotFound,
+        message: 'Member Does Not Exist!',
+      })
+    }
+
+    const slotFound = await SlotAssignmentModel.findById(slotId)
+    if (!slotFound) {
+      return res.status(404).json({
+        code: slotAssignmentNotFound,
+        message: 'Slot Does Not Exist!',
+      })
+    }
+
+    const tokenId = req.member.memberId
+    if (!slotFound.member || slotFound.member.toString() !== tokenId) {
+      return res.status(403).json({
+        code: slotNotAssignedToMember,
+        message: 'Slot Not Assigned to this member',
+      })
+    }
+    const checkSameCourse = await CourseAssignmentModel.findOne({
+      member: replacementId,
+      course: slotFound.course,
+    })
+    if (!checkSameCourse) {
+      return res.status(400).json({
+        code: memberNotAssignedToCourse,
+        message: 'Member Not Assigned To Course',
+      })
+    }
+
+    if (dateOfReplacement < new Date()) {
+      return res.status(400).json({
+        code: dateInThePast,
+        message: 'Date in the past',
+      })
+    }
+    const dayNumber = dateOfReplacement.getDay()
+    if (weekDaysNumbers[dayNumber] === weekDaysNumbers[5]) {
+      return res.status(400).json({
+        code: cannotSendReplacementOnFriday,
+        message: 'Cannot Send Replacement on Friday',
+      })
+    }
+
+    if (weekDaysNumbers[dayNumber] !== slotFound.day) {
+      return res.status(400).json({
+        code: slotIsNotOnReplacementDay,
+        message: 'Slot is not on the replacement day',
+      })
+    }
+    const checkmembernotfree = await slotAssignmentModel.findOne({
+      member: replacementId,
+      day: slotFound.day,
+      slot: slotFound.slot,
+    })
+    if (checkmembernotfree) {
+      return res.status(400).json({
+        code: memberNotFree,
+        message: 'Member not free in this slot ',
+      })
+    }
+
+    const newReplacement = {}
+    newReplacement.replacementMember = req.body.replacementMemberId
+    newReplacement.slot = req.body.slotId
+    newReplacement.dateOfReplacement = req.body.dateOfReplacement
+    newReplacement.member = req.member.memberId
+    newReplacement.status = requestType.PENDING
+    if (req.body.reason) {
+      newReplacement.reason = req.body.reason
+    }
+    await replacment.create(newReplacement)
+
+    return res.json({
+      message: 'Request sent successfully',
+    })
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
 module.exports = {
   changeDayOffRequest,
   acceptDayOffRequest,
@@ -711,4 +913,8 @@ module.exports = {
   cancelChangeDayOffRequest,
   sendSlotLinking,
   acceptSlotLinkingRequest,
+  rejectSlotLinkingRequest,
+  cancelSlotLinkingRequest,
+  viewSlotLinkning,
+  sendReplacementRequest,
 }
