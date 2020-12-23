@@ -29,10 +29,6 @@ module.exports = {
   slotAlreadyAssigned: '028',
   memberNotAssignedToCourse: '029',
   roomDoesnotExist: '100',
-  roomIsFull: '101',
-  roomNotOffice: '102',
-<<<<<<< HEAD
-  IdnotFound: "201",
   departmentDoesnotExist: "101",
   slotNumberNotValid:'102',
   entryAlreadyExist:'103',
@@ -40,15 +36,18 @@ module.exports = {
   notInstructor:'105',
   courseNotInDepartment: '106',
   courseNotFound:'107',
-  noDepartment:'108' ,
-=======
-  slotNumberNotValid: '103',
-  entryAlreadyExist: '104',
-  entryNotExist: '105',
-  notInstructor: '106',
   courseDoesNotExist: '107',
-  departmentDoesnotExist: '108',
-  courseNotFound: '109',
-  IdnotFound: '201',
->>>>>>> c13630f74038d04eed41d4c484d7e3462f608fed
+  noDepartment:'108' ,
+ departmentDoesnotExist: '108',
+  roomIsFull: '109',
+  roomNotOffice: '110',
+  IdnotFound: "201",
+  memberDoesnotExist:"111"
+ 
+
+
+
+ 
+
+
 }

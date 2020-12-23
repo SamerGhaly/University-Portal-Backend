@@ -4,7 +4,7 @@ const {roomTypes}=require("../constants/constants")
 const validateRoom=(req,res,next) => {
     const roomSchema=Joi.object({
         name:Joi.string().required(),
-        type:Joi.string().valid(roomTypes.HALL,roomTypes.LAB,roomTypes.TUTURIAL,roomTypes.OFFICE).required(),
+        type:Joi.string().valid(roomTypes.HALL,roomTypes.LAB,roomTypes.TUTORIAL,roomTypes.OFFICE).required(),
         capacity:Joi.number().required()
     })
     const checkSchema=roomSchema.validate(req.body)
@@ -21,7 +21,7 @@ const validateRoomU=(req,res,next) => {
     const roomSchema=Joi.object({
         roomId:Joi.string().length(24).required(),
         name:Joi.string(),
-        type:Joi.string().valid(roomTypes.HALL,roomTypes.LAB,roomTypes.TUTURIAL,roomTypes.OFFICE),
+        type:Joi.string().valid(roomTypes.HALL,roomTypes.LAB,roomTypes.TUTORIAL,roomTypes.OFFICE),
         capacity:Joi.number()
     })
     const checkSchema=roomSchema.validate(req.body)

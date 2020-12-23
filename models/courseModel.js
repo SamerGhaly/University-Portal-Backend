@@ -10,5 +10,12 @@ const courseSchema = new mongoose.Schema({
     },
   ],
 })
+courseSchema.virtual('slotsAssignments', {
+  ref: 'SlotAssignment',
+  localField: '_id',
+  foreignField: 'course',
+})
+courseSchema.set('toObject', { virtuals: true })
+courseSchema.set('toJSON', { virtuals: true })
 
 module.exports = mongoose.model('Course', courseSchema)

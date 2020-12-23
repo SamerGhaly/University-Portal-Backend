@@ -30,7 +30,7 @@ memberSchema.virtual('attendanceRecords', {
 })
 
 memberSchema.virtual('schedule', {
-  ref: 'Schedule',
+  ref: 'SlotAssignment',
   localField: '_id',
   foreignField: 'member',
 })
