@@ -12,4 +12,7 @@ const slotLinkingRequestSchema = new mongoose.Schema({
   status: String,
 })
 
+slotLinkingRequestSchema.set('toObject', { virtuals: true })
+slotLinkingRequestSchema.set('toJSON', { virtuals: true })
+
 module.exports = mongoose.model('SlotLinkingRequest', slotLinkingRequestSchema)

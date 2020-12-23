@@ -21,7 +21,7 @@ const memberSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Room',
   },
-  annualBalance: Number,
+  annualBalanceTaken: Number,
 })
 
 memberSchema.virtual('attendanceRecords', {
@@ -42,7 +42,7 @@ memberSchema.virtual('replacements', {
   foreignField: 'replacementMember',
 })
 
-memberSchema.post('findOneAndDelete', async (doc) => {
+memberSchema.post('findOneAndDelete findByIdAndDelete', async (doc) => {
   await AttendanceRecordModel.deleteMany({ member: doc._id })
   await tokenBlacklistModel.deleteMany({ member: doc._id })
 })

@@ -22,7 +22,6 @@ connectDB()
 
 app.use('/members', memberRoutes)
 app.use('/request', requestRoutes)
-app.use('/course', courseRoutes)
 app.use('/faculties', facultyRoutes)
 app.use('/departments', departmentRoutes)
 app.use('/course', courseRoutes)
@@ -35,7 +34,7 @@ setInterval(async () => {
   await tokenBlacklistModel.deleteMany({
     date: { $lt: new Date() },
   })
-}, 10 * 60 * 60 * 1000) //every 10 hours
+}, 48 * 60 * 60 * 1000) //every 48 hours
 
 app.listen(5000, () => {
   console.log('Server is up and running on port 5000')

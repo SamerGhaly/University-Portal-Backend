@@ -336,7 +336,7 @@ const viewMember = async (req, res) => {
 
 const signIn = async (req, res) => {
   try {
-    const memberId = req.body.memberId
+    const memberId = req.member.memberId
     const checkMember = await MemberModel.findById(memberId)
     if (!checkMember) {
       return res.status(404).json({
@@ -408,7 +408,7 @@ const signIn = async (req, res) => {
 
 const signOut = async (req, res) => {
   try {
-    const memberId = req.body.memberId
+    const memberId = req.member.memberId
     const checkMember = await MemberModel.findById(memberId)
     if (!checkMember) {
       return res.status(404).json({
@@ -802,6 +802,37 @@ const removeTaAssignment = async (req, res) => {
   }
 }
 
+const viewMissingDaysHours = async (req, res) => {
+  try {
+    const tokenId = req.member.memberId
+    let currentYear = new Date(2021, 0, 5).getFullYear()
+    let currentMonth
+    let startDate
+    let endDate
+    currentMonth =
+      new Date(2021, 0, 5).getDate() >= 11
+        ? new Date(2021, 0, 5).getMonth()
+        : new Date(2021, 0, 5).getMonth() - 1
+    if (currentMonth === -1) {
+      currentMonth = 11
+      currentYear = currentYear - 1
+      startDate = new Date(currentYear, currentMonth, 11)
+      endDate = new Date(currentYear + 1, 0, 11)
+    } else {
+      startDate = new Date(currentYear, currentMonth, 11)
+      endDate = new Date(currentYear, currentMonth + 1, 11)
+    }
+
+    console.log(currentMonth, currentYear, startDate, endDate)
+  } catch (err) {
+    console.log(err)
+    return res.json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
 module.exports = {
   addMember,
   login,
@@ -817,4 +848,5 @@ module.exports = {
   updateTaAssignment,
   removeTaAssignment,
   assignCoorinatorToCourse,
+  viewMissingDaysHours,
 }

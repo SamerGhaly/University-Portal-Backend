@@ -4,60 +4,8 @@ const verifyToken = require('../authorizations/verifyToken')
 const { verifyTA } = require('../authorizations/memberAuthorization')
 
 const {
-  validateSlotLinkingRequest,
-  validateAcceptRejectLinkingRequest,
-  validateReplcamentRequest,
-} = require('../validations/requestValidation')
-const {
-  sendSlotLinking,
-  acceptSlotLinkingRequest,
-  rejectSlotLinkingRequest,
-  cancelSlotLinkingRequest,
-  viewSlotLinkning,
-  sendReplacementRequest,
-} = require('../controllers/requestController')
-
-router.post(
-  '/sendReplacementRequest',
-  validateReplcamentRequest,
-  verifyToken,
-  sendReplacementRequest
-)
-
-router.post(
-  '/sendSlotLinking',
-  validateSlotLinkingRequest,
-  verifyToken,
-  sendSlotLinking
-)
-
-router.post(
-  '/acceptSlotLinking',
-  validateAcceptRejectLinkingRequest,
-  verifyToken,
-  verifyTA,
-  acceptSlotLinkingRequest
-)
-
-router.post(
-  '/rejectSlotLinking',
-  validateAcceptRejectLinkingRequest,
-  verifyToken,
-  verifyTA,
-  rejectSlotLinkingRequest
-)
-
-router.post(
-  '/cancelSlotLinking',
-  validateAcceptRejectLinkingRequest,
-  verifyToken,
-  cancelSlotLinkingRequest
-)
-
-router.get('/viewSlotLinking', verifyToken, verifyTA, viewSlotLinkning)
-
-const {
   validateChangeDayOffRequest,
+  validateViewSlotLinkingRequest,
 } = require('../validations/requestValidation')
 const { changeDayOffRequest } = require('../controllers/requestController')
 const {
@@ -114,6 +62,65 @@ const {
 const {
   cancelChangeDayOffRequest,
 } = require('../controllers/requestController')
+
+const {
+  validateSlotLinkingRequest,
+  validateAcceptRejectLinkingRequest,
+  validateReplcamentRequest,
+} = require('../validations/requestValidation')
+const {
+  sendSlotLinking,
+  acceptSlotLinkingRequest,
+  rejectSlotLinkingRequest,
+  cancelSlotLinkingRequest,
+  viewSlotLinkning,
+  sendReplacementRequest,
+} = require('../controllers/requestController')
+
+router.post(
+  '/sendReplacementRequest',
+  validateReplcamentRequest,
+  verifyToken,
+  sendReplacementRequest
+)
+
+router.post(
+  '/sendSlotLinking',
+  validateSlotLinkingRequest,
+  verifyToken,
+  sendSlotLinking
+)
+
+router.post(
+  '/acceptSlotLinking',
+  validateAcceptRejectLinkingRequest,
+  verifyToken,
+  verifyTA,
+  acceptSlotLinkingRequest
+)
+
+router.post(
+  '/rejectSlotLinking',
+  validateAcceptRejectLinkingRequest,
+  verifyToken,
+  verifyTA,
+  rejectSlotLinkingRequest
+)
+
+router.post(
+  '/cancelSlotLinking',
+  validateAcceptRejectLinkingRequest,
+  verifyToken,
+  cancelSlotLinkingRequest
+)
+
+router.post(
+  '/viewSlotLinking',
+  validateViewSlotLinkingRequest,
+  verifyToken,
+  verifyTA,
+  viewSlotLinkning
+)
 
 router.post(
   '/changeDayOff',

@@ -39,6 +39,7 @@ module.exports = {
   slotIsNotOnReplacementDay: '038',
   cannotSendReplacementOnFriday: '039',
   memberNotFree: '040',
+  notCoordinatorOnCourse: '041',
   roomDoesnotExist: '100',
   roomIsFull: '101',
   roomNotOffice: '102',

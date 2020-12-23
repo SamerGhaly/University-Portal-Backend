@@ -7,13 +7,14 @@ const {
   databaseerror,
   requestDoesNotExist,
   requestNotPending,
-  notCoordinator,
+  notCoordinatorOnCourse,
   cannotCancel,
   slotNotAssignedToMember,
   dateInThePast,
   slotIsNotOnReplacementDay,
   cannotSendReplacementOnFriday,
   memberNotFree,
+  courseDoesNotExist,
 } = require('../constants/errorCodes')
 
 const {
@@ -32,6 +33,7 @@ const SlotLinkingModel = require('../models/slotLinkingRequest')
 const MemberModel = require('../models/memberModel')
 const CourseAssignmentModel = require('../models/courseAssignment')
 const slotAssignmentModel = require('../models/slotAssignmentModel')
+const courseModel = require('../models/courseModel')
 
 const sendSlotLinking = async (req, res) => {
   try {
@@ -125,7 +127,7 @@ const acceptSlotLinkingRequest = async (req, res) => {
     })
     if (!courseAssignment) {
       return res.status(403).json({
-        code: notCoordinator,
+        code: notCoordinatorOnCourse,
         message: 'Not a Coordinator on this course',
       })
     }
@@ -180,7 +182,7 @@ const rejectSlotLinkingRequest = async (req, res) => {
 
     if (!courseAssignment) {
       return res.status(403).json({
-        code: notCoordinator,
+        code: notCoordinatorOnCourse,
         message: 'Not a Coordinator on this course',
       })
     }
@@ -241,6 +243,45 @@ const cancelSlotLinkingRequest = async (req, res) => {
 const viewSlotLinkning = async (req, res) => {
   try {
     const coordinatorId = req.member.memberId // from token
+    const courseId = req.body.courseId
+    const checkCourse = await courseModel.findById(courseId)
+    if (!checkCourse) {
+      return res.status(404).json({
+        code: courseDoesNotExist,
+        message: 'Course Does Not Exist',
+      })
+    }
+    const checkCoordinatorOnCourse = await CourseAssignmentModel.findOne({
+      member: coordinatorId,
+      course: courseId,
+      role: memberRoles.COORDINATOR,
+    })
+    if (!checkCoordinatorOnCourse) {
+      return res.status(403).json({
+        code: notCoordinatorOnCourse,
+        message: 'Not Coordinator on this course',
+      })
+    }
+
+    const records = await SlotLinkingModel.find({})
+      .populate({
+        path: 'slot',
+        match: {
+          course: courseId,
+        },
+        select: 'slot day',
+      })
+      .populate({
+        path: 'member',
+        select: '_id name email type ',
+      })
+    const result = []
+    records.forEach((record) => {
+      record.slot && result.push(record)
+    })
+    return res.json({
+      data: result,
+    })
   } catch (err) {
     console.log(err)
     return res.status(500).json({

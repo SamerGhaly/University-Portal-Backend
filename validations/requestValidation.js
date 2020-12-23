@@ -28,6 +28,19 @@ const validateAcceptRejectLinkingRequest = (req, res, next) => {
   next()
 }
 
+const validateViewSlotLinkingRequest = (req, res, next) => {
+  const viewSlotLinkingSchema = Joi.object({
+    courseId: Joi.string().length(24).required(),
+  })
+  const checkSchema = viewSlotLinkingSchema.validate(req.body)
+  if (checkSchema.error)
+    return res.status(400).json({
+      code: checkSchema,
+      message: checkSchema.error.details[0],
+    })
+  next()
+}
+
 const validateChangeDayOffRequest = (req, res, next) => {
   const changeDayOffRequestSchema = Joi.object({
     newDayOff: Joi.string()
@@ -244,4 +257,5 @@ module.exports = {
   validateSlotLinkingRequest,
   validateAcceptRejectLinkingRequest,
   validateReplcamentRequest,
+  validateViewSlotLinkingRequest,
 }

@@ -30,6 +30,7 @@ const {
   assignCoorinatorToCourse,
   updateTaAssignment,
   removeTaAssignment,
+  viewMissingDaysHours,
 } = require('../controllers/memberController')
 
 const verifyToken = require('../authorizations/verifyToken')
@@ -41,8 +42,8 @@ const {
 router.post('/login', validateLogin, login)
 router.get('/logout', verifyToken, logout)
 router.post('/addMember', validateAddMember, verifyToken, verifyHR, addMember)
-router.post('/signIn', validateSignInOut, signIn)
-router.post('/signOut', validateSignInOut, signOut)
+router.get('/signIn', verifyToken, signIn)
+router.get('/signOut', verifyToken, signOut)
 router.post(
   '/addMissingSign',
   validateMissingSign,
@@ -89,5 +90,5 @@ router.delete(
 router.put('/updateMember', validateUpdateMember, verifyToken, updateMember)
 router.post('/viewMember', validateViewMember, verifyToken, viewMember)
 router.post('/resetPassword', validateResetPassword, resetPassword)
-
+router.get('/viewMissingDaysHours', verifyToken, viewMissingDaysHours)
 module.exports = router

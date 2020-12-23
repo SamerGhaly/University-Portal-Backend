@@ -234,6 +234,7 @@ const validateAssignCoordinator = (req, res, next) => {
   next()
 }
 
+
 module.exports = {
   validateLogin,
   validateAddMember,
