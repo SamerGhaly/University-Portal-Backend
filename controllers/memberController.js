@@ -2,6 +2,7 @@ require('dotenv').config()
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const mongoose = require('mongoose')
+const invalidateToken = require('../helpers/invalidateToken')
 const AttendanceRecordModel = require('../models/attendanceRecordModel')
 const MemberModel = require('../models/memberModel')
 const RoomModel = require('../models/roomModel')
@@ -74,8 +75,31 @@ const login = async (req, res) => {
     const token = await jwt.sign(payload, process.env.SIGNING_KEY, {
       expiresIn: '8h',
     })
+    res.header('auth-token', token)
     return res.json({
-      token,
+      message: 'Logged in successfully',
+    })
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
+const logout = async (req, res) => {
+  try {
+    const tokenId = req.member.memberId
+    const token = req.headers['auth-token']
+    const expDate = new Date(jwt.decode(token).exp * 1000)
+    const blacklistToken = await invalidateToken(token, tokenId, expDate)
+    if (blacklistToken)
+      return res.json({
+        message: 'Logged out successfully',
+      })
+    return res.json({
+      message: 'Could Not Logout',
     })
   } catch (err) {
     console.log(err)
@@ -781,6 +805,7 @@ const removeTaAssignment = async (req, res) => {
 module.exports = {
   addMember,
   login,
+  logout,
   updateMember,
   viewMember,
   resetPassword,

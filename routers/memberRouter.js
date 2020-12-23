@@ -18,6 +18,7 @@ const {
 const {
   addMember,
   login,
+  logout,
   resetPassword,
   updateMember,
   viewMember,
@@ -38,6 +39,7 @@ const {
 } = require('../authorizations/memberAuthorization')
 
 router.post('/login', validateLogin, login)
+router.get('/logout', verifyToken, logout)
 router.post('/addMember', validateAddMember, verifyToken, verifyHR, addMember)
 router.post('/signIn', validateSignInOut, signIn)
 router.post('/signOut', validateSignInOut, signOut)

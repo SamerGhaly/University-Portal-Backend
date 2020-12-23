@@ -26,7 +26,7 @@ const Request = require('../models/changeDayOffRequest')
 const sickRequest = require('../models/sickLeaveRequest')
 const maternityRequest = require('../models/maternityLeaveRequest')
 const Member = require('../models/memberModel')
-const replacment = require('../models/replacementRequest')
+const Replacment = require('../models/replacementRequest')
 const SlotAssignmentModel = require('../models/slotAssignmentModel')
 const SlotLinkingModel = require('../models/slotLinkingRequest')
 const MemberModel = require('../models/memberModel')
@@ -223,7 +223,9 @@ const cancelSlotLinkingRequest = async (req, res) => {
       })
     }
 
-    await SlotLinkingModel.findByIdAndDelete(req.body.requestId)
+    await SlotLinkingModel.findByIdAndUpdate(req.body.requestId, {
+      $set: { status: requestType.CANCELLED },
+    })
     return res.json({
       message: 'Slot Linking Request is cancelled successfully',
     })
@@ -884,7 +886,7 @@ const sendReplacementRequest = async (req, res) => {
     if (req.body.reason) {
       newReplacement.reason = req.body.reason
     }
-    await replacment.create(newReplacement)
+    await Replacment.create(newReplacement)
 
     return res.json({
       message: 'Request sent successfully',

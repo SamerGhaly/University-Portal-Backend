@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const AttendanceRecordModel = require('./attendanceRecordModel')
+const tokenBlacklistModel = require('./tokenBlacklistModel')
 
 const memberSchema = new mongoose.Schema({
   name: String,
@@ -43,6 +44,7 @@ memberSchema.virtual('replacements', {
 
 memberSchema.post('findOneAndDelete', async (doc) => {
   await AttendanceRecordModel.deleteMany({ member: doc._id })
+  await tokenBlacklistModel.deleteMany({ member: doc._id })
 })
 
 memberSchema.set('toObject', { virtuals: true })

@@ -66,6 +66,7 @@ const requestType = {
   ACCEPT: 'accept',
   REJECT: 'reject',
   PENDING: 'pending',
+  CANCELLED: 'cancelled',
 }
 module.exports = {
   memberRoles,
