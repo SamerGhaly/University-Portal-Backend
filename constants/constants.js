@@ -13,8 +13,8 @@ const roomTypes = {
 }
 
 const attendanceRecordTypes = {
-  SIGN_IN: 'sign in',
-  SIGN_OUT: 'sign out',
+  SIGN_IN: 'signin',
+  SIGN_OUT: 'signout',
 }
 
 const gender = {
@@ -30,6 +30,16 @@ const weekDays = {
   TUESDAY: 'tuesday',
   WEDNESDAY: 'wednesday',
   THURSDAY: 'thursday',
+}
+
+const weekDaysNumbers = {
+  0: weekDays.SUNDAY,
+  1: weekDays.MONDAY,
+  2: weekDays.TUESDAY,
+  3: weekDays.WEDNESDAY,
+  4: weekDays.THURSDAY,
+  5: weekDays.FRIDAY,
+  6: weekDays.SATURDAY,
 }
 
 const months = {
@@ -52,7 +62,12 @@ const slotTypes = {
   LECTURE: 'lecture',
   LAB: 'lab',
 }
-
+const requestType = {
+  ACCEPT: 'accept',
+  REJECT: 'reject',
+  PENDING: 'pending',
+  CANCELLED: 'cancelled',
+}
 module.exports = {
   memberRoles,
   attendanceRecordTypes,
@@ -61,4 +76,6 @@ module.exports = {
   weekDays,
   months,
   slotTypes,
+  requestType,
+  weekDaysNumbers,
 }

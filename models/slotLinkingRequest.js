@@ -1,22 +1,18 @@
 const mongoose = require('mongoose')
 
 const slotLinkingRequestSchema = new mongoose.Schema({
-  slot: Number,
-  day: String,
-  status: String,
-  comment: String,
-  course: {
+  slot: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Course',
-  },
-  room: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Room',
+    ref: 'SlotAssignment',
   },
   member: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Member',
   },
+  status: String,
 })
+
+slotLinkingRequestSchema.set('toObject', { virtuals: true })
+slotLinkingRequestSchema.set('toJSON', { virtuals: true })
 
 module.exports = mongoose.model('SlotLinkingRequest', slotLinkingRequestSchema)

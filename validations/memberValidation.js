@@ -192,9 +192,8 @@ const validateAssignTaToCourse = (req, res, next) => {
 
 const validateUpdateAssignTaToCourse = (req, res, next) => {
   const assignMemberCourseSchema = Joi.object({
-    member: Joi.string().length(24).required(),
-    oldCourse: Joi.string().length(24).required(),
-    newCourse: Joi.string().length(24).required(),
+    assignmentId: Joi.string().length(24).required(),
+    newMemberId: Joi.string().length(24).required(),
   })
   const checkSchema = assignMemberCourseSchema.validate(req.body)
   if (checkSchema.error) {
@@ -208,8 +207,7 @@ const validateUpdateAssignTaToCourse = (req, res, next) => {
 
 const validateRemoveTaFromCourse = (req, res, next) => {
   const assignMemberCourseSchema = Joi.object({
-    member: Joi.string().length(24).required(),
-    course: Joi.string().length(24).required(),
+    assignmentId: Joi.string().length(24).required(),
   })
   const checkSchema = assignMemberCourseSchema.validate(req.body)
   if (checkSchema.error) {
@@ -235,6 +233,7 @@ const validateAssignCoordinator = (req, res, next) => {
   }
   next()
 }
+
 
 module.exports = {
   validateLogin,

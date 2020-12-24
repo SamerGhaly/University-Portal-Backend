@@ -1,6 +1,6 @@
-const { required } = require('joi')
 const mongoose = require('mongoose')
 const AttendanceRecordModel = require('./attendanceRecordModel')
+const tokenBlacklistModel = require('./tokenBlacklistModel')
 
 const memberSchema = new mongoose.Schema({
   name: String,
@@ -21,6 +21,7 @@ const memberSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Room',
   },
+  annualBalanceTaken: Number,
 })
 
 memberSchema.virtual('attendanceRecords', {
@@ -35,8 +36,15 @@ memberSchema.virtual('schedule', {
   foreignField: 'member',
 })
 
-memberSchema.post('findOneAndDelete', async (doc) => {
+memberSchema.virtual('replacements', {
+  ref: 'ReplacementRequest',
+  localField: '_id',
+  foreignField: 'replacementMember',
+})
+
+memberSchema.post('findOneAndDelete findByIdAndDelete', async (doc) => {
   await AttendanceRecordModel.deleteMany({ member: doc._id })
+  await tokenBlacklistModel.deleteMany({ member: doc._id })
 })
 
 memberSchema.set('toObject', { virtuals: true })
