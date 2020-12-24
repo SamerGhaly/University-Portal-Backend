@@ -20,14 +20,14 @@ app.use(express.urlencoded({ extended: true }))
 
 connectDB()
 
-app.use('/members', memberRoutes)
+app.use('/member', memberRoutes)
 app.use('/request', requestRoutes)
-app.use('/faculties', facultyRoutes)
-app.use('/departments', departmentRoutes)
+app.use('/faculty', facultyRoutes)
+app.use('/department', departmentRoutes)
 app.use('/course', courseRoutes)
 app.use('/attendance', attendanceRoutes)
+app.use('/room', roomRoutes)
 app.use('/slotAssignment', slotAssignmentRoutes)
-
 //useTimeout to delete expired tokens
 setInterval(async () => {
   console.log('Will Check DB')

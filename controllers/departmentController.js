@@ -1,4 +1,8 @@
-const { IdnotFound, noDepartment ,memberDoesnotExist} = require('../constants/errorCodes')
+const {
+  IdnotFound,
+  noDepartment,
+  memberDoesnotExist,
+} = require('../constants/errorCodes')
 const Department = require('../models/departmentModel')
 const Faculty = require('../models/facultyModel')
 const { populate } = require('../models/memberModel')
@@ -92,7 +96,7 @@ const deleteDepartment = async (req, res) => {
 const viewMemberInDepartment = async (req, res) => {
   try {
     const memberId = req.member.memberId
-    const out =  await Member.findById(memberId)
+    const out = await Member.findById(memberId)
       .select('department')
       .populate({
         path: 'department',
@@ -101,7 +105,7 @@ const viewMemberInDepartment = async (req, res) => {
           path: 'membersPerDepartment',
         },
       })
-    if (!(out.department))
+    if (!out.department)
       return res.json({
         code: noDepartment,
         message: 'you have no Department ',
@@ -116,10 +120,46 @@ const viewMemberInDepartment = async (req, res) => {
     })
   }
 }
+const viewMemberInDepartment = async (req, res) => {
+  try {
+    const memberId = req.member.memberId
+    const out = await Member.findById(memberId)
+      .select('department')
+      .populate({
+        path: 'department',
+        select: 'membersPerDepartment',
+        populate: {
+          path: 'membersPerDepartment',
+        },
+      })
+    // let array = []
+    // out.department.membersPerDepartment.forEach((element) => {
+    //   array.push({
+    //     _id: element._id.toString(),
+    //     name: element.name,
+    //     dayoff: element.dayoff,
+    //   })
+    // })
+
+    if (!out.department)
+      return res.json({
+        code: noDepartment,
+        message: 'you have no Department ',
+      })
+
+    res.json(out.department.membersPerDepartment)
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
 const viewAllMember_dayoff_InDepartment = async (req, res) => {
   try {
     const memberId = req.member.memberId
-    const out =  await Member.findById(memberId)
+    const out = await Member.findById(memberId)
       .select('department')
       .populate({
         path: 'department',
@@ -156,15 +196,14 @@ const viewAllMember_dayoff_InDepartment = async (req, res) => {
 
 const viewMember_dayoff_InDepartment = async (req, res) => {
   try {
-
     const memberId = req.member.memberId
-    const memberIsExist=await Member.findById(req.body.memberId)
+    const memberIsExist = await Member.findById(req.body.memberId)
     if (!memberIsExist)
       return res.json({
         code: memberDoesnotExist,
         message: 'No Member by this Id ',
       })
-    const out = await  Member.findById(memberId)
+    const out = await Member.findById(memberId)
       .select('department')
       .populate({
         path: 'department',
@@ -175,7 +214,7 @@ const viewMember_dayoff_InDepartment = async (req, res) => {
           match: { _id: req.body.memberId },
         },
       })
-    if (!(out.department))
+    if (!out.department)
       return res.json({
         code: noDepartment,
         message: 'your  department Does not exist',

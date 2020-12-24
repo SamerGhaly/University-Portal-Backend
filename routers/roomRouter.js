@@ -6,7 +6,7 @@ const {addRoom,updateRoom,deleteRoom}=require("../controllers/roomController")
 const verifyToken = require('../authorizations/verifyToken')
 const { verifyHR } = require('../authorizations/memberAuthorization')
 
-router.post('/addRoom',validateRoom,addRoom)
+router.post('/addRoom',verifyHR,validateRoom,addRoom)
 router.put('/updateRoom',validateRoomU,updateRoom)
 router.delete('/deleteRoom',validateRoomU,deleteRoom)
 
