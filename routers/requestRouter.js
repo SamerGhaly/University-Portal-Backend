@@ -60,6 +60,10 @@ const {
 const {
   cancelChangeDayOffRequest,
 } = require('../controllers/requestController')
+const {
+  validateCompensationLeavesRequest,
+} = require('../validations/requestValidation')
+const { compensationLeaveRequest } = require('../controllers/requestController')
 
 router.post(
   '/changeDayOff',
@@ -133,5 +137,12 @@ router.post(
   validateCancelChangeDayOffRequest,
   verifyToken,
   cancelChangeDayOffRequest
+)
+
+router.post(
+  '/compensationLeaveRequest',
+  validateCompensationLeavesRequest,
+  verifyToken,
+  compensationLeaveRequest
 )
 module.exports = router

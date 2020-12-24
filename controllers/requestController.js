@@ -1,11 +1,13 @@
 const { databaseerror, catchError } = require('../constants/errorCodes')
 const { requestType } = require('../constants/constants')
+const { weekDays } = require('../constants/constants')
 const Request = require('../models/changeDayOffRequest')
 const sickRequest = require('../models/sickLeaveRequest')
 const maternityRequest = require('../models/maternityLeaveRequest')
 const Member = require('../models/memberModel')
 const { date } = require('joi')
 const { findById } = require('../models/changeDayOffRequest')
+const Compensation = require('../models/compensationLeaveRequest')
 
 const changeDayOffRequest = (req, res) => {
   if (
@@ -528,17 +530,8 @@ const cancelChangeDayOffRequest = async (req, res) => {
           findrequest.status === requestType.ACCEPT ||
           findrequest.status === requestType.REJECT
         ) {
-          Request.findByIdAndDelete(req.body.requestId, function (err) {
-            if (err) {
-              return res.status(500).json({
-                code: databaseerror,
-                message: 'database error',
-              })
-            } else {
-              return res.json({
-                message: 'Request Cancelled',
-              })
-            }
+          return res.json({
+            message: 'Not Pending Request',
           })
         }
       } else {
@@ -559,6 +552,80 @@ const cancelChangeDayOffRequest = async (req, res) => {
     })
   }
 }
+const compensationLeaveRequest = async (req, res) => {
+  try {
+    const memberComp = await Member.findById(req.member.memberId)
+    let dateArr = req.body.compensationDate.split('-')
+    const compensationDateobject = new Date(dateArr[0], dateArr[1], dateArr[2])
+    let dateArr1 = memberComp.dayoff.split('-')
+    const memberCompdayoff = new Date(dateArr1[0], dateArr1[1], dateArr1[2])
+
+    console.log(req.body.compensationDate)
+    console.log(memberComp.dayoff)
+    if (compensationDateobject.getDay() !== memberCompdayoff.getDay()) {
+      return res.json({
+        message: 'Compensation day must be your DayOff',
+      })
+    }
+    if (
+      req.body.absentDate === memberComp.dayoff ||
+      req.body.absentDate === weekDays.FRIDAY
+    ) {
+      return res.json({
+        message: 'Absent day should not be FRIDDAY OR YOUR DAYOFF',
+      })
+    }
+
+    let currentYear = new Date(req.body.absentDate).getFullYear()
+    let currentMonth
+    let startDate
+    let endDate
+    currentMonth =
+      new Date(req.body.absentDate).getDate() >= 11
+        ? new Date(req.body.absentDate).getMonth()
+        : new Date(req.body.absentDate).getMonth() - 1
+    if (currentMonth === -1) {
+      currentMonth = 11
+      currentYear = currentYear - 1
+      startDate = new Date(currentYear, currentMonth, 11)
+      endDate = new Date(currentYear + 1, 0, 11)
+    } else {
+      if (currentMonth === 11) {
+        currentMonth = 0
+        currentYear = currentYear - 1
+        startDate = new Date(currentYear, 11, 11)
+        endDate = new Date(currentYear + 1, currentMonth, 11)
+      } else {
+        startDate = new Date(currentYear, currentMonth, 11)
+        endDate = new Date(currentYear, currentMonth + 1, 11)
+      }
+    }
+    if (
+      req.body.compensationDate > startDate &&
+      req.body.compensationDate < endDate
+    ) {
+      const newrequest = req.body
+      newrequest.member = req.member.memberId
+      newrequest.status = requestType.PENDING
+      newrequest.dateSubmitted = new Date()
+      Compensation.create(newrequest)
+      return res.json({
+        message: 'Compensation Leave Sent Successfuly',
+      })
+    } else {
+      return res.json({
+        message: 'Compensation Day must be in same month ',
+      })
+    }
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
 module.exports = {
   changeDayOffRequest,
   acceptDayOffRequest,
@@ -572,4 +639,5 @@ module.exports = {
   cancelSickLeaveRequest,
   cancelMaternityLeaveRequest,
   cancelChangeDayOffRequest,
+  compensationLeaveRequest,
 }
