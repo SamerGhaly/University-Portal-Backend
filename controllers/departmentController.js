@@ -120,7 +120,7 @@ const viewMemberInDepartment = async (req, res) => {
     })
   }
 }
-const viewMemberInDepartment = async (req, res) => {
+const viewAllMemberInDepartment = async (req, res) => {
   try {
     const memberId = req.member.memberId
     const out = await Member.findById(memberId)
