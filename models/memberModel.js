@@ -22,6 +22,8 @@ const memberSchema = new mongoose.Schema({
     ref: 'Room',
   },
   annualBalanceTaken: Number,
+  accidentalDaysTaken: Number,
+  dateCreated: Date,
 })
 
 memberSchema.virtual('attendanceRecords', {
