@@ -4,16 +4,22 @@ const verifyToken = require('../authorizations/verifyToken')
 const {
   verifyTA,
   verifyAcademic,
+  verifyHOD,
 } = require('../authorizations/memberAuthorization')
 
 const {
   validateChangeDayOffRequest,
   validateViewSlotLinkingRequest,
   validateSendAnnualLeaveRequest,
+  validateAcceptRejectAnnualLeaveRequest,
+  validateCancelAnnualLeaveRequest,
 } = require('../validations/requestValidation')
 const {
   changeDayOffRequest,
   sendAnnualLeave,
+  acceptAnnualLeaveRequest,
+  rejectAnnualLeaveRequest,
+  cancelAnnualLeaveRequest,
 } = require('../controllers/requestController')
 const {
   validateAcceptDayOffRequest,
@@ -209,6 +215,30 @@ router.post(
   verifyToken,
   verifyAcademic,
   sendAnnualLeave
+)
+
+router.post(
+  '/acceptAnnualLeaveRequest',
+  validateAcceptRejectAnnualLeaveRequest,
+  verifyToken,
+  verifyHOD,
+  acceptAnnualLeaveRequest
+)
+
+router.post(
+  '/rejectAnnualLeaveRequest',
+  validateAcceptRejectAnnualLeaveRequest,
+  verifyToken,
+  verifyHOD,
+  rejectAnnualLeaveRequest
+)
+
+router.post(
+  '/cancelAnnualLeaveRequest',
+  validateCancelAnnualLeaveRequest,
+  verifyToken,
+  verifyAcademic,
+  cancelAnnualLeaveRequest
 )
 
 module.exports = router

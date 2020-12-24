@@ -4,6 +4,7 @@ const annualLeaveRequestSchema = new mongoose.Schema({
   from: Date,
   to: Date,
   comment: String,
+  reason: String,
   status: String,
   dateSubmitted: Date,
   member: {
