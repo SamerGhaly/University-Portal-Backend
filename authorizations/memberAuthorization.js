@@ -41,4 +41,20 @@ const verifyTA = (req, res, next) => {
   next()
 }
 
-module.exports = { verifyHR, verifyHOD, verifyInstructor, verifyTA }
+const verifyAcademic = (req, res, next) => {
+  if (req.member.type === memberRoles.HR) {
+    return res.status(403).json({
+      code: unauthorized,
+      message: 'Unauthorized to perform Academic member actions',
+    })
+  }
+  next()
+}
+
+module.exports = {
+  verifyHR,
+  verifyHOD,
+  verifyInstructor,
+  verifyTA,
+  verifyAcademic,
+}

@@ -186,6 +186,9 @@ const addMember = async (req, res) => {
     member.password = await bcrypt.hashSync('123456', Number(process.env.SALT))
     member.activated = false
     member.customId = customId
+    member.dateCreated = new Date(new Date().getTime() + 2 * 60 * 60 * 1000)
+    member.annualBalanceTaken = 0
+    member.accidentalDaysTaken = 0
     const createdMember = await MemberModel.create(member)
     return res.json({
       message: 'Member Added',

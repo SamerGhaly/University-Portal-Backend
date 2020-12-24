@@ -8,7 +8,7 @@ const replacementRequestSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Member',
   },
-  replacementMember: {
+replacementMember: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Member',
   },
