@@ -24,6 +24,7 @@ const {
   notYourRequest,
   noReplacementFound,
   requestNotAccepted,
+  differentDepartments,
 } = require('../constants/errorCodes')
 
 const {
@@ -46,7 +47,7 @@ const courseModel = require('../models/courseModel')
 const AccidentalLeaveRequest = require('../models/accidentalLeaveRequest')
 const annualLeaveRequest = require('../models/annualLeaveRequest')
 const replacementRequest = require('../models/replacementRequest')
-
+const {calcMemberanualLeavesLeft}=require('../helpers/calculateTime')
 const sendSlotLinking = async (req, res) => {
   try {
     const tokenId = req.member.memberId //from token
@@ -970,17 +971,19 @@ const accidentalLeaveRequest = async (req, res) => {
     if (reason) obj.reason = reason
     let dateArr = req.body.absentDate.split('-')
     obj.absentDate = new Date(dateArr[0], dateArr[1], dateArr[2])
-    const member = await Member.findById(memberId)
+    const member = await Member.findById(obj.memberId)
     let accidentalDaysTaken = member.accidentalDaysTaken
-    let annualBalanceTaken = member.annualBalanceTaken
-    if (accidentalDaysTaken <7 && annualBalanceTaken > 0) {
-      Member.findOneAndUpdate(memberId, {
-        accidentalDaysTaken: accidentalDaysTaken + 1,
-        annualBalanceTaken: annualBalanceTaken - 1,
-      })
+    let annualBalance = calcMemberanualLeavesLeft(member)
+    console.log(annualBalance);
+
+    if (accidentalDaysTaken < 6 && annualBalance >= 1) {
+      // Member.findOneAndUpdate(obj.memberId, {
+      //   accidentalDaysTaken: accidentalDaysTaken + 1,
+      //   annualBalanceTaken: annualBalanceTaken + 1,
+      // })
       AccidentalLeaveRequest.create(obj)
     } else {
-      if (accidentalDaysTaken >6)
+      if (accidentalDaysTaken > 5)
         return res.status(404).json({
           message: 'you used the whole 6 accidental Days leaves',
           code: zeroAccidentalLeaves,
@@ -991,6 +994,9 @@ const accidentalLeaveRequest = async (req, res) => {
           code: zeroAnnualLeaves,
         })
     }
+    res.json({
+      message:"succefully make a request"
+    })
   } catch (err) {
     console.log(err)
     return res.status(500).json({
@@ -1059,16 +1065,15 @@ const sendAnnualLeave = async (req, res) => {
         diffDays -= 1
     }
     //Get Available days for member
-    const memberStartDate = new Date(2020, 9, 5)
+    const memberStartDate = memberFound.dateCreated
     // console.log(memberStartDate.toDateString())
-    const diffInMillies = today - memberStartDate
-    const days = diffInMillies / (1000 * 60 * 60 * 24) + 1
-    // console.log(days)
-    const months = Math.ceil(days / 28)
-    // console.log(months)
-    const availableDays = months * 2.5 - memberFound.annualBalanceTaken
-    // console.log(availableDays)
-    if (diffDays > availableDays) {
+    const diffInMonths = today.getMonth() - memberStartDate.getMonth()
+    const diffInYears = today.getFullYear() - memberStartDate.getFullYear()
+    let availableDays = (diffInMonths + 12 * diffInYears) * 2.5
+    if (today.getDate() <= memberStartDate.getDate()) availableDays += 2.5
+
+    availableDays -= memberFound.annualBalanceTaken
+    if (diffDays >= availableDays) {
       return res.json({
         code: noAvailableDays,
         message: 'There is no available days left in the annual balance',
@@ -1110,7 +1115,7 @@ const sendAnnualLeave = async (req, res) => {
       newReq.replacement = req.body.replacementId
     }
     newReq.member = tokenId
-
+    if (req.body.reason) newReq.reason = req.body.reason
     await annualLeaveRequest.create(newReq)
 
     return res.json({
@@ -1127,70 +1132,175 @@ const sendAnnualLeave = async (req, res) => {
 
 const acceptAnnualLeaveRequest = async (req, res) => {
   try {
-    // const dayFrom = new Date(
-    //   new Date(
-    //     dayFromArray[0],
-    //     Number(dayFromArray[1]) - 1,
-    //     dayFromArray[2]
-    //   ).getTime() +
-    //     2 * 60 * 60 * 1000
-    // )
-    // const dayTo = new Date(
-    //   new Date(
-    //     dayToArray[0],
-    //     Number(dayToArray[1]) - 1,
-    //     dayToArray[2]
-    //   ).getTime() +
-    //     2 * 60 * 60 * 1000
-    // )
-    // if (dayFrom > dayTo) {
-    //   return res.json({
-    //     code: FromDayAfterToDay,
-    //     message: 'Day From Must Be Before Day To',
-    //   })
-    // }
-    // if (dayFrom < today) {
-    //   return res.json({
-    //     code: mustBeBeforeTargetDay,
-    //     message: 'Annual Leaves Must Be Submitted Before Target Day',
-    //   })
-    // }
+    const requestId = req.body.requestId
+    const tokenId = req.member.memberId
+
+    const requestFound = await annualLeaveRequest
+      .findById(requestId)
+      .populate('member')
+    if (!requestFound) {
+      return res.status(404).json({
+        code: requestDoesNotExist,
+        message: 'Annual Leave Request Does Not Exist',
+      })
+    }
+
+    if (requestFound.status !== requestType.PENDING)
+      return res.status(400).json({
+        code: requestNotPending,
+        message: 'The request is not pending',
+      })
+   // console.log(requestFound.member.department)
+    const hod = await MemberModel.findById(tokenId)
+  //  console.log(hod.department)
+    if (requestFound.member.department.toString() !== hod.department.toString())
+      return res.status(403).json({
+        code: differentDepartments,
+        message: 'Member belongs to different department',
+      })
+
     // //Get the days of annaul leave request
-    // const diffDaysInMillis = dayTo - dayFrom
-    // let diffDays = diffDaysInMillis / (24 * 60 * 60 * 1000) + 1
-    // // console.log('Before', diffDays)
-    // const checkDay = dayFrom.getTime()
-    // for (
-    //   let start = checkDay;
-    //   start <= dayTo.getTime();
-    //   start += 24 * 60 * 60 * 1000
-    // ) {
-    //   const certainDay = new Date(start).getDay()
-    //   if (
-    //     certainDay === 5 ||
-    //     weekDaysNumbers[certainDay] === memberFound.dayoff
-    //   )
-    //     diffDays -= 1
-    // }
-    // //Get Available days for member
-    // const memberStartDate = new Date(2020, 9, 5)
-    // // console.log(memberStartDate.toDateString())
-    // const diffInMillies = today - memberStartDate
-    // const days = diffInMillies / (1000 * 60 * 60 * 24) + 1
-    // // console.log(days)
-    // const months = Math.ceil(days / 28)
-    // // console.log(months)
-    // const availableDays = months * 2.5 - memberFound.annualBalanceTaken
-    // // console.log(availableDays)
-    // if (diffDays > availableDays) {
-    //   return res.json({
-    //     code: noAvailableDays,
-    //     message: 'There is no available days left in the annual balance',
-    //   })
-    // }
-    // await MemberModel.findByIdAndUpdate(tokenId, {
-    //   $set: { annualBalanceTaken: memberFound.annualBalanceTaken + diffDays },
-    // })
+    const dayFrom = requestFound.from
+    const dayTo = requestFound.to
+    const diffDaysInMillis = dayTo - dayFrom
+    let diffDays = diffDaysInMillis / (24 * 60 * 60 * 1000) + 1
+    const checkDay = dayFrom.getTime()
+    for (
+      let start = checkDay;
+      start <= dayTo.getTime();
+      start += 24 * 60 * 60 * 1000
+    ) {
+      const certainDay = new Date(start).getDay()
+      if (
+        certainDay === 5 ||
+        weekDaysNumbers[certainDay] === requestFound.member.dayoff
+      )
+        diffDays -= 1
+    }
+  //  console.log(diffDays)
+
+    //Get Available days for member
+    const today = new Date()
+    const memberStartDate = requestFound.member.dateCreated
+    const diffInMonths = today.getMonth() - memberStartDate.getMonth()
+    const diffInYears = today.getFullYear() - memberStartDate.getFullYear()
+    let availableDays = (diffInMonths + 12 * diffInYears) * 2.5
+    if (today.getDate() <= memberStartDate.getDate()) availableDays += 2.5
+
+    availableDays -= requestFound.member.annualBalanceTaken
+    if (diffDays > availableDays) {
+      return res.json({
+        code: noAvailableDays,
+        message: 'There is no available days left in the annual balance',
+      })
+    }
+    await MemberModel.findByIdAndUpdate(requestFound.member._id, {
+      $set: {
+        annualBalanceTaken: requestFound.member.annualBalanceTaken + diffDays,
+      },
+    })
+    const updateBody = {}
+    updateBody.status = requestType.ACCEPT
+    if (req.body.comment) updateBody.comment = req.body.comment
+
+    await annualLeaveRequest.findByIdAndUpdate(requestId, {
+      $set: updateBody,
+    })
+
+    return res.json({
+      message: 'Request Accepted Successfully',
+    })
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
+const rejectAnnualLeaveRequest = async (req, res) => {
+  try {
+    const requestId = req.body.requestId
+
+    const requestFound = await annualLeaveRequest
+      .findById(requestId)
+      .populate('member')
+    if (!requestFound) {
+      return res.status(404).json({
+        code: requestDoesNotExist,
+        message: 'Annual Leave Request Does Not Exist',
+      })
+    }
+
+    if (requestFound.status !== requestType.PENDING)
+      return res.status(400).json({
+        code: requestNotPending,
+        message: 'The request is not pending',
+      })
+    const hod = await MemberModel.findById(req.member.memberId)
+    if (requestFound.member.department.toString() !== hod.department.toString())
+      return res.status(403).json({
+        code: differentDepartments,
+        message: 'Member belongs to different department',
+      })
+
+    const updateBody = {}
+    updateBody.status = requestType.REJECT
+    if (req.body.comment) updateBody.comment = req.body.comment
+
+    await annualLeaveRequest.findByIdAndUpdate(requestId, {
+      $set: updateBody,
+    })
+
+    return res.json({
+      message: 'Request is Rejected Successfully',
+    })
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
+const cancelAnnualLeaveRequest = async (req, res) => {
+  try {
+    const tokenId = req.member.memberId
+    const requestId = req.body.requestId
+    const requestFound = await annualLeaveRequest
+      .findById(requestId)
+      .populate('member')
+    if (!requestFound) {
+      return res.status(404).json({
+        code: requestDoesNotExist,
+        message: 'Request Does Not Exist',
+      })
+    }
+    if (requestFound.member._id.toString() !== tokenId)
+      return res.status(403).json({
+        code: notYourRequest,
+        message: 'You are not allowed to cancel others requests',
+      })
+    if (requestFound.status !== requestType.PENDING)
+      return res.status(400).json({
+        code: requestNotPending,
+        message: 'Request is not pending',
+      })
+    if (requestFound.from < new Date())
+      return res.status(400).json({
+        code: cannotCancel,
+        message: 'You cannot Cancel this request because its date has come',
+      })
+
+    await annualLeaveRequest.findByIdAndUpdate(requestId, {
+      $set: { status: requestType.CANCELLED },
+    })
+
+    return res.json({
+      message: 'Request Cancelled Successfully',
+    })
   } catch (err) {
     console.log(err)
     return res.status(500).json({
@@ -1219,5 +1329,9 @@ module.exports = {
   cancelSlotLinkingRequest,
   viewSlotLinkning,
   sendReplacementRequest,
-  accidentalLeaveRequest
+  sendAnnualLeave,
+  acceptAnnualLeaveRequest,
+  rejectAnnualLeaveRequest,
+  cancelAnnualLeaveRequest,
+  accidentalLeaveRequest,
 }

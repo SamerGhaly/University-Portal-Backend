@@ -1,4 +1,5 @@
 const { attendanceRecordTypes } = require('../constants/constants')
+const Member = require('../models/memberModel')
 const calcHours = (attendanceRecords, today) => {
   //0==> sign i
   //1==> sign out
@@ -43,9 +44,9 @@ const attendanceRecordsCheck = (attendanceRecords, today, dayoff) => {
     return { missingDays, time }
   } else if (time == 0) {
     missingDays = 1
-    return {missingDays,time}
+    return { missingDays, time }
   }
-  return {missingDays,time}
+  return { missingDays, time }
 }
 const convertTomilli = (hours, min, sec) => {
   return (hours * 60 * 60 + min * 60 + sec) * 1000
@@ -53,4 +54,24 @@ const convertTomilli = (hours, min, sec) => {
 const convertTohours = (hours, min, sec) => {
   return (hours * 60 * 60 + min * 60 + sec) * 1000
 }
-module.exports = {convertTohours, attendanceRecordsCheck, convertTomilli }
+const calcMemberanualLeavesLeft = (member) => {
+  //Get Available days for member
+  //console.log(member);
+  const memberStartDate = member.dateCreated
+ // console.log(typeof memberStartDate)
+
+  const today = new Date()
+  const diffInMonths = today.getMonth() - memberStartDate.getMonth()
+  const diffInYears = today.getFullYear() - memberStartDate.getFullYear()
+  let availableDays = (diffInMonths + 12 * diffInYears) * 2.5
+  if (today.getDate() <= memberStartDate.getDate()) availableDays += 2.5
+
+  availableDays -= member.annualBalanceTaken
+  return availableDays
+}
+module.exports = {
+  calcMemberanualLeavesLeft,
+  convertTohours,
+  attendanceRecordsCheck,
+  convertTomilli,
+}

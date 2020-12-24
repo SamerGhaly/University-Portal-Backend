@@ -9,7 +9,7 @@ const RoomModel = require('../models/roomModel')
 const DepartmentModel = require('../models/departmentModel')
 const CourseModel = require('../models/courseModel')
 const courseAssignmentModel = require('../models/courseAssignment')
-const {attendanceRecordsCheck}=require('../helpers/calculateTime')
+const { attendanceRecordsCheck } = require('../helpers/calculateTime')
 const {
   userNotFound,
   unActivatedAccount,
@@ -183,7 +183,10 @@ const addMember = async (req, res) => {
         })
       }
     }
-    member.password = await bcrypt.hashSync('123456', Number(process.env.SALT))
+    const salt = parseInt(process.env.SALT)
+    // console.log(typeof salt)
+    member.password = bcrypt.hashSync('123456')
+   // console.log(member.password)
     member.activated = false
     member.customId = customId
     member.dateCreated = new Date(new Date().getTime() + 2 * 60 * 60 * 1000)
@@ -826,23 +829,40 @@ const viewMissingDaysHours = async (req, res) => {
       endDate = new Date(currentYear, currentMonth + 1, 11)
     }
     //
-    let today=new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate())
+    let today = new Date(
+      new Date().getFullYear(),
+      new Date().getMonth(),
+      new Date().getDate()
+    )
 
-    let startDay=startDate.getTime()+2*60*60*1000
-    let endDay=today.getTime()
-    let stepTime=24*60*60*1000;
+    let startDay = startDate.getTime() + 2 * 60 * 60 * 1000
+    let endDay = today.getTime()
+    let stepTime = 24 * 60 * 60 * 1000
     long
-    for(let DayTime=startDay+stepTime ;DayTime <= endDay;DayTime+=stepTime){
-      let attendanceRecords=await AttendanceRecordModel.find({
-        member:tokenId,
-        date:{$gt:new Date(DayTime-stepTime),$lt:new Date(DayTime)},
+    for (
+      let DayTime = startDay + stepTime;
+      DayTime <= endDay;
+      DayTime += stepTime
+    ) {
+      let attendanceRecords = await AttendanceRecordModel.find(
+        {
+          member: tokenId,
+          date: { $gt: new Date(DayTime - stepTime), $lt: new Date(DayTime) },
+        },
+        null,
+        { sort: { date: 1 } }
+      )
+      console.log(
+        attendanceRecordsCheck(attendanceRecords, new Date(DayTime - stepTime))
+      )
 
-      },null,{sort:{date:1}})
-      console.log(attendanceRecordsCheck(attendanceRecords,new Date(DayTime-stepTime),));
-
-      console.log(new Date(DayTime-stepTime),new Date(DayTime),attendanceRecords);
-    } 
-  //  console.log(currentMonth, currentYear, startDate, endDate)
+      console.log(
+        new Date(DayTime - stepTime),
+        new Date(DayTime),
+        attendanceRecords
+      )
+    }
+    //  console.log(currentMonth, currentYear, startDate, endDate)
   } catch (err) {
     console.log(err)
     return res.json({
