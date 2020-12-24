@@ -241,6 +241,23 @@ const validateReplcamentRequest = (req, res, next) => {
   next()
 }
 
+const validateSendAnnualLeaveRequest = (req, res, next) => {
+  const annualLeaveSchema = Joi.object({
+    from: Joi.string().required(),
+    to: Joi.date().required(),
+    replacementId: Joi.string().length(24),
+  })
+
+  const checkSchema = annualLeaveSchema.validate(req.body)
+  if (checkSchema.error) {
+    return res.json({
+      code: validationError,
+      message: checkSchema.error.details[0],
+    })
+  }
+  next()
+}
+
 module.exports = {
   validateChangeDayOffRequest,
   validateAcceptDayOffRequest,
@@ -258,4 +275,5 @@ module.exports = {
   validateAcceptRejectLinkingRequest,
   validateReplcamentRequest,
   validateViewSlotLinkingRequest,
+  validateSendAnnualLeaveRequest,
 }

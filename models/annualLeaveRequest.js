@@ -10,6 +10,10 @@ const annualLeaveRequestSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Member',
   },
+  replacement: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'ReplacementRequest',
+  },
 })
 
 module.exports = mongoose.model('AnnualLeaveRequest', annualLeaveRequestSchema)

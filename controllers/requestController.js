@@ -15,6 +15,13 @@ const {
   cannotSendReplacementOnFriday,
   memberNotFree,
   courseDoesNotExist,
+  mustBeBeforeTargetDay,
+  FromDayAfterToDay,
+  userNotFound,
+  noAvailableDays,
+  notYourRequest,
+  noReplacementFound,
+  requestNotAccepted,
 } = require('../constants/errorCodes')
 
 const {
@@ -34,6 +41,8 @@ const MemberModel = require('../models/memberModel')
 const CourseAssignmentModel = require('../models/courseAssignment')
 const slotAssignmentModel = require('../models/slotAssignmentModel')
 const courseModel = require('../models/courseModel')
+const annualLeaveRequest = require('../models/annualLeaveRequest')
+const replacementRequest = require('../models/replacementRequest')
 
 const sendSlotLinking = async (req, res) => {
   try {
@@ -941,6 +950,206 @@ const sendReplacementRequest = async (req, res) => {
   }
 }
 
+const sendAnnualLeave = async (req, res) => {
+  try {
+    const tokenId = req.member.memberId
+    const memberFound = await MemberModel.findById(tokenId)
+    if (!memberFound) {
+      return res.status(404).json({
+        code: userNotFound,
+        message: 'User Not Found',
+      })
+    }
+    const today = new Date()
+    const dayFromArray = req.body.from.split('-')
+    const dayToArray = req.body.to.split('-')
+    const dayFrom = new Date(
+      new Date(
+        dayFromArray[0],
+        Number(dayFromArray[1]) - 1,
+        dayFromArray[2]
+      ).getTime() +
+        2 * 60 * 60 * 1000
+    )
+    const dayTo = new Date(
+      new Date(
+        dayToArray[0],
+        Number(dayToArray[1]) - 1,
+        dayToArray[2]
+      ).getTime() +
+        2 * 60 * 60 * 1000
+    )
+    if (dayFrom > dayTo) {
+      return res.json({
+        code: FromDayAfterToDay,
+        message: 'Day From Must Be Before Day To',
+      })
+    }
+    if (dayFrom < today) {
+      return res.json({
+        code: mustBeBeforeTargetDay,
+        message: 'Annual Leaves Must Be Submitted Before Target Day',
+      })
+    }
+    //Get the days of annaul leave request
+    const diffDaysInMillis = dayTo - dayFrom
+    let diffDays = diffDaysInMillis / (24 * 60 * 60 * 1000) + 1
+    // console.log('Before', diffDays)
+    const checkDay = dayFrom.getTime()
+    for (
+      let start = checkDay;
+      start <= dayTo.getTime();
+      start += 24 * 60 * 60 * 1000
+    ) {
+      const certainDay = new Date(start).getDay()
+      if (
+        certainDay === 5 ||
+        weekDaysNumbers[certainDay] === memberFound.dayoff
+      )
+        diffDays -= 1
+    }
+    //Get Available days for member
+    const memberStartDate = new Date(2020, 9, 5)
+    // console.log(memberStartDate.toDateString())
+    const diffInMillies = today - memberStartDate
+    const days = diffInMillies / (1000 * 60 * 60 * 24) + 1
+    // console.log(days)
+    const months = Math.ceil(days / 28)
+    // console.log(months)
+    const availableDays = months * 2.5 - memberFound.annualBalanceTaken
+    // console.log(availableDays)
+    if (diffDays > availableDays) {
+      return res.json({
+        code: noAvailableDays,
+        message: 'There is no available days left in the annual balance',
+      })
+    }
+    const newReq = {}
+    newReq.from = dayFrom
+    newReq.to = dayTo
+    newReq.status = requestType.PENDING
+    newReq.dateSubmitted = today
+    if (req.body.replacementId) {
+      const replacementFound = await replacementRequest.findById(
+        req.body.replacementId
+      )
+      if (!replacementFound) {
+        return res.status(404).json({
+          code: requestDoesNotExist,
+          message: 'Request Does Not Exist!',
+        })
+      }
+      if (replacementFound.member.toString() !== tokenId) {
+        return res.status(403).json({
+          code: notYourRequest,
+          message: 'The replacement request must be done by you',
+        })
+      }
+      if (!replacementFound.replacementMember) {
+        return res.status(400).json({
+          code: noReplacementFound,
+          message: 'No Replacement Member Found',
+        })
+      }
+      if (replacementFound.status !== requestType.ACCEPT) {
+        return res.status(400).json({
+          code: requestNotAccepted,
+          message: 'The request is not accepted',
+        })
+      }
+      newReq.replacement = req.body.replacementId
+    }
+    newReq.member = tokenId
+
+    await annualLeaveRequest.create(newReq)
+
+    return res.json({
+      message: 'Request Created Successfully',
+    })
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
+const acceptAnnualLeaveRequest = async (req, res) => {
+  try {
+    // const dayFrom = new Date(
+    //   new Date(
+    //     dayFromArray[0],
+    //     Number(dayFromArray[1]) - 1,
+    //     dayFromArray[2]
+    //   ).getTime() +
+    //     2 * 60 * 60 * 1000
+    // )
+    // const dayTo = new Date(
+    //   new Date(
+    //     dayToArray[0],
+    //     Number(dayToArray[1]) - 1,
+    //     dayToArray[2]
+    //   ).getTime() +
+    //     2 * 60 * 60 * 1000
+    // )
+    // if (dayFrom > dayTo) {
+    //   return res.json({
+    //     code: FromDayAfterToDay,
+    //     message: 'Day From Must Be Before Day To',
+    //   })
+    // }
+    // if (dayFrom < today) {
+    //   return res.json({
+    //     code: mustBeBeforeTargetDay,
+    //     message: 'Annual Leaves Must Be Submitted Before Target Day',
+    //   })
+    // }
+    // //Get the days of annaul leave request
+    // const diffDaysInMillis = dayTo - dayFrom
+    // let diffDays = diffDaysInMillis / (24 * 60 * 60 * 1000) + 1
+    // // console.log('Before', diffDays)
+    // const checkDay = dayFrom.getTime()
+    // for (
+    //   let start = checkDay;
+    //   start <= dayTo.getTime();
+    //   start += 24 * 60 * 60 * 1000
+    // ) {
+    //   const certainDay = new Date(start).getDay()
+    //   if (
+    //     certainDay === 5 ||
+    //     weekDaysNumbers[certainDay] === memberFound.dayoff
+    //   )
+    //     diffDays -= 1
+    // }
+    // //Get Available days for member
+    // const memberStartDate = new Date(2020, 9, 5)
+    // // console.log(memberStartDate.toDateString())
+    // const diffInMillies = today - memberStartDate
+    // const days = diffInMillies / (1000 * 60 * 60 * 24) + 1
+    // // console.log(days)
+    // const months = Math.ceil(days / 28)
+    // // console.log(months)
+    // const availableDays = months * 2.5 - memberFound.annualBalanceTaken
+    // // console.log(availableDays)
+    // if (diffDays > availableDays) {
+    //   return res.json({
+    //     code: noAvailableDays,
+    //     message: 'There is no available days left in the annual balance',
+    //   })
+    // }
+    // await MemberModel.findByIdAndUpdate(tokenId, {
+    //   $set: { annualBalanceTaken: memberFound.annualBalanceTaken + diffDays },
+    // })
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
 module.exports = {
   changeDayOffRequest,
   acceptDayOffRequest,
@@ -960,4 +1169,5 @@ module.exports = {
   cancelSlotLinkingRequest,
   viewSlotLinkning,
   sendReplacementRequest,
+  sendAnnualLeave,
 }

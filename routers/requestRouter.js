@@ -1,13 +1,20 @@
 const express = require('express')
 const router = express.Router()
 const verifyToken = require('../authorizations/verifyToken')
-const { verifyTA } = require('../authorizations/memberAuthorization')
+const {
+  verifyTA,
+  verifyAcademic,
+} = require('../authorizations/memberAuthorization')
 
 const {
   validateChangeDayOffRequest,
   validateViewSlotLinkingRequest,
+  validateSendAnnualLeaveRequest,
 } = require('../validations/requestValidation')
-const { changeDayOffRequest } = require('../controllers/requestController')
+const {
+  changeDayOffRequest,
+  sendAnnualLeave,
+} = require('../controllers/requestController')
 const {
   validateAcceptDayOffRequest,
 } = require('../validations/requestValidation')
@@ -195,4 +202,13 @@ router.post(
   verifyToken,
   cancelChangeDayOffRequest
 )
+
+router.post(
+  '/sendAnnualLeaveRequest',
+  validateSendAnnualLeaveRequest,
+  verifyToken,
+  verifyAcademic,
+  sendAnnualLeave
+)
+
 module.exports = router
