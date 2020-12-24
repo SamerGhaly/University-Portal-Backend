@@ -828,7 +828,7 @@ const viewMissingDaysHours = async (req, res) => {
     let startDay=startDate.getTime()+2*60*60*1000
     let endDay=today.getTime()
     let stepTime=24*60*60*1000;
-    long 
+    long
     for(let DayTime=startDay+stepTime ;DayTime <= endDay;DayTime+=stepTime){
       let attendanceRecords=await AttendanceRecordModel.find({
         member:tokenId,

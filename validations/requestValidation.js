@@ -241,6 +241,22 @@ const validateReplcamentRequest = (req, res, next) => {
   next()
 }
 
+
+const validateAccidentalLeave = (req, res, next) => {
+  const validateAccidentalLeaveSchema = Joi.object({
+    absentDate:Joi.date().required(),
+    reason: Joi.string(),
+  })
+  const checkSchema = validateAccidentalLeaveSchema.validate(req.body)
+  if (checkSchema.error) {
+    return res.json({
+      code: validationError,
+      message: checkSchema.error.details[0],
+    })
+  }
+  next()
+}
+
 module.exports = {
   validateChangeDayOffRequest,
   validateAcceptDayOffRequest,
@@ -258,4 +274,5 @@ module.exports = {
   validateAcceptRejectLinkingRequest,
   validateReplcamentRequest,
   validateViewSlotLinkingRequest,
+  validateAccidentalLeave,
 }

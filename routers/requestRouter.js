@@ -4,10 +4,14 @@ const verifyToken = require('../authorizations/verifyToken')
 const { verifyTA } = require('../authorizations/memberAuthorization')
 
 const {
+  validateAccidentalLeave,
   validateChangeDayOffRequest,
   validateViewSlotLinkingRequest,
 } = require('../validations/requestValidation')
-const { changeDayOffRequest } = require('../controllers/requestController')
+const {
+  accidentalLeaveRequest,
+  changeDayOffRequest,
+} = require('../controllers/requestController')
 const {
   validateAcceptDayOffRequest,
 } = require('../validations/requestValidation')
@@ -194,5 +198,11 @@ router.post(
   validateCancelChangeDayOffRequest,
   verifyToken,
   cancelChangeDayOffRequest
+)
+router.post(
+  '/accidentalLeaveRequest',
+  validateAccidentalLeave,
+  verifyToken,
+  accidentalLeaveRequest
 )
 module.exports = router
