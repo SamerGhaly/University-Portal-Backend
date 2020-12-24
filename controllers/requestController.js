@@ -23,6 +23,8 @@ const {
   noReplacementFound,
   requestNotAccepted,
   differentDepartments,
+  zeroAnnualLeaves,
+  zeroAccidentalLeaves,
 } = require('../constants/errorCodes')
 
 const {
@@ -45,6 +47,7 @@ const courseModel = require('../models/courseModel')
 const annualLeaveRequest = require('../models/annualLeaveRequest')
 const replacementRequest = require('../models/replacementRequest')
 
+const AccidentalLeaveRequest = require('../models/accidentalLeaveRequest')
 const sendSlotLinking = async (req, res) => {
   try {
     const tokenId = req.member.memberId //from token
@@ -950,6 +953,53 @@ const sendReplacementRequest = async (req, res) => {
     })
   }
 }
+// absentDate: Date,
+// reason: String,
+// status: String,
+// dateSubmitted: Date,
+// member: {
+//   type: mongoose.Schema.Types.ObjectId,
+//   ref: 'Member',
+// },
+const accidentalLeaveRequest = async (req, res) => {
+  try {
+    const obj = {}
+    obj.memberId = req.member.memberId
+    obj.status = requestType.PENDING
+    obj.dateSubmitted = new Date()
+    const reason = req.body.reason
+    if (reason) obj.reason = reason
+    let dateArr = req.body.absentDate.split('-')
+    obj.absentDate = new Date(dateArr[0], dateArr[1], dateArr[2])
+    const member = await Member.findById(memberId)
+    let accidentalDaysTaken = member.accidentalDaysTaken
+    let annualBalanceTaken = member.annualBalanceTaken
+    if (accidentalDaysTaken < 7 && annualBalanceTaken > 0) {
+      Member.findOneAndUpdate(memberId, {
+        accidentalDaysTaken: accidentalDaysTaken + 1,
+        annualBalanceTaken: annualBalanceTaken - 1,
+      })
+      AccidentalLeaveRequest.create(obj)
+    } else {
+      if (accidentalDaysTaken > 6)
+        return res.status(404).json({
+          message: 'you used the whole 6 accidental Days leaves',
+          code: zeroAccidentalLeaves,
+        })
+      else
+        return res.status(404).json({
+          message: 'you used the whole annual balance you have',
+          code: zeroAnnualLeaves,
+        })
+    }
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
 
 const sendAnnualLeave = async (req, res) => {
   try {
@@ -1278,4 +1328,5 @@ module.exports = {
   acceptAnnualLeaveRequest,
   rejectAnnualLeaveRequest,
   cancelAnnualLeaveRequest,
+  accidentalLeaveRequest,
 }

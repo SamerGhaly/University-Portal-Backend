@@ -9,7 +9,7 @@ const RoomModel = require('../models/roomModel')
 const DepartmentModel = require('../models/departmentModel')
 const CourseModel = require('../models/courseModel')
 const courseAssignmentModel = require('../models/courseAssignment')
-
+const {attendanceRecordsCheck}=require('../helpers/calculateTime')
 const {
   userNotFound,
   unActivatedAccount,
@@ -808,14 +808,14 @@ const removeTaAssignment = async (req, res) => {
 const viewMissingDaysHours = async (req, res) => {
   try {
     const tokenId = req.member.memberId
-    let currentYear = new Date(2021, 0, 5).getFullYear()
+    let currentYear = new Date().getFullYear()
     let currentMonth
     let startDate
     let endDate
     currentMonth =
-      new Date(2021, 0, 5).getDate() >= 11
-        ? new Date(2021, 0, 5).getMonth()
-        : new Date(2021, 0, 5).getMonth() - 1
+      new Date().getDate() >= 11
+        ? new Date().getMonth()
+        : new Date().getMonth() - 1
     if (currentMonth === -1) {
       currentMonth = 11
       currentYear = currentYear - 1
@@ -825,8 +825,24 @@ const viewMissingDaysHours = async (req, res) => {
       startDate = new Date(currentYear, currentMonth, 11)
       endDate = new Date(currentYear, currentMonth + 1, 11)
     }
+    //
+    let today=new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate())
 
-    console.log(currentMonth, currentYear, startDate, endDate)
+    let startDay=startDate.getTime()+2*60*60*1000
+    let endDay=today.getTime()
+    let stepTime=24*60*60*1000;
+    long
+    for(let DayTime=startDay+stepTime ;DayTime <= endDay;DayTime+=stepTime){
+      let attendanceRecords=await AttendanceRecordModel.find({
+        member:tokenId,
+        date:{$gt:new Date(DayTime-stepTime),$lt:new Date(DayTime)},
+
+      },null,{sort:{date:1}})
+      console.log(attendanceRecordsCheck(attendanceRecords,new Date(DayTime-stepTime),));
+
+      console.log(new Date(DayTime-stepTime),new Date(DayTime),attendanceRecords);
+    } 
+  //  console.log(currentMonth, currentYear, startDate, endDate)
   } catch (err) {
     console.log(err)
     return res.json({

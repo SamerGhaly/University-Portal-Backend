@@ -8,6 +8,7 @@ const {
 } = require('../authorizations/memberAuthorization')
 
 const {
+  validateAccidentalLeave,
   validateChangeDayOffRequest,
   validateViewSlotLinkingRequest,
   validateSendAnnualLeaveRequest,
@@ -20,6 +21,8 @@ const {
   acceptAnnualLeaveRequest,
   rejectAnnualLeaveRequest,
   cancelAnnualLeaveRequest,
+  accidentalLeaveRequest,
+  changeDayOffRequest,
 } = require('../controllers/requestController')
 const {
   validateAcceptDayOffRequest,
@@ -241,4 +244,10 @@ router.post(
   cancelAnnualLeaveRequest
 )
 
+router.post(
+  '/accidentalLeaveRequest',
+  validateAccidentalLeave,
+  verifyToken,
+  accidentalLeaveRequest
+)
 module.exports = router

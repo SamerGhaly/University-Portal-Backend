@@ -241,6 +241,7 @@ const validateReplcamentRequest = (req, res, next) => {
   next()
 }
 
+<<<<<<< HEAD
 const validateSendAnnualLeaveRequest = (req, res, next) => {
   const annualLeaveSchema = Joi.object({
     from: Joi.string().required(),
@@ -281,6 +282,15 @@ const validateCancelAnnualLeaveRequest = (req, res, next) => {
   })
 
   const checkSchema = acceptRejectAnnualLeaveSchema.validate(req.body)
+=======
+
+const validateAccidentalLeave = (req, res, next) => {
+  const validateAccidentalLeaveSchema = Joi.object({
+    absentDate:Joi.date().required(),
+    reason: Joi.string(),
+  })
+  const checkSchema = validateAccidentalLeaveSchema.validate(req.body)
+>>>>>>> 84d4a5b18941d2d683aa308fa0233de9d9df9d6f
   if (checkSchema.error) {
     return res.json({
       code: validationError,
@@ -307,7 +317,11 @@ module.exports = {
   validateAcceptRejectLinkingRequest,
   validateReplcamentRequest,
   validateViewSlotLinkingRequest,
+<<<<<<< HEAD
   validateSendAnnualLeaveRequest,
   validateAcceptRejectAnnualLeaveRequest,
   validateCancelAnnualLeaveRequest,
+=======
+  validateAccidentalLeave,
+>>>>>>> 84d4a5b18941d2d683aa308fa0233de9d9df9d6f
 }

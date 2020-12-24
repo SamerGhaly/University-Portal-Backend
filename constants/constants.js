@@ -13,8 +13,8 @@ const roomTypes = {
 }
 
 const attendanceRecordTypes = {
-  SIGN_IN: 'sign in',
-  SIGN_OUT: 'sign out',
+  SIGN_IN: 'signin',
+  SIGN_OUT: 'signout',
 }
 
 const gender = {

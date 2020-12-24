@@ -60,4 +60,7 @@ module.exports = {
   noDepartment: '111',
   IdnotFound: '201',
   databaseerror: '202',
+  memberDoesnotExist: '112',
+  zeroAnnualLeaves: '113',
+  zeroAccidentalLeaves:'114',
 }
