@@ -9,7 +9,7 @@ const RoomModel = require('../models/roomModel')
 const DepartmentModel = require('../models/departmentModel')
 const CourseModel = require('../models/courseModel')
 const courseAssignmentModel = require('../models/courseAssignment')
-const {attendanceRecordsCheck}=require('../helpers/calculateTime')
+const { attendanceRecordsCheck } = require('../helpers/calculateTime')
 const {
   userNotFound,
   unActivatedAccount,
@@ -32,6 +32,10 @@ const {
   coordinatorAlreadyAssignment,
   assignmentDoesNotExist,
   instructorNotInCourse,
+  hrDoesNotHaveDepartment,
+  academicMemberDoesMustHaveDepartment,
+  departmentAlreadyHasHOD,
+  signInOutCantBeInFuture,
 } = require('../constants/errorCodes')
 const {
   memberRoles,
@@ -161,6 +165,12 @@ const addMember = async (req, res) => {
           })
         }
       } else customId = 'hr-1'
+      if (req.body.department) {
+        return res.status(400).json({
+          code: hrDoesNotHaveDepartment,
+          message: 'Hr Does Not Have Department',
+        })
+      }
     } else {
       const lastAc = await MemberModel.findOne(
         {
@@ -175,15 +185,35 @@ const addMember = async (req, res) => {
         customId = 'ac-' + newAcId
       } else customId = 'ac-1'
 
-      const depFound = await DepartmentModel.findById(req.body.department)
-      if (!depFound) {
-        return res.status(404).json({
-          code: IdnotFound,
-          message: 'Department Does Not Exist!',
+      if (req.body.department) {
+        const depFound = await DepartmentModel.findById(req.body.department)
+        if (!depFound) {
+          return res.status(404).json({
+            code: IdnotFound,
+            message: 'Department Does Not Exist!',
+          })
+        }
+        if (req.body.type === memberRoles.HOD) {
+          const depHasHOD = await MemberModel.findOne({
+            department: req.body.department,
+            type: memberRoles.HOD,
+          })
+          if (depHasHOD) {
+            return res.status(400).json({
+              code: departmentAlreadyHasHOD,
+              message: 'Department ALready has a Head of Department',
+            })
+          }
+        }
+        member.department = req.body.department
+      } else {
+        return res.status(400).json({
+          code: academicMemberDoesMustHaveDepartment,
+          message: 'Academic Member Must Have Department',
         })
       }
     }
-    member.password = await bcrypt.hashSync('123456', Number(process.env.SALT))
+    member.password = await bcrypt.hashSync('123456')
     member.activated = false
     member.customId = customId
     member.dateCreated = new Date(new Date().getTime() + 2 * 60 * 60 * 1000)
@@ -237,7 +267,8 @@ const updateMember = async (req, res) => {
   try {
     const userType = req.member.type
     const userId = req.member.memberId
-    const memberFound = await MemberModel.findById(req.body.memberId)
+    const memberId = req.body.memberId ? req.body.memberId : userId
+    const memberFound = await MemberModel.findById(memberId)
     if (!memberFound) {
       return res.status(404).json({
         code: userNotFound,
@@ -274,7 +305,16 @@ const updateMember = async (req, res) => {
         })
       }
     }
-    if (req.body.email) memberFound.email = req.body.email
+    if (req.body.email) {
+      const checkEmail = await MemberModel.findOne({ email: req.body.email })
+      if (checkEmail) {
+        return res.status(400).json({
+          code: emailAlreadyExists,
+          message: 'Email Already Exists',
+        })
+      }
+      memberFound.email = req.body.email
+    }
     if (req.body.birthdate) memberFound.birthdate = req.body.birthdate
     if (req.body.department) {
       const depFound = await DepartmentModel.findById(req.body.department)
@@ -283,6 +323,18 @@ const updateMember = async (req, res) => {
           code: IdnotFound,
           message: 'Department Not Found',
         })
+      }
+      if (req.body.type === memberRoles.HOD) {
+        const depHasHOD = await MemberModel.findOne({
+          department: req.body.department,
+          type: memberRoles.HOD,
+        })
+        if (depHasHOD) {
+          return res.status(400).json({
+            code: departmentAlreadyHasHOD,
+            message: 'Department ALready has a Head of Department',
+          })
+        }
       }
       memberFound.department = req.body.department
     }
@@ -300,6 +352,16 @@ const updateMember = async (req, res) => {
           message: 'Room is not an office',
         })
       }
+      const officeCapacity = await MemberModel.countDocuments({
+        office: req.body.office,
+      })
+      if (officeCapacity === officeFound.capacity) {
+        return res.json({
+          code: roomIsFull,
+          message: 'Room is Already Full',
+        })
+      }
+
       memberFound.office = req.body.office
     }
     await MemberModel.findByIdAndUpdate(memberFound._id, memberFound)
@@ -317,7 +379,12 @@ const updateMember = async (req, res) => {
 
 const viewMember = async (req, res) => {
   try {
-    const memberFound = await MemberModel.findById(req.body.memberId)
+    const memberFound = await MemberModel.findById(req.member.memberId)
+      .populate({
+        path: 'department',
+        populate: 'faculty',
+      })
+      .populate('office')
     if (!memberFound) {
       return res.status(404).json({
         code: userNotFound,
@@ -483,6 +550,12 @@ const addMissingSign = async (req, res) => {
       timeArr[1],
       0
     )
+    if (newDate > new Date()) {
+      return res.json({
+        code: signInOutCantBeInFuture,
+        message: 'Missing Sign Ins or Outs cant be in the future',
+      })
+    }
     const type = req.body.type
     const newSign = {
       type,
@@ -742,6 +815,17 @@ const updateTaAssignment = async (req, res) => {
       })
     }
 
+    const checkRepeated = await courseAssignmentModel.findOne({
+      course: checkOldAssign.course,
+      member: checkMember._id,
+    })
+    if (checkRepeated) {
+      return res.status(400).json({
+        code: assignmentAlreadyThere,
+        message: 'Assignment Already There',
+      })
+    }
+
     checkOldAssign.member = memberId
     await courseAssignmentModel.findByIdAndUpdate(
       checkOldAssign._id,
@@ -826,23 +910,40 @@ const viewMissingDaysHours = async (req, res) => {
       endDate = new Date(currentYear, currentMonth + 1, 11)
     }
     //
-    let today=new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate())
+    let today = new Date(
+      new Date().getFullYear(),
+      new Date().getMonth(),
+      new Date().getDate()
+    )
 
-    let startDay=startDate.getTime()+2*60*60*1000
-    let endDay=today.getTime()
-    let stepTime=24*60*60*1000;
-    long
-    for(let DayTime=startDay+stepTime ;DayTime <= endDay;DayTime+=stepTime){
-      let attendanceRecords=await AttendanceRecordModel.find({
-        member:tokenId,
-        date:{$gt:new Date(DayTime-stepTime),$lt:new Date(DayTime)},
+    let startDay = startDate.getTime() + 2 * 60 * 60 * 1000
+    let endDay = today.getTime()
+    let stepTime = 24 * 60 * 60 * 1000
 
-      },null,{sort:{date:1}})
-      console.log(attendanceRecordsCheck(attendanceRecords,new Date(DayTime-stepTime),));
+    for (
+      let DayTime = startDay + stepTime;
+      DayTime <= endDay;
+      DayTime += stepTime
+    ) {
+      let attendanceRecords = await AttendanceRecordModel.find(
+        {
+          member: tokenId,
+          date: { $gt: new Date(DayTime - stepTime), $lt: new Date(DayTime) },
+        },
+        null,
+        { sort: { date: 1 } }
+      )
+      console.log(
+        attendanceRecordsCheck(attendanceRecords, new Date(DayTime - stepTime))
+      )
 
-      console.log(new Date(DayTime-stepTime),new Date(DayTime),attendanceRecords);
-    } 
-  //  console.log(currentMonth, currentYear, startDate, endDate)
+      console.log(
+        new Date(DayTime - stepTime),
+        new Date(DayTime),
+        attendanceRecords
+      )
+    }
+    //  console.log(currentMonth, currentYear, startDate, endDate)
   } catch (err) {
     console.log(err)
     return res.json({

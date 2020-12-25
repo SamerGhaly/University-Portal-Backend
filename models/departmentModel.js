@@ -18,12 +18,16 @@ departmentSchema.virtual('membersPerDepartment', {
   foreignField: 'department',
 })
 //userSchema.virtual('fullName').
- // get(function() { return `${this.firstName} ${this.lastName}`; })
+// get(function() { return `${this.firstName} ${this.lastName}`; })
 departmentSchema.virtual('coursesPerDepartment', {
   ref: 'Course',
   localField: '_id',
   foreignField: 'department',
 })
+
+// departmentSchema.post('findOneAndDelete', async(doc) => {
+//   await courseModel.updateMany({dep})
+// })
 
 departmentSchema.set('toObject', { virtuals: true })
 departmentSchema.set('toJSON', { virtuals: true })

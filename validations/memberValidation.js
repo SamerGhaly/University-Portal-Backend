@@ -23,9 +23,9 @@ const validateAddMember = (req, res, next) => {
   const addMemberSchema = Joi.object({
     name: Joi.string().required(),
     email: Joi.string().required(),
-    office: Joi.string().length(24).required(), //To be adjusted to real objectId
+    office: Joi.string().length(24).required(),
     salary: Joi.number().required(),
-    department: Joi.string().length(24).required(),
+    department: Joi.string().length(24),
     dayoff: Joi.string()
       .valid(
         weekDays.SATURDAY,
@@ -51,7 +51,7 @@ const validateAddMember = (req, res, next) => {
   if (checkSchema.error) {
     return res.status(400).json({
       code: validationError,
-      message: checkSchema.error.details[0],
+      message: checkSchema.error.details[0].mes,
     })
   }
   next()
@@ -77,7 +77,6 @@ const validateUpdateMember = (req, res, next) => {
     memberId: Joi.string().length(24).required(),
     department: Joi.string().length(24),
     office: Joi.string().length(24),
-    salary: Joi.number(),
     name: Joi.string(),
     email: Joi.string(),
     type: Joi.string().valid(
@@ -88,6 +87,36 @@ const validateUpdateMember = (req, res, next) => {
     ),
     birthdate: Joi.date(),
     gender: Joi.string().valid(gender.MALE, gender.FEMALE),
+  })
+  const checkSchema = updateMemberSchema.validate(req.body)
+  if (checkSchema.error) {
+    return res.status(400).json({
+      code: validationError,
+      message: checkSchema.error.details[0],
+    })
+  }
+  next()
+}
+
+const validateUpdateSalary = (req, res, next) => {
+  const updateMemberSchema = Joi.object({
+    memberId: Joi.string().length(24).required(),
+    salary: Joi.number().min(0),
+  })
+  const checkSchema = updateMemberSchema.validate(req.body)
+  if (checkSchema.error) {
+    return res.status(400).json({
+      code: validationError,
+      message: checkSchema.error.details[0],
+    })
+  }
+  next()
+}
+
+const validateUpdateMyProfile = (req, res, next) => {
+  const updateMemberSchema = Joi.object({
+    email: Joi.string(),
+    birthdate: Joi.date(),
   })
   const checkSchema = updateMemberSchema.validate(req.body)
   if (checkSchema.error) {
@@ -112,22 +141,6 @@ const validateViewMember = (req, res, next) => {
   }
   next()
 }
-
-// const validateResetPassword = (req, res, next) => {
-//   const validateResetPasswordSchema = Joi.object({
-//     memberId: Joi.string().required(),
-//     oldPassword: Joi.string().required(),
-//     newPassword: Joi.string().required(),
-//   })
-//   const checkSchema = validateResetPasswordSchema.validate(req.body)
-//   if (checkSchema.error) {
-//     return res.status(400).json({
-//       code: validationError,
-//       message: checkSchema.error.details[0],
-//     })
-//   }
-//   next()
-// }
 
 const validateSignInOut = (req, res, next) => {
   const signSchema = Joi.object({
@@ -234,7 +247,6 @@ const validateAssignCoordinator = (req, res, next) => {
   next()
 }
 
-
 module.exports = {
   validateLogin,
   validateAddMember,
@@ -248,4 +260,6 @@ module.exports = {
   validateAssignCoordinator,
   validateUpdateAssignTaToCourse,
   validateRemoveTaFromCourse,
+  validateUpdateSalary,
+  validateUpdateMyProfile,
 }

@@ -1,25 +1,124 @@
 const express = require('express')
 const router = express.Router()
 
-const {validateMemberPerAllCoursesorSpecific,validateMemberPerCourse,validateCourseInstructorU,validateCourse,validateCourseU,validateCourseInstructor}=require("../validations/courseValidation")
-const {viewInstructorSlotsInCourse,viewCourseCoverageInstructor,viewCourseCoverageHOD,viewOneCourseCoverageHOD,viewMemberSlotsInCourse,viewMemberInCourse,updateCourseInstructor,deleteCourseInstructor,addCourse,updateCourse,deleteCourse,assignCourseInstructor}=require("../controllers/courseController")
+const {
+  validateMemberPerAllCoursesorSpecific,
+  validateMemberPerCourse,
+  validateCourseInstructorU,
+  validateCourse,
+  validateCourseU,
+  validateCourseInstructor,
+  validateCourseInstructorD,
+} = require('../validations/courseValidation')
+const {
+  viewInstructorSlotsInCourse,
+  viewCourseCoverageInstructor,
+  viewCourseCoverageHOD,
+  viewOneCourseCoverageHOD,
+  viewMemberSlotsInCourse,
+  viewMemberInCourse,
+  updateCourseInstructor,
+  deleteCourseInstructor,
+  addCourse,
+  updateCourse,
+  deleteCourse,
+  assignCourseInstructor,
+} = require('../controllers/courseController')
 
 const verifyToken = require('../authorizations/verifyToken')
-const { verifyHR, verifyInstructor ,verifyHOD} = require('../authorizations/memberAuthorization')
+const {
+  verifyHR,
+  verifyInstructor,
+  verifyHOD,
+} = require('../authorizations/memberAuthorization')
 
 // router.post('addCourse',verifyToken,verifyHR,validateCourse,addCourse)
-router.post('/addCourse',validateCourse,addCourse)
-router.put('/updateCourse',validateCourseU,updateCourse)
-router.delete('/deleteCourse',validateCourseU,deleteCourse)
-router.post('/assignCourseInstructor',validateCourseInstructor,verifyToken,assignCourseInstructor)
-router.delete('/deleteCourseInstructor',validateCourseInstructor,verifyToken,deleteCourseInstructor)
-router.put('/updateCourseInstructor',validateCourseInstructorU,verifyToken,updateCourseInstructor)
-router.post('/viewMemberInCourseHOD',verifyHOD,verifyToken,validateMemberPerCourse,viewMemberInCourse)
-router.post('/viewMemberSlotsInCourse',verifyToken,validateMemberPerCourse,viewMemberSlotsInCourse)
-router.post('/viewOneCourseCoverageHOD',verifyToken,validateMemberPerCourse,viewOneCourseCoverageHOD)
-router.get('/viewCourseCoverageHOD',verifyToken,viewCourseCoverageHOD)
-router.get('/viewCourseCoverageInstructor',verifyToken,viewCourseCoverageInstructor)
-router.post('/viewInstructorSlotsInCourse',verifyToken,validateMemberPerAllCoursesorSpecific,viewInstructorSlotsInCourse)
-router.post('/viewMemberInCourseInstructor',verifyToken,verifyInstructor,validateMemberPerCourse,viewMemberInCourse)
+router.post('/addCourse', validateCourse, verifyToken, verifyHR, addCourse)
+router.put(
+  '/updateCourse',
+  validateCourseU,
+  verifyToken,
+  verifyHR,
+  updateCourse
+)
+router.delete(
+  '/deleteCourse',
+  validateCourseU,
+  verifyToken,
+  verifyHR,
+  deleteCourse
+)
 
-module.exports=router
+router.post(
+  '/assignCourseInstructor',
+  validateCourseInstructor,
+  verifyToken,
+  verifyHOD,
+  assignCourseInstructor
+)
+
+router.delete(
+  '/deleteCourseInstructor',
+  validateCourseInstructorD,
+  verifyToken,
+  verifyHOD,
+  deleteCourseInstructor
+)
+
+router.put(
+  '/updateCourseInstructor',
+  validateCourseInstructorU,
+  verifyToken,
+  verifyHOD,
+  updateCourseInstructor
+)
+
+router.post(
+  '/viewMemberInCourseHOD',
+  validateMemberPerCourse,
+  verifyToken,
+  verifyHOD,
+  viewMemberInCourse
+)
+router.post(
+  '/viewMemberSlotsInCourse',
+  validateMemberPerCourse,
+  verifyToken,
+  verifyHOD,
+  viewMemberSlotsInCourse
+)
+router.post(
+  '/viewOneCourseCoverageHOD',
+  validateMemberPerCourse,
+  verifyToken,
+  verifyHOD,
+  viewOneCourseCoverageHOD
+)
+router.get(
+  '/viewCourseCoverageHOD',
+  verifyToken,
+  verifyHOD,
+  viewCourseCoverageHOD
+)
+router.get(
+  '/viewCourseCoverageInstructor',
+  verifyToken,
+  verifyInstructor,
+  viewCourseCoverageInstructor
+)
+router.post(
+  '/viewInstructorSlotsInCourse',
+  verifyToken,
+  verifyInstructor,
+  validateMemberPerAllCoursesorSpecific,
+  viewInstructorSlotsInCourse
+)
+router.post(
+  '/viewMemberInCourseInstructor',
+  verifyToken,
+  verifyInstructor,
+  validateMemberPerCourse,
+  viewMemberInCourse
+)
+
+module.exports = router

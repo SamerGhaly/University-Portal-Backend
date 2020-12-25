@@ -9,8 +9,8 @@ const validateSlotLinkingRequest = (req, res, next) => {
   const checkSchema = slotLinkingSchema.validate(req.body)
   if (checkSchema.error)
     return res.status(400).json({
-      code: checkSchema,
-      message: checkSchema.error.details[0],
+      code: validationError,
+      message: checkSchema.error.details[0].message,
     })
   next()
 }
@@ -22,8 +22,8 @@ const validateAcceptRejectLinkingRequest = (req, res, next) => {
   const checkSchema = slotLinkingSchema.validate(req.body)
   if (checkSchema.error)
     return res.status(400).json({
-      code: checkSchema,
-      message: checkSchema.error.details[0],
+      code: validationError,
+      message: checkSchema.error.details[0].message,
     })
   next()
 }
@@ -35,8 +35,8 @@ const validateViewSlotLinkingRequest = (req, res, next) => {
   const checkSchema = viewSlotLinkingSchema.validate(req.body)
   if (checkSchema.error)
     return res.status(400).json({
-      code: checkSchema,
-      message: checkSchema.error.details[0],
+      code: validationError,
+      message: checkSchema.error.details[0].message,
     })
   next()
 }
@@ -59,7 +59,7 @@ const validateChangeDayOffRequest = (req, res, next) => {
   if (checkSchema.error) {
     return res.json({
       code: validationError,
-      message: checkSchema.error.details[0],
+      message: checkSchema.error.details[0].message,
     })
   }
   next()
@@ -72,7 +72,7 @@ const validateAcceptDayOffRequest = (req, res, next) => {
   if (checkSchema.error) {
     return res.json({
       code: validationError,
-      message: checkSchema.error.details[0],
+      message: checkSchema.error.details[0].message,
     })
   }
   next()
@@ -87,7 +87,7 @@ const validateRejectDayOffRequest = (req, res, next) => {
   if (checkSchema.error) {
     return res.json({
       code: validationError,
-      message: checkSchema.error.details[0],
+      message: checkSchema.error.details[0].message,
     })
   }
   next()
@@ -104,7 +104,7 @@ const validateSickLeavesRequest = (req, res, next) => {
   if (checkSchema.error) {
     return res.json({
       code: validationError,
-      message: checkSchema.error.details[0],
+      message: checkSchema.error.details[0].message,
     })
   }
   next()
@@ -121,7 +121,7 @@ const validateMaternityLeavesRequest = (req, res, next) => {
   if (checkSchema.error) {
     return res.json({
       code: validationError,
-      message: checkSchema.error.details[0],
+      message: checkSchema.error.details[0].message,
     })
   }
   next()
@@ -134,7 +134,7 @@ const validateAcceptSickLeavesRequest = (req, res, next) => {
   if (checkSchema.error) {
     return res.json({
       code: validationError,
-      message: checkSchema.error.details[0],
+      message: checkSchema.error.details[0].message,
     })
   }
   next()
@@ -149,7 +149,7 @@ const validateRejectSickLeavesRequest = (req, res, next) => {
   if (checkSchema.error) {
     return res.json({
       code: validationError,
-      message: checkSchema.error.details[0],
+      message: checkSchema.error.details[0].message,
     })
   }
   next()
@@ -162,7 +162,7 @@ const validateAcceptMaternityLeavesRequest = (req, res, next) => {
   if (checkSchema.error) {
     return res.json({
       code: validationError,
-      message: checkSchema.error.details[0],
+      message: checkSchema.error.details[0].message,
     })
   }
   next()
@@ -177,7 +177,7 @@ const validateRejectMaternityLeavesRequest = (req, res, next) => {
   if (checkSchema.error) {
     return res.json({
       code: validationError,
-      message: checkSchema.error.details[0],
+      message: checkSchema.error.details[0].message,
     })
   }
   next()
@@ -191,7 +191,7 @@ const validateCancelSickLeavesRequest = (req, res, next) => {
   if (checkSchema.error) {
     return res.json({
       code: validationError,
-      message: checkSchema.error.details[0],
+      message: checkSchema.error.details[0].message,
     })
   }
   next()
@@ -199,13 +199,13 @@ const validateCancelSickLeavesRequest = (req, res, next) => {
 
 const validateCancelMaternityLeavesRequest = (req, res, next) => {
   const cancelMaternityLeavesRequestSchema = Joi.object({
-    requestId: Joi.string().required(),
+    requestId: Joi.string().length(24).required(),
   })
   const checkSchema = cancelMaternityLeavesRequestSchema.validate(req.body)
   if (checkSchema.error) {
     return res.json({
       code: validationError,
-      message: checkSchema.error.details[0],
+      message: checkSchema.error.details[0].message,
     })
   }
   next()
@@ -219,7 +219,7 @@ const validateCancelChangeDayOffRequest = (req, res, next) => {
   if (checkSchema.error) {
     return res.json({
       code: validationError,
-      message: checkSchema.error.details[0],
+      message: checkSchema.error.details[0].message,
     })
   }
   next()
@@ -235,13 +235,12 @@ const validateReplcamentRequest = (req, res, next) => {
   if (checkSchema.error) {
     return res.json({
       code: validationError,
-      message: checkSchema.error.details[0],
+      message: checkSchema.error.details[0].message,
     })
   }
   next()
 }
 
-<<<<<<< HEAD
 const validateSendAnnualLeaveRequest = (req, res, next) => {
   const annualLeaveSchema = Joi.object({
     from: Joi.string().required(),
@@ -254,7 +253,7 @@ const validateSendAnnualLeaveRequest = (req, res, next) => {
   if (checkSchema.error) {
     return res.json({
       code: validationError,
-      message: checkSchema.error.details[0],
+      message: checkSchema.error.details[0].message,
     })
   }
   next()
@@ -270,7 +269,7 @@ const validateAcceptRejectAnnualLeaveRequest = (req, res, next) => {
   if (checkSchema.error) {
     return res.json({
       code: validationError,
-      message: checkSchema.error.details[0],
+      message: checkSchema.error.details[0].message,
     })
   }
   next()
@@ -282,19 +281,42 @@ const validateCancelAnnualLeaveRequest = (req, res, next) => {
   })
 
   const checkSchema = acceptRejectAnnualLeaveSchema.validate(req.body)
-=======
-
-const validateAccidentalLeave = (req, res, next) => {
-  const validateAccidentalLeaveSchema = Joi.object({
-    absentDate:Joi.date().required(),
-    reason: Joi.string(),
-  })
-  const checkSchema = validateAccidentalLeaveSchema.validate(req.body)
->>>>>>> 84d4a5b18941d2d683aa308fa0233de9d9df9d6f
   if (checkSchema.error) {
     return res.json({
       code: validationError,
-      message: checkSchema.error.details[0],
+      message: checkSchema.error.details[0].message,
+    })
+  }
+  next()
+}
+
+const validateAccidentalLeave = (req, res, next) => {
+  const validateAccidentalLeaveSchema = Joi.object({
+    absentDate: Joi.date().required(),
+    reason: Joi.string(),
+  })
+  const checkSchema = validateAccidentalLeaveSchema.validate(req.body)
+  if (checkSchema.error) {
+    return res.json({
+      code: validationError,
+      message: checkSchema.error.details[0].message,
+    })
+  }
+  next()
+}
+
+const validateCompensationLeavesRequest = (req, rees, next) => {
+  const compensationLeavesRequestSchema = Joi.object({
+    absentDate: Joi.string().required(),
+    compensationDate: Joi.string().required(),
+    comment: Joi.string(),
+  })
+
+  const checkSchema = compensationLeavesRequestSchema.validate(req.body)
+  if (checkSchema.error) {
+    return res.json({
+      code: validationError,
+      message: checkSchema.error.details[0].message,
     })
   }
   next()
@@ -317,11 +339,9 @@ module.exports = {
   validateAcceptRejectLinkingRequest,
   validateReplcamentRequest,
   validateViewSlotLinkingRequest,
-<<<<<<< HEAD
   validateSendAnnualLeaveRequest,
   validateAcceptRejectAnnualLeaveRequest,
   validateCancelAnnualLeaveRequest,
-=======
   validateAccidentalLeave,
->>>>>>> 84d4a5b18941d2d683aa308fa0233de9d9df9d6f
+  validateCompensationLeavesRequest,
 }

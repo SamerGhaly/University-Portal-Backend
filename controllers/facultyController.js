@@ -8,6 +8,13 @@ const addFaculty = async (req, res) => {
   })
 }
 const updateFaculty = async (req, res) => {
+  const facultyFound = await Faculty.findById(req.body.id)
+  if (!facultyFound) {
+    return res.json({
+      code: IdnotFound,
+      message: 'Faculty Does Not Exist',
+    })
+  }
   await Faculty.findByIdAndUpdate(
     req.body.id,
     { name: req.body.name },
@@ -26,7 +33,14 @@ const updateFaculty = async (req, res) => {
   )
 }
 const deleteFaculty = async (req, res) => {
-  await Faculty.findByIdAndDelete(req.body.id, function (err) {
+  const facultyFound = await Faculty.findById(req.body.id)
+  if (!facultyFound) {
+    return res.json({
+      code: IdnotFound,
+      message: 'Faculty Does Not Exist',
+    })
+  }
+  Faculty.findOneAndDelete({ _id: req.body.id }, function (err) {
     if (err) {
       return res.json({
         code: IdnotFound,

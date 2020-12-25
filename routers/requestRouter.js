@@ -5,6 +5,7 @@ const {
   verifyTA,
   verifyAcademic,
   verifyHOD,
+  verifyInstructorTA,
 } = require('../authorizations/memberAuthorization')
 
 const {
@@ -16,7 +17,6 @@ const {
   validateCancelAnnualLeaveRequest,
 } = require('../validations/requestValidation')
 const {
-  changeDayOffRequest,
   sendAnnualLeave,
   acceptAnnualLeaveRequest,
   rejectAnnualLeaveRequest,
@@ -78,6 +78,10 @@ const {
 const {
   cancelChangeDayOffRequest,
 } = require('../controllers/requestController')
+const {
+  validateCompensationLeavesRequest,
+} = require('../validations/requestValidation')
+const { compensationLeaveRequest } = require('../controllers/requestController')
 
 const {
   validateSlotLinkingRequest,
@@ -97,6 +101,7 @@ router.post(
   '/sendReplacementRequest',
   validateReplcamentRequest,
   verifyToken,
+  verifyAcademic,
   sendReplacementRequest
 )
 
@@ -104,6 +109,7 @@ router.post(
   '/sendSlotLinking',
   validateSlotLinkingRequest,
   verifyToken,
+  verifyInstructorTA,
   sendSlotLinking
 )
 
@@ -127,6 +133,7 @@ router.post(
   '/cancelSlotLinking',
   validateAcceptRejectLinkingRequest,
   verifyToken,
+  verifyAcademic,
   cancelSlotLinkingRequest
 )
 
@@ -142,66 +149,78 @@ router.post(
   '/changeDayOff',
   validateChangeDayOffRequest,
   verifyToken,
+  verifyAcademic,
   changeDayOffRequest
 )
 router.post(
   '/acceptDayOff',
   validateAcceptDayOffRequest,
   verifyToken,
+  verifyHOD,
   acceptDayOffRequest
 )
 router.post(
   '/rejectDayOff',
   validateRejectDayOffRequest,
   verifyToken,
+  verifyHOD,
   rejectDayOffRequest
 )
 router.post(
   '/sickLeave',
   validateSickLeavesRequest,
   verifyToken,
+  verifyAcademic,
   sickLeaveRequest
 )
 router.post(
   '/maternityLeave',
   validateMaternityLeavesRequest,
   verifyToken,
+  verifyAcademic,
   maternityLeaveRequest
 )
 router.post(
   '/acceptSickLeave',
   validateAcceptSickLeavesRequest,
   verifyToken,
+  verifyHOD,
   acceptSickLeaveRequest
 )
 router.post(
   '/rejectSickLeave',
   validateRejectSickLeavesRequest,
   verifyToken,
+  verifyHOD,
   rejectSickLeaveRequest
 )
 router.post(
   '/acceptMaternityLeave',
   validateAcceptMaternityLeavesRequest,
   verifyToken,
+  verifyHOD,
   acceptMaternityLeaveRequest
 )
 router.post(
   '/rejectMaternityLeave',
   validateRejectMaternityLeavesRequest,
   verifyToken,
+  verifyHOD,
   rejectMaternityLeaveRequest
 )
 router.post(
   '/cancelSickLeaveRequest',
   validateCancelMaternityLeavesRequest,
   verifyToken,
+  verifyAcademic,
   cancelSickLeaveRequest
 )
+
 router.post(
   '/cancelMaternityLeaveRequest',
   validateCancelSickLeavesRequest,
   verifyToken,
+  verifyAcademic,
   cancelMaternityLeaveRequest
 )
 
@@ -209,6 +228,7 @@ router.post(
   '/cancelChangeDayOffRequest',
   validateCancelChangeDayOffRequest,
   verifyToken,
+  verifyAcademic,
   cancelChangeDayOffRequest
 )
 
@@ -249,5 +269,12 @@ router.post(
   validateAccidentalLeave,
   verifyToken,
   accidentalLeaveRequest
+)
+
+router.post(
+  '/compensationLeaveRequest',
+  validateCompensationLeavesRequest,
+  verifyToken,
+  compensationLeaveRequest
 )
 module.exports = router

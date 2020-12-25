@@ -46,6 +46,10 @@ module.exports = {
   notYourRequest: '045',
   noReplacementFound: '046',
   requestNotAccepted: '047',
+  hrDoesNotHaveDepartment: '048',
+  academicMemberDoesMustHaveDepartment: '049',
+  departmentAlreadyHasHOD: '050',
+  signInOutCantBeInFuture: '051',
   roomDoesnotExist: '100',
   roomIsFull: '101',
   roomNotOffice: '102',
@@ -62,5 +66,5 @@ module.exports = {
   databaseerror: '202',
   memberDoesnotExist: '112',
   zeroAnnualLeaves: '113',
-  zeroAccidentalLeaves:'114',
+  zeroAccidentalLeaves: '114',
 }

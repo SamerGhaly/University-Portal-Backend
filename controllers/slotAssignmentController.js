@@ -346,12 +346,14 @@ const deleteMemberSlotAssignment = async (req, res) => {
         message: 'Slot Asssignment Not Found',
       })
     }
+
     if (!slotAssignFound.member) {
       return res.status(404).json({
         code: slotNotAssigned,
         message: 'Slot Not Assigned TO Member',
       })
     }
+
     const instructorId = req.member.memberId
     //check instructor on course
     const checkInstructorOnCourse = await CourseAssignmentModel.findOne({

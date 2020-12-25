@@ -24,7 +24,7 @@ const {
 const verifyToken = require('../authorizations/verifyToken')
 
 router.post('/addSlot', validateAddSlot, verifyToken, verifyTA, addSlot)
-router.post(
+router.put(
   '/updateSlot',
   validateUpdateSlot,
   verifyToken,
@@ -32,7 +32,7 @@ router.post(
   updateSlot
 )
 
-router.post(
+router.delete(
   '/deleteSlot',
   validateDeleteSlot,
   verifyToken,

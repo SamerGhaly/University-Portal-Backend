@@ -20,7 +20,7 @@ const validateAddFaculty = (req, res, next) => {
 const validateUpdateFaculty = (req, res, next) => {
   const updateFacultySchema = Joi.object({
     name: Joi.string().required(),
-    id: Joi.string().required(),
+    id: Joi.string().length(24).required(),
   })
   const checkSchema = updateFacultySchema.validate(req.body)
   if (checkSchema.error) {
@@ -34,7 +34,7 @@ const validateUpdateFaculty = (req, res, next) => {
 
 const validateDeleteFaculty = (req, res, next) => {
   const deleteFacultySchema = Joi.object({
-    id: Joi.string().required(),
+    id: Joi.string().length(24).required(),
   })
   const checkSchema = deleteFacultySchema.validate(req.body)
   if (checkSchema.error) {

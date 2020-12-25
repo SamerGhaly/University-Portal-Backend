@@ -1,9 +1,9 @@
 const mongoose = require('mongoose')
+const memberModel = require('./memberModel')
 
 const roomSchema = new mongoose.Schema({
   name: {
-    type:String ,
-    unique:true
+    type: String,
   },
   type: String,
   capacity: Number,
@@ -23,5 +23,9 @@ roomSchema.virtual('schedule', {
 
 roomSchema.set('toObject', { virtuals: true })
 roomSchema.set('toJSON', { virtuals: true })
+
+roomSchema.post('findOneAndRemove', async (doc) => {
+  await memberModel.updateMany({ office: doc._id }, { $unset: { office: '' } })
+})
 
 module.exports = mongoose.model('Room', roomSchema)

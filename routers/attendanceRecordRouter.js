@@ -9,7 +9,7 @@ const {
 const {
   viewAttendanceRecords,
 } = require('../controllers/attendanceRecordContoller')
-const { verify, verifyHR } = require('../authorizations/memberAuthorization')
+const { verifyHR } = require('../authorizations/memberAuthorization')
 
 router.post(
   '/viewMyAttendance',

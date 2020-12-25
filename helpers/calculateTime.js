@@ -29,23 +29,27 @@ const calcHours = (attendanceRecords, today) => {
   return ans
 }
 
-const checkMissingDay = () => {}
+const checkValidLeave = (today) => {}
+
+
+const checkCompensation = (today) => {}
+
 const attendanceRecordsCheck = (attendanceRecords, today, dayoff) => {
   // check friday
   let missingDays = 0
   let time = calcHours(attendanceRecords, today)
   if (today.getDay() === 5) return { missingDays, time: 0 }
-  else if (today.getDay() === dayoff && !compancated)
+  else if (today.getDay() === dayoff && !checkCompensation(today))
     return { missingDays, time }
-  else if (/*fe agaza */ true) return { missingDays, time: 0 }
-  else if (compancated || time !== 0) {
+  else if (checkValidLeave(today)) return { missingDays, time: 0 }
+  else if (checkCompensation(today) || time !== 0) {
     time -= convertTomilli(8, 25, 0)
     return { missingDays, time }
   } else if (time == 0) {
     missingDays = 1
-    return {missingDays,time}
+    return { missingDays, time }
   }
-  return {missingDays,time}
+  return { missingDays, time }
 }
 const convertTomilli = (hours, min, sec) => {
   return (hours * 60 * 60 + min * 60 + sec) * 1000
@@ -53,4 +57,4 @@ const convertTomilli = (hours, min, sec) => {
 const convertTohours = (hours, min, sec) => {
   return (hours * 60 * 60 + min * 60 + sec) * 1000
 }
-module.exports = {convertTohours, attendanceRecordsCheck, convertTomilli }
+module.exports = { convertTohours, attendanceRecordsCheck, convertTomilli }

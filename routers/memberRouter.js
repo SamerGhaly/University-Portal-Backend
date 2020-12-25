@@ -14,6 +14,8 @@ const {
   validateAssignCoordinator,
   validateUpdateAssignTaToCourse,
   validateRemoveTaFromCourse,
+  validateUpdateMyProfile,
+  validateUpdateSalary,
 } = require('../validations/memberValidation')
 const {
   addMember,
@@ -37,6 +39,7 @@ const verifyToken = require('../authorizations/verifyToken')
 const {
   verifyHR,
   verifyInstructor,
+  verifyAcademic,
 } = require('../authorizations/memberAuthorization')
 
 router.post('/login', validateLogin, login)
@@ -45,13 +48,13 @@ router.post('/addMember', validateAddMember, verifyToken, verifyHR, addMember)
 router.get('/signIn', verifyToken, signIn)
 router.get('/signOut', verifyToken, signOut)
 router.post(
+
   '/addMissingSign',
   validateMissingSign,
   verifyToken,
   verifyHR,
   addMissingSign
 )
-router.post('/addMember', validateAddMember, addMember)
 router.delete(
   '/deleteMember',
   validateDeleteMember,
@@ -87,8 +90,28 @@ router.delete(
   verifyInstructor,
   removeTaAssignment
 )
-router.put('/updateMember', validateUpdateMember, verifyToken, updateMember)
-router.post('/viewMember', validateViewMember, verifyToken, viewMember)
+router.put(
+  '/updateMember',
+  validateUpdateMember,
+  verifyToken,
+  verifyHR,
+  updateMember
+)
+router.put(
+  '/updateMyProfile',
+  validateUpdateMyProfile,
+  verifyToken,
+  verifyAcademic,
+  updateMember
+)
+router.put(
+  '/updateSalary',
+  validateUpdateSalary,
+  verifyToken,
+  verifyHR,
+  updateMember
+)
+router.get('/viewMember', verifyToken, viewMember)
 router.post('/resetPassword', validateResetPassword, resetPassword)
 router.get('/viewMissingDaysHours', verifyToken, viewMissingDaysHours)
 module.exports = router

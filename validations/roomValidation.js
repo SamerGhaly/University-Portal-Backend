@@ -1,7 +1,7 @@
 const Joi = require('joi')
-const { catchError } = require('../constants/errorCodes')
+const { validationError } = require('../constants/errorCodes')
 const { roomTypes } = require('../constants/constants')
-const validateRoom = (req, res, next) => {
+const validateRoom = async (req, res, next) => {
   const roomSchema = Joi.object({
     name: Joi.string().required(),
     type: Joi.string()
@@ -12,14 +12,16 @@ const validateRoom = (req, res, next) => {
         roomTypes.OFFICE
       )
       .required(),
-    capacity: Joi.number().required(),
+    capacity: Joi.number().required().min(1),
   })
   const checkSchema = roomSchema.validate(req.body)
-  if (checkSchema.error)
+  if (checkSchema.error) {
     return res.status(400).json({
-      code: checkSchema,
-      message: checkSchema.error.details[0],
+      code: validationError,
+      message: checkSchema.error.details[0].message,
     })
+  }
+
   next()
 }
 
@@ -33,14 +35,28 @@ const validateRoomU = (req, res, next) => {
       roomTypes.TUTORIAL,
       roomTypes.OFFICE
     ),
-    capacity: Joi.number(),
+    capacity: Joi.number().min(1),
   })
   const checkSchema = roomSchema.validate(req.body)
   if (checkSchema.error)
     return res.status(400).json({
-      code: checkSchema,
-      message: checkSchema.error.details[0],
+      code: validationError,
+      message: checkSchema.error.details[0].message,
     })
   next()
 }
-module.exports = { validateRoom, validateRoomU }
+
+const validateRoomD = (req, res, next) => {
+  const roomSchema = Joi.object({
+    roomId: Joi.string().length(24).required(),
+  })
+  const checkSchema = roomSchema.validate(req.body)
+  if (checkSchema.error)
+    return res.status(400).json({
+      code: validationError,
+      message: checkSchema.error.details[0].message,
+    })
+  next()
+}
+
+module.exports = { validateRoom, validateRoomU, validateRoomD }

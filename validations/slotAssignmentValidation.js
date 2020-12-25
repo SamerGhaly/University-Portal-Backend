@@ -1,5 +1,6 @@
 const Joi = require('joi')
 const { weekDays, slotTypes } = require('../constants/constants')
+const { validationError } = require('../constants/errorCodes')
 
 const validateAddSlot = (req, res, next) => {
   const addSlotSchema = Joi.object({
@@ -24,8 +25,8 @@ const validateAddSlot = (req, res, next) => {
   const checkSchema = addSlotSchema.validate(req.body)
   if (checkSchema.error)
     return res.status(400).json({
-      code: checkSchema,
-      message: checkSchema.error.details[0],
+      code: validationError,
+      message: checkSchema.error.details[0].message,
     })
   next()
 }
@@ -54,8 +55,8 @@ const validateUpdateSlot = (req, res, next) => {
   const checkSchema = updateSlotSchema.validate(req.body)
   if (checkSchema.error)
     return res.status(400).json({
-      code: checkSchema,
-      message: checkSchema.error.details[0],
+      code: validationError,
+      message: checkSchema.error.details[0].message,
     })
   next()
 }
@@ -67,8 +68,8 @@ const validateDeleteSlot = (req, res, next) => {
   const checkSchema = deleteSlotSchema.validate(req.body)
   if (checkSchema.error)
     return res.status(400).json({
-      code: checkSchema,
-      message: checkSchema.error.details[0],
+      code: validationError,
+      message: checkSchema.error.details[0].message,
     })
   next()
 }
@@ -81,8 +82,8 @@ const validateAssignSlotToMember = (req, res, next) => {
   const checkSchema = assignSlotSchema.validate(req.body)
   if (checkSchema.error)
     return res.status(400).json({
-      code: checkSchema,
-      message: checkSchema.error.details[0],
+      code: validationError,
+      message: checkSchema.error.details[0].message,
     })
   next()
 }
@@ -95,8 +96,8 @@ const validateUpdateSlotAssignment = (req, res, next) => {
   const checkSchema = assignSlotSchema.validate(req.body)
   if (checkSchema.error)
     return res.status(400).json({
-      code: checkSchema,
-      message: checkSchema.error.details[0],
+      code: validationError,
+      message: checkSchema.error.details[0].message,
     })
   next()
 }
@@ -108,8 +109,8 @@ const validateDeleteSlotAssignment = (req, res, next) => {
   const checkSchema = assignSlotSchema.validate(req.body)
   if (checkSchema.error)
     return res.status(400).json({
-      code: checkSchema,
-      message: checkSchema.error.details[0],
+      code: validationError,
+      message: checkSchema.error.details[0].message,
     })
   next()
 }
