@@ -519,6 +519,22 @@ Response:
 }  
 
 
+#### Add Missing Sign  
+Functionality: add missing signin or signout  
+Route: /member/addMissingSign  
+Request type: POST  
+Request Body:  
+{  
+    "memberId":"5fe526cc4a96390450b26521",  
+    "date":"2020-12-24",  
+    "time":"15:50",  
+    "type":"signin"  
+}  
+  
+Response:  
+{  
+    "message": "Missing sign added successfully"  
+}  
 
 
 
