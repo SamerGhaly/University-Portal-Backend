@@ -20,6 +20,8 @@ SIGNING_KEY
 5. Kindly find below the link to the UML :
 https://drive.google.com/file/d/1m0H27HB1s1gr2yOPDQOu7QU2izioXRZg/view
 
+6. The Notification Module is handled in the frontend by getting all the pending requests which are not seen by the member yet  by using routes which view requests and filtering by status: "pending"  
+
 ## Routes  
 
 ### 2 GUC Staff Members Functionalities  
