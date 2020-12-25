@@ -1030,7 +1030,7 @@ Request type: GET
 #### View ths slot assignments
 
 ##### Request  
-Functionality: view course coverage he/she is assigned to and it can be filtered by a course id  
+Functionality: view slot assignments in courses he/she is assigned to   
 Route: /course/viewInstructorSlotsInCourse  
 Request type: POST  
 Request Body:  
@@ -1073,16 +1073,115 @@ Request Body:
 ]   
 
 
-#### View ths slot assignments
+#### View staff in instructor department  
 
 ##### Request  
-Functionality: view course coverage he/she is assigned to and it can be filtered by a course id  
-Route: /course/viewInstructorSlotsInCourse  
-Request type: POST  
+Functionality: view all staff in instructor's department  
+Route: /department/viewMemberInInstructorDepartment  
+Request type: GET     
+
+##### Response    
+{  
+    "_id": "5fe599d3d845793440cc82a6",  
+    "department": {  
+        "_id": "5fe521c2118e283b186235c6",  
+        "membersPerDepartment": [  
+            {  
+                "_id": "5fe585d21612f542b0c115b1",  
+                "name": "john",  
+                "email": "hod2@guc.com",  
+                "salary": 5000,  
+                "office": "5fe5262a4a96390450b26520",  
+                "department": "5fe521c2118e283b186235c6",  
+                "dayoff": "monday",  
+                "type": "head of department",  
+                "birthdate": "1999-05-08T21:00:00.000Z",  
+                "gender": "male",  
+                "password": "$2a$10$HoiS6yWHVEhcW/Bup1kqK.LQxFnJ8R8O8/wPeOPbFwrjEqHp6nKfu",  
+                "activated": true,  
+                "customId": "ac-5",  
+                "dateCreated": "2020-12-25T08:25:22.242Z",  
+                "annualBalanceTaken": 0,  
+                "accidentalDaysTaken": 0,  
+                "__v": 0,  
+                "id": "5fe585d21612f542b0c115b1"  
+            },  
+            {  
+                "_id": "5fe599d3d845793440cc82a6",  
+                "name": "john",  
+                "email": "i2@guc.com",  
+                "salary": 5000,  
+                "office": "5fe5262a4a96390450b26520",  
+                "department": "5fe521c2118e283b186235c6",  
+                "dayoff": "monday",  
+                "type": "instructor",  
+                "birthdate": "1999-05-08T21:00:00.000Z",  
+                "gender": "male",  
+                "password": "$2a$10$gLJfGBqBkqXFQaOtHtY37e2ZhxTt09oz/WjFlHmlAly1yszSvOUFW",  
+                "activated": true,  
+                "customId": "ac-10",  
+                "dateCreated": "2020-12-25T09:50:43.128Z",  
+                "annualBalanceTaken": 0,  
+                "accidentalDaysTaken": 0,  
+                "__v": 0,  
+                "id": "5fe599d3d845793440cc82a6"  
+            },  
+            {  
+                "_id": "5fe599ebd845793440cc82a7",  
+                "name": "john",  
+                "email": "t2@guc.com",  
+                "salary": 5000,  
+                "office": "5fe5262a4a96390450b26520",  
+                "department": "5fe521c2118e283b186235c6",  
+                "dayoff": "monday",  
+                "type": "instructor",  
+                "birthdate": "1999-05-08T21:00:00.000Z",  
+                "gender": "male",  
+                "password": "$2a$10$5OtprwLUPKS4h633pQXYEeo.gPpB/3hJexmppHJC4b5uZ3Ac4CKCe",  
+                "activated": true,  
+                "customId": "ac-10",  
+                "dateCreated": "2020-12-25T09:51:07.534Z",  
+                "annualBalanceTaken": 0,  
+                "accidentalDaysTaken": 0,  
+                "__v": 0,  
+                "id": "5fe599ebd845793440cc82a7"  
+            },  
+            {  
+                "_id": "5fe59aaed845793440cc82a9",  
+                "name": "john",  
+                "email": "t3@guc.com",  
+                "salary": 5000,  
+                "office": "5fe5262a4a96390450b26520",  
+                "department": "5fe521c2118e283b186235c6",  
+                "dayoff": "monday",  
+                "type": "instructor",  
+                "birthdate": "1999-05-08T21:00:00.000Z",  
+                "gender": "male",  
+                "password": "$2a$10$k6Ka46XG2NTvIGceyrhs0.LS/S0npMb4Krbti6aOhgeHJbu0kvR/q",  
+                "activated": true,  
+                "customId": "ac-10",  
+                "dateCreated": "2020-12-25T09:54:22.251Z",  
+                "annualBalanceTaken": 0,  
+                "accidentalDaysTaken": 0,  
+                "__v": 0,  
+                "id": "5fe59aaed845793440cc82a9"  
+            }  
+        ],  
+        "id": "5fe521c2118e283b186235c6"  
+    },  
+    "id": "5fe599d3d845793440cc82a6"  
+}  
+
+
+#### View Members on same course as instructor 
+##### Request  
+Functionality: view all staff members in instructor's department   per course  
+Route: /course/viewMemberInCourseInstructor  
+Request type: POST      
 Request Body:  
 {  
     "courseId":"5fe596ddd845793440cc82a5"  
-}   
+}    
 
 ##### Response    
 [  
@@ -1099,8 +1198,8 @@ Request Body:
             "type": "instructor",  
             "birthdate": "1999-05-08T21:00:00.000Z",  
             "gender": "male",  
-            "password": "$2a$10$gLJfGBqBkqXFQaOtHtY37e2ZhxTt09oz/WjFlHmlAly1yszSvOUFW",   
-            "activated": true,   
+            "password": "$2a$10$gLJfGBqBkqXFQaOtHtY37e2ZhxTt09oz/WjFlHmlAly1yszSvOUFW",  
+            "activated": true,  
             "customId": "ac-10",  
             "dateCreated": "2020-12-25T09:50:43.128Z",  
             "annualBalanceTaken": 0,  
@@ -1119,7 +1218,7 @@ Request Body:
             "office": "5fe5262a4a96390450b26520",  
             "department": "5fe521c2118e283b186235c6",  
             "dayoff": "monday",  
-            "type": "teaching assistant",  
+            "type": "instructor",  
             "birthdate": "1999-05-08T21:00:00.000Z",  
             "gender": "male",  
             "password": "$2a$10$k6Ka46XG2NTvIGceyrhs0.LS/S0npMb4Krbti6aOhgeHJbu0kvR/q",  
@@ -1132,7 +1231,9 @@ Request Body:
             "id": "5fe59aaed845793440cc82a9"  
         }  
     }  
-]  
+]    
+
+
 
 ### 4.3 Coordinator Functionalities
 
@@ -1280,7 +1381,7 @@ Request Body:
 #### ChangeDayOff Request   
 
 ##### Request  
-Functionality: Change Day Off Request
+Functionality: Change Day Off Request  
 Route: /request/changeDayOff  
 Request type: POST          
 Request Body:  
@@ -1307,20 +1408,20 @@ Request Body:
     "slotId":"5fe5a63a5374372c6c4f2465"  (slot Assignment Id from slot assignment model)
 } 
 
-##### Response    
+##### Response     
 
-{
-    "message": "Slot Linking Request Sent Successfully!"
-}
+{  
+    "message": "Slot Linking Request Sent Successfully!"  
+}  
 
 
   
 #### Cancel Slot Linking Requests  
 
 ##### Request  
-Functionality: Cancel slot linking requests
-Route: /request/cancelSlotLinking  
-Request type: POST  
+Functionality: Cancel slot linking requests  
+Route: /request/cancelSlotLinking   
+Request type: POST   
 Request Body:  
 {  
     "requestId":"5fe6094df7c75030509afe35"  (slot linkning request Id from slotLinkningRequestModel)  
