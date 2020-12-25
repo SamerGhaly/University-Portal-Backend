@@ -170,7 +170,7 @@ Request Body:
     "month":12,  
     "year":"2020"  
 }  
-
+###### NOTE: If you want to filter, both month and year are required  
 ##### Response    
 {
     "data": [  
@@ -471,8 +471,38 @@ Response:
     "message": "Member Deleted Successfully"  
 }  
 
+###### NOTE: If you want to filter, both month and year are required  
 
+#### View Staff Member Attendance Records
+Functionality: view staff members attendance records
+Route: /attendance/viewMemberAttendance  
+Request type: POST    
+Request Body:  {  
+    "memberId":"5fe505f40c620c07989655c0",  
+    "month":12,  (optional)
+    "year":"2020"  (optional)
+}   
 
+Response:
+{  
+    "data": [  
+        {  
+            "_id": "5fe559a6a8cde83ba4088e21",  
+            "type": "signin",  
+            "date": "2020-12-25T05:16:54.549Z",  
+            "member": "5fe505f40c620c07989655c0",  
+            "__v": 0  
+        },  
+        {  
+            "_id": "5fe559afa8cde83ba4088e22",  
+            "type": "signout",  
+            "date": "2020-12-25T05:17:03.284Z",  
+            "member": "5fe505f40c620c07989655c0",  
+            "__v": 0  
+        }  
+    ]  
+}  
+ 
 #### Update Salary
 Functionality: update Salary  
 Route: /member/updateSalary  
