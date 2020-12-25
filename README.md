@@ -982,7 +982,72 @@ Request Body:
 }  
 
 
+ #### Accept Compensation Leave Request   
 
+##### Request  
+Functionality: Accept Compensation Leave Request   
+Route: /request/acceptCompensationLeaveRequest   
+Request type: POST          
+Request Body:  
+{  
+    "requestId":"5fe5bbfe6076e031402cf891"  (maternity leave request Id from maternityLeaveRequests collection)  
+}     
+
+##### Response     
+{
+    "message": "Compensation Request accepetd"
+}
+
+ #### Reject Compensation Leave Request    
+
+##### Request  
+Functionality: Reject Compensation Leave Request  
+Route: /request/rejectCompensationLeaveRequest  
+Request type: POST      
+Request Body:  
+     
+    {   
+        "requestId":"5fe641939b02d34fc88892cf"  (compensation id from compensationLeaverequests collection)  
+    }  
+
+##### Response        
+{  
+    "message": "Request rejected"  
+}  
+
+
+ #### Accept Accidental Leave Request   
+
+##### Request  
+Functionality: Accept Accidental Leave Request    
+Route: /request/accidentalAcceptRequest     
+Request type: POST          
+Request Body:  
+{  
+    "requestId":"5fe5bbfe6076e031402cf891"  (maternity leave request Id from maternityLeaveRequests collection)  
+}     
+
+##### Response      
+{  
+    "message": "succefully Accept the request",  
+    "accidentalLeavesYouUsed": 1,  
+    "annualBalance": 1.5  
+}  
+
+ #### Reject Accidental Leave Request    
+
+##### Request  
+Functionality: Reject Accidental Leave Request  
+Route: /request/accidentalRejectRequest  
+Request type: POST      
+Request Body:  
+    {   
+        "requestId":"5fe641939b02d34fc88892cf"  (accidental id from accidentalRequests collection)  
+    }  
+##### Response        
+{  
+    "message": "succefully reject the request"  
+}  
 
 ### 4.2 Instructor Functionalities
 
@@ -1657,3 +1722,62 @@ Request Body:
     "message": "Request Cancelled"  
 }  
     
+
+
+#### Send Accidental Leave Request  
+
+##### Request  
+Functionality: Send Accidental leave request  
+Route: /request/accidentalLeaveRequest  
+Request type: POST   
+Request Body:    
+  {   
+        "absentDate":"2020-12-9",   
+        "reason":"qwerty"  
+}     
+    
+##### Response    
+{  
+    "message": "succefully make a request"  
+}  
+
+
+
+#### Cancel Accidental Leave Request  
+
+##### Request  
+Functionality: Cancel accidental leave request    
+Route: /request/accidentalCancelRequest  
+Request type: POST   
+Request Body:    
+     {  
+        "requestId":"5fe63ed2322568458c888ec9"  (request id from accidentalLeaveRequests collection)  
+}    
+
+##### Response     
+{  
+    "message": "succefully Cancel the request"  
+}   
+    
+
+#### Send Compensation Leave Request  
+
+##### Request  
+Functionality: Send Compensation leave request  
+Route: /request/compensationLeaveRequest  
+Request type: POST   
+Request Body:    
+  {  
+        "absentDate":"2020-12-13",  
+        "compensationDate":"2020-12-21",  
+        "reason":"qwertyui"  
+}    
+    
+##### Response    
+{  
+    "message": "Compensation Leave Sent Successfuly"  
+}   
+
+
+
+
