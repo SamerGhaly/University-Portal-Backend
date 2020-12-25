@@ -45,6 +45,7 @@ const {
   attendanceRecordTypes,
   roomTypes,
   weekDays,
+  requestType,
 } = require('../constants/constants')
 const attendanceRecordModel = require('../models/attendanceRecordModel')
 const departmentModel = require('../models/departmentModel')
@@ -1054,6 +1055,7 @@ const ViewScadule = async (req, res) => {
     result.Member = me
     const ReplacmentRecords = await replacementRequest.find({
       member: req.member.memberId,
+      status: requestType.ACCEPT,
     })
     result.ScaduleReplacment = ReplacmentRecords
     return res.json(result)
