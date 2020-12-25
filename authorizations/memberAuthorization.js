@@ -42,6 +42,7 @@ const verifyTA = (req, res, next) => {
 }
 
 const verifyAcademic = (req, res, next) => {
+  //console.log(req.member.type);
   if (req.member.type === memberRoles.HR) {
     return res.status(403).json({
       code: unauthorized,

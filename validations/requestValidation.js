@@ -77,6 +77,19 @@ const validateAcceptDayOffRequest = (req, res, next) => {
   }
   next()
 }
+const validateAcceptAccidentalLeave = (req, res, next) => {
+  const acceptDayOffRequestSchema = Joi.object({
+    requestId: Joi.string().required(),
+  })
+  const checkSchema = acceptDayOffRequestSchema.validate(req.body)
+  if (checkSchema.error) {
+    return res.json({
+      code: validationError,
+      message: checkSchema.error.details[0].message,
+    })
+  }
+  next()
+}
 
 const validateRejectDayOffRequest = (req, res, next) => {
   const rejectDayOffRequestSchema = Joi.object({
@@ -250,12 +263,11 @@ const validateAccidentalLeave = (req, res, next) => {
   if (checkSchema.error) {
     return res.json({
       code: validationError,
-      message: checkSchema.error.details[0],
+      message: checkSchema.error.details[0].message,
     })
   }
   next()
 }
-
 
 const validateSendAnnualLeaveRequest = (req, res, next) => {
   const annualLeaveSchema = Joi.object({
@@ -317,7 +329,7 @@ const validateCompensationLeavesRequest = (req, rees, next) => {
   if (checkSchema.error) {
     return res.json({
       code: validationError,
-      message: checkSchema.error.details[0],
+      message: checkSchema.error.details[0].message,
     })
   }
   next()
@@ -340,7 +352,7 @@ module.exports = {
   validateAcceptRejectLinkingRequest,
   validateReplcamentRequest,
   validateViewSlotLinkingRequest,
-
+  validateAcceptAccidentalLeave,
   validateAccidentalLeave,
   validateSendAnnualLeaveRequest,
   validateAcceptRejectAnnualLeaveRequest,

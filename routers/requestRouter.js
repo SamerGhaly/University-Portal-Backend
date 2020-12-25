@@ -8,7 +8,7 @@ const {
 } = require('../authorizations/memberAuthorization')
 
 const {
-  validateAccidentalLeave,
+  validateAcceptAccidentalLeave,
   validateChangeDayOffRequest,
   validateViewSlotLinkingRequest,
   validateSendAnnualLeaveRequest,
@@ -16,6 +16,9 @@ const {
   validateCancelAnnualLeaveRequest,
 } = require('../validations/requestValidation')
 const {
+  accidentalCancelRequest,
+  accidentalRejectRequest,
+  accidentalAcceptRequest,
   sendAnnualLeave,
   acceptAnnualLeaveRequest,
   rejectAnnualLeaveRequest,
@@ -41,6 +44,7 @@ const {
 const { maternityLeaveRequest } = require('../controllers/requestController')
 
 const {
+  validateAccidentalLeave,
   validateAcceptSickLeavesRequest,
 } = require('../validations/requestValidation')
 const { acceptSickLeaveRequest } = require('../controllers/requestController')
@@ -214,11 +218,28 @@ router.post(
   verifyToken,
   cancelChangeDayOffRequest
 )
+
 router.post(
-  '/accidentalLeaveRequest',
-  validateAccidentalLeave,
+  '/accidentalAcceptRequest',
+  validateAcceptAccidentalLeave,
   verifyToken,
-  accidentalLeaveRequest
+  verifyHOD,
+  accidentalAcceptRequest
+)
+accidentalRejectRequest
+router.post(
+  '/accidentalRejectRequest',
+  validateAcceptAccidentalLeave,
+  verifyToken,
+  verifyHOD,
+  accidentalRejectRequest
+)
+router.post(
+  '/accidentalCancelRequest',
+  validateAcceptAccidentalLeave,
+  verifyToken,
+  verifyAcademic,
+  accidentalCancelRequest
 )
 
 router.post(
@@ -229,6 +250,14 @@ router.post(
   sendAnnualLeave
 )
 
+// router.post(
+//   '/acceptcompensationLeaveRequest',
+//   validat,
+//   verifyToken,
+//   verifyHOD,
+//   acceptAnnualLeaveRequest
+// )
+
 router.post(
   '/acceptAnnualLeaveRequest',
   validateAcceptRejectAnnualLeaveRequest,
@@ -236,7 +265,6 @@ router.post(
   verifyHOD,
   acceptAnnualLeaveRequest
 )
-
 router.post(
   '/rejectAnnualLeaveRequest',
   validateAcceptRejectAnnualLeaveRequest,
@@ -257,6 +285,7 @@ router.post(
   '/accidentalLeaveRequest',
   validateAccidentalLeave,
   verifyToken,
+  verifyAcademic,
   accidentalLeaveRequest
 )
 router.post(
