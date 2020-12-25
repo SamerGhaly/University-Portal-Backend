@@ -777,8 +777,38 @@ Request type: GET
 }  
 
 
+ #### Accept ChangeDayOff Request   
+
+##### Request  
+Functionality: Accept Change Day Off Request
+Route: /request/acceptDayOff  
+Request type: POST          
+Request Body:  
+{  
+    "requestId":"5fe5bbfe6076e031402cf891"  
+}    
+
+##### Response    
+{  
+    "message": "Request accepted anad DayOff updated successfully"  
+}  
 
 
+ #### Reject ChangeDayOff Request   
+
+##### Request  
+Functionality: Reject Change Day Off Request
+Route: /request/rejectDayOff    
+Request type: POST          
+Request Body:  
+{  
+    "requestId":"5fe5bbfe6076e031402cf891"  
+}    
+
+##### Response    
+{
+    "message": "Request rejected"
+}
 
 
 
@@ -835,6 +865,59 @@ Request Body:
 {
     "message": "Assignment Removed Successfully"
 }
+
+#### AssignMember to Slots  
+
+##### Request  
+Functionality: assign member to created slots    
+Route: /slotAssignment/assignSlotToMember   
+Request type: POST      
+Request Body:  
+{  
+    "assignmentId":"5fe5a63a5374372c6c4f2465",  (slot assignment id from slotAssignment model)  
+    "memberId":"5fe582d3b0c0e32214dd0c0b"  
+}  
+
+##### Response    
+{  
+    "message": "Member Assigned Successfully"  
+}   
+  
+
+
+#### Update Members Assignments to Slots  
+
+##### Request  
+Functionality: update member to slots      
+Route: /slotAssignment/updateSlotMemberAssign     
+Request type: PUT      
+Request Body:  
+{  
+    "assignmentId":"5fe5a6495374372c6c4f2466",  
+    "newMemberId":"5fe582d3b0c0e32214dd0c0b"  
+}  
+
+##### Response    
+{  
+    "message": "Slot Assignment Updated Successfully"  
+}   
+ 
+ #### Delete Members Assignments from Slots  
+
+##### Request  
+Functionality: delete member from slots      
+Route: /slotAssignment/deleteSlotMemberAssign      
+Request type: DELETE        
+Request Body:  
+{
+    "assignmentId":"5fe5a6495374372c6c4f2466"
+} 
+
+##### Response    
+{
+    "message": "Member removed from slot"
+}
+
 
 #### Assign Coordinator To Course  
 
@@ -918,59 +1001,13 @@ Request Body:
     "message": "Assignment Deleted successfully"  
 }  
 
-#### AssignMember to Slots  
-
-##### Request  
-Functionality: assign member to created slots    
-Route: /slotAssignment/assignSlotToMember   
-Request type: POST      
-Request Body:  
-{  
-    "assignmentId":"5fe5a63a5374372c6c4f2465",  (slot assignment id from slotAssignment model)  
-    "memberId":"5fe582d3b0c0e32214dd0c0b"  
-}  
-
-##### Response    
-{  
-    "message": "Member Assigned Successfully"  
-}   
-  
 
 
-#### Update Members Assignments to Slots  
 
-##### Request  
-Functionality: update member to slots      
-Route: /slotAssignment/updateSlotMemberAssign     
-Request type: PUT      
-Request Body:  
-{  
-    "assignmentId":"5fe5a6495374372c6c4f2466",  
-    "newMemberId":"5fe582d3b0c0e32214dd0c0b"  
-}  
 
-##### Response    
-{  
-    "message": "Slot Assignment Updated Successfully"  
-}   
- 
- #### Delete Members Assignments from Slots  
+### 4.4 Academic Member Functionalities
 
-##### Request  
-Functionality: delete member from slots      
-Route: /slotAssignment/deleteSlotMemberAssign      
-Request type: DELETE        
-Request Body:  
-{
-    "assignmentId":"5fe5a6495374372c6c4f2466"
-} 
-
-##### Response    
-{
-    "message": "Member removed from slot"
-}
-
- #### ChangeDayOff Request   
+#### ChangeDayOff Request   
 
 ##### Request  
 Functionality: Change Day Off Request
@@ -987,23 +1024,24 @@ Request Body:
     "message": "Change DayOff Request sent successfully"  
 }  
 
- #### Accept ChangeDayOff Request   
+
+
+#### Send SLotLinking    
 
 ##### Request  
-Functionality: Accept Change Day Off Request
-Route: /request/acceptDayOff  
+Functionality: send slot linking request to certain slot  
+Route: /request/sendSlotLinking  
 Request type: POST          
 Request Body:  
-{  
-    "requestId":"5fe5bbfe6076e031402cf891"  
-}    
+{
+    "slotId":"5fe5a63a5374372c6c4f2465"  (slot Assignment Id from slot assignment model)
+} 
 
 ##### Response    
-{  
-    "message": "Request accepted anad DayOff updated successfully"  
-}  
+
+{
+    "message": "Slot Linking Request Sent Successfully!"
+}
 
 
-
-
-
+  
