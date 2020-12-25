@@ -26,6 +26,7 @@ Route: /member/login
 Request type: POST
 Request Body: {
     "email":"john@guc.com",
+    #
     "password":"1234"
 }
 
