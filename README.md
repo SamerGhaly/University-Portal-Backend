@@ -132,6 +132,88 @@ Request Body: {
     "message": "Account Activated Successfully"  
 }  
 
+###### NOTE: The sign in and sign out functionalities use the member provided in the token  
+
+#### Sign in
+
+##### Request  
+Functionality:signin to create attendance record  
+Route: /member/signin  
+Request type: GET  
+
+##### Response
+{  
+    "message": "Signed In successfully"  
+}  
+
+
+#### Sign out
+
+##### Request  
+Functionality:signout to create attendance record  
+Route: /member/signout  
+Request type: GET  
+
+##### Response  
+{  
+    "message": "Signed Out successfully"  
+}  
+
+#### View My Attendance Record
+
+##### Request  
+Functionality:view my attendance records in a certain month and year or through all time    
+Route: /attendance/viewMyAttendance  
+Request type: POST   
+Request Body: 
+{  
+    "month":12,  
+    "year":"2020"  
+}  
+
+##### Response    
+{
+    "data": [  
+        {  
+            "_id": "5fe554cba8cde83ba4088e1c",  
+            "type": "signin",  
+            "date": "2020-12-25T04:56:11.810Z",  
+            "member": "5fe526cc4a96390450b26521",  
+            "__v": 0  
+        },  
+        {  
+            "_id": "5fe554cfa8cde83ba4088e1d",  
+            "type": "signin",  
+            "date": "2020-12-25T04:56:15.818Z",  
+            "member": "5fe526cc4a96390450b26521",  
+            "__v": 0  
+        },  
+        {  
+            "_id": "5fe554d7a8cde83ba4088e1e",  
+            "type": "signout",  
+            "date": "2020-12-25T04:56:23.278Z",  
+            "member": "5fe526cc4a96390450b26521",  
+            "__v": 0  
+        },  
+        {  
+            "_id": "5fe554daa8cde83ba4088e1f",  
+            "type": "signout",  
+            "date": "2020-12-25T04:56:26.761Z",  
+            "member": "5fe526cc4a96390450b26521",  
+            "__v": 0  
+        },  
+        {  
+            "_id": "5fe554dba8cde83ba4088e20",  
+            "type": "signout",  
+            "date": "2020-12-25T04:56:27.863Z",  
+            "member": "5fe526cc4a96390450b26521",  
+            "__v": 0  
+        }  
+    ]  
+}  
+
+
+
 
 ### 3 HR Functionalities
 
