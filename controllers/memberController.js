@@ -9,7 +9,10 @@ const RoomModel = require('../models/roomModel')
 const DepartmentModel = require('../models/departmentModel')
 const CourseModel = require('../models/courseModel')
 const courseAssignmentModel = require('../models/courseAssignment')
-const { attendanceRecordsCheck } = require('../helpers/calculateTime')
+const {
+  attendanceRecordsCheck,
+  convertToHours_min_sec,
+} = require('../helpers/calculateTime')
 const {
   userNotFound,
   unActivatedAccount,
@@ -186,7 +189,7 @@ const addMember = async (req, res) => {
     const salt = parseInt(process.env.SALT)
     // console.log(typeof salt)
     member.password = bcrypt.hashSync('123456')
-   // console.log(member.password)
+    // console.log(member.password)
     member.activated = false
     member.customId = customId
     member.dateCreated = new Date(new Date().getTime() + 2 * 60 * 60 * 1000)
@@ -838,30 +841,55 @@ const viewMissingDaysHours = async (req, res) => {
     let startDay = startDate.getTime() + 2 * 60 * 60 * 1000
     let endDay = today.getTime()
     let stepTime = 24 * 60 * 60 * 1000
-    long
+    let ans = { missingDays: 0, time: 0 }
+
+    let attendanceRecords = await AttendanceRecordModel.find(
+      {
+        member: tokenId,
+        date: { $gt: new Date(startDay), $lt: new Date(endDay) },
+      },
+      null,
+      { sort: { date: 1 } }
+    )
+    let lastIdx = 0
+    let member = await MemberModel.findById(tokenId)
     for (
       let DayTime = startDay + stepTime;
-      DayTime <= endDay;
+      DayTime <= endDay+stepTime;
       DayTime += stepTime
     ) {
-      let attendanceRecords = await AttendanceRecordModel.find(
-        {
-          member: tokenId,
-          date: { $gt: new Date(DayTime - stepTime), $lt: new Date(DayTime) },
-        },
-        null,
-        { sort: { date: 1 } }
+      DayRecords = []
+      for (let i = lastIdx; i < attendanceRecords.length; i++) {
+        if (
+          
+          attendanceRecords[i].date > DayTime - stepTime &&
+          attendanceRecords[i].date < DayTime
+        ) {
+          DayRecords.push(attendanceRecords[i])
+        } else {
+          lastIdx = i
+          break
+        }
+      }
+      let x = await attendanceRecordsCheck(
+        DayRecords,
+        new Date(DayTime - stepTime),
+        member
       )
-      console.log(
-        attendanceRecordsCheck(attendanceRecords, new Date(DayTime - stepTime))
-      )
+      console.log('ans', x)
+      ans.missingDays += x.missingDays
+      ans.time += x.time
 
       console.log(
-        new Date(DayTime - stepTime),
-        new Date(DayTime),
-        attendanceRecords
+        new Date(DayTime - stepTime-1000).toDateString(),
+        new Date(DayTime).toDateString(),
+       // attendanceRecords
       )
     }
+    ans.time = convertToHours_min_sec(ans.time)
+    res.json({
+      ans,
+    })
     //  console.log(currentMonth, currentYear, startDate, endDate)
   } catch (err) {
     console.log(err)

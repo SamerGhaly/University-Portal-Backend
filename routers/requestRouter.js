@@ -77,6 +77,10 @@ const {
 const {
   cancelChangeDayOffRequest,
 } = require('../controllers/requestController')
+const {
+  validateCompensationLeavesRequest,
+} = require('../validations/requestValidation')
+const { compensationLeaveRequest } = require('../controllers/requestController')
 
 const {
   validateSlotLinkingRequest,
@@ -254,5 +258,11 @@ router.post(
   validateAccidentalLeave,
   verifyToken,
   accidentalLeaveRequest
+)
+router.post(
+  '/compensationLeaveRequest',
+  validateCompensationLeavesRequest,
+  verifyToken,
+  compensationLeaveRequest
 )
 module.exports = router

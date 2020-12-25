@@ -33,6 +33,7 @@ const {
   weekDaysNumbers,
   weekDays,
 } = require('../constants/constants')
+
 const Request = require('../models/changeDayOffRequest')
 const sickRequest = require('../models/sickLeaveRequest')
 const maternityRequest = require('../models/maternityLeaveRequest')
@@ -47,7 +48,7 @@ const courseModel = require('../models/courseModel')
 const AccidentalLeaveRequest = require('../models/accidentalLeaveRequest')
 const annualLeaveRequest = require('../models/annualLeaveRequest')
 const replacementRequest = require('../models/replacementRequest')
-const {calcMemberanualLeavesLeft}=require('../helpers/calculateTime')
+const { calcMemberanualLeavesLeft } = require('../helpers/calculateTime')
 const sendSlotLinking = async (req, res) => {
   try {
     const tokenId = req.member.memberId //from token
@@ -303,6 +304,8 @@ const viewSlotLinkning = async (req, res) => {
     })
   }
 }
+
+const Compensation = require('../models/compensationLeaveRequest')
 
 const changeDayOffRequest = (req, res) => {
   if (
@@ -827,17 +830,8 @@ const cancelChangeDayOffRequest = async (req, res) => {
           findrequest.status === requestType.ACCEPT ||
           findrequest.status === requestType.REJECT
         ) {
-          Request.findByIdAndDelete(req.body.requestId, function (err) {
-            if (err) {
-              return res.status(500).json({
-                code: databaseerror,
-                message: 'database error',
-              })
-            } else {
-              return res.json({
-                message: 'Request Cancelled',
-              })
-            }
+          return res.json({
+            message: 'Not Pending Request',
           })
         }
       } else {
@@ -970,12 +964,11 @@ const accidentalLeaveRequest = async (req, res) => {
     const reason = req.body.reason
     if (reason) obj.reason = reason
     let dateArr = req.body.absentDate.split('-')
-    obj.absentDate = new Date(dateArr[0], dateArr[1], dateArr[2])
+    obj.absentDate = new Date(dateArr[0], dateArr[1]-1, dateArr[2])
     const member = await Member.findById(obj.memberId)
     let accidentalDaysTaken = member.accidentalDaysTaken
     let annualBalance = calcMemberanualLeavesLeft(member)
-    console.log(annualBalance);
-
+    console.log(annualBalance)
     if (accidentalDaysTaken < 6 && annualBalance >= 1) {
       // Member.findOneAndUpdate(obj.memberId, {
       //   accidentalDaysTaken: accidentalDaysTaken + 1,
@@ -995,7 +988,7 @@ const accidentalLeaveRequest = async (req, res) => {
         })
     }
     res.json({
-      message:"succefully make a request"
+      message: 'succefully make a request',
     })
   } catch (err) {
     console.log(err)
@@ -1150,9 +1143,9 @@ const acceptAnnualLeaveRequest = async (req, res) => {
         code: requestNotPending,
         message: 'The request is not pending',
       })
-   // console.log(requestFound.member.department)
+    // console.log(requestFound.member.department)
     const hod = await MemberModel.findById(tokenId)
-  //  console.log(hod.department)
+    //  console.log(hod.department)
     if (requestFound.member.department.toString() !== hod.department.toString())
       return res.status(403).json({
         code: differentDepartments,
@@ -1177,7 +1170,7 @@ const acceptAnnualLeaveRequest = async (req, res) => {
       )
         diffDays -= 1
     }
-  //  console.log(diffDays)
+    //  console.log(diffDays)
 
     //Get Available days for member
     const today = new Date()
@@ -1309,6 +1302,98 @@ const cancelAnnualLeaveRequest = async (req, res) => {
     })
   }
 }
+const checkday = (date1, date2) => {
+  if (date1.getDate() === date2.getDate()) {
+    if (date1.getMonth() === date2.getMonth()) {
+      if (date1.getFullYear() === date2.getFullYear()) {
+        return 1
+      }
+    }
+  }
+  return 0
+}
+const compensationLeaveRequest = async (req, res) => {
+  try {
+    const memberComp = await Member.findById(req.member.memberId)
+    let dateArr = req.body.compensationDate.split('-')
+    const compensationDateobject = new Date(dateArr[0], dateArr[1]-1, dateArr[2])
+    const absent=req.body.absentDate
+    let dateArr1 =absent.split('-')
+    const absentDate = new Date(dateArr1[0], dateArr1[1]-1, dateArr1[2])
+    const memberCompdayoff = memberComp.dayoff
+   
+
+    console.log(req.body.compensationDate)
+    console.log(memberComp.dayoff)
+    if (weekDaysNumbers[compensationDateobject.getDay()] != memberCompdayoff) {
+      return res.json({
+        message: 'Compensation day must be your DayOff',
+      })
+    }
+    if (
+      weekDaysNumbers[absentDate.getDay()] === memberComp.dayoff ||
+      weekDaysNumbers[absentDate.getDay()] === weekDays.FRIDAY
+    ) {
+      return res.json({
+        message: 'Absent day should not be FRIDAY OR YOUR DAYOFF',
+      })
+    }
+
+    
+    let currentYear = absentDate.getFullYear()
+    let currentMonth
+    let startDate
+    let endDate
+    currentMonth =
+    absentDate.getDate() >= 11
+        ? absentDate.getMonth()
+        : absentDate.getMonth() - 1
+    if (currentMonth === -1) {
+      currentMonth = 11
+      currentYear = currentYear - 1
+      startDate = new Date(currentYear, currentMonth, 11)
+      endDate = new Date(currentYear + 1, 0, 11)
+    } else {
+      startDate = new Date(currentYear, currentMonth, 11)
+      endDate = new Date(currentYear, currentMonth + 1, 11)
+    }
+    console.log("startDate",startDate.toDateString());
+    console.log("endDate",endDate.toDateString());
+    console.log("comp Date",compensationDateobject.toDateString());
+    if (
+      compensationDateobject >= startDate &&
+      compensationDateobject < endDate
+    ) {
+      // absentDate: Date,
+      // compensationDate: Date,
+      // comment: String,
+      // status: String,
+      // dateSubmitted: Date,
+      // member:
+      const newrequest = {}
+      newrequest.absentDate=absentDate
+      newrequest.compensationDate=compensationDateobject
+      newrequest.member = req.member.memberId
+      newrequest.status = requestType.PENDING
+      newrequest.dateSubmitted = new Date()
+
+      Compensation.create(newrequest)
+      return res.json({
+        message: 'Compensation Leave Sent Successfuly',
+      })
+    } else {
+      return res.json({
+        message: 'Compensation Day must be in same month ',
+      })
+    }
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
 
 module.exports = {
   changeDayOffRequest,
@@ -1334,4 +1419,5 @@ module.exports = {
   rejectAnnualLeaveRequest,
   cancelAnnualLeaveRequest,
   accidentalLeaveRequest,
+  compensationLeaveRequest,
 }

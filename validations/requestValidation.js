@@ -306,6 +306,22 @@ const validateCancelAnnualLeaveRequest = (req, res, next) => {
   }
   next()
 }
+const validateCompensationLeavesRequest = (req, rees, next) => {
+  const compensationLeavesRequestSchema = Joi.object({
+    absentDate: Joi.string().required(),
+    compensationDate: Joi.string().required(),
+    comment: Joi.string(),
+  })
+
+  const checkSchema = compensationLeavesRequestSchema.validate(req.body)
+  if (checkSchema.error) {
+    return res.json({
+      code: validationError,
+      message: checkSchema.error.details[0],
+    })
+  }
+  next()
+}
 
 module.exports = {
   validateChangeDayOffRequest,
@@ -329,4 +345,5 @@ module.exports = {
   validateSendAnnualLeaveRequest,
   validateAcceptRejectAnnualLeaveRequest,
   validateCancelAnnualLeaveRequest,
+  validateCompensationLeavesRequest,
 }

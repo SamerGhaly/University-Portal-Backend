@@ -1,4 +1,8 @@
-const { attendanceRecordTypes } = require('../constants/constants')
+const {
+  attendanceRecordTypes,
+  weekDaysNumbers,
+  requestType,
+} = require('../constants/constants')
 const { findOne } = require('../models/memberModel')
 const Member = require('../models/memberModel')
 const ChangeDayOffRequest = require('../models/changeDayOffRequest')
@@ -7,6 +11,7 @@ const maternityRequest = require('../models/maternityLeaveRequest')
 const AccidentalLeaveRequest = require('../models/accidentalLeaveRequest')
 const annualLeaveRequest = require('../models/annualLeaveRequest')
 const replacementRequest = require('../models/replacementRequest')
+const compensationLeaveRequest = require('../models/compensationLeaveRequest')
 
 const calcHours = (attendanceRecords, today) => {
   //0==> sign i
@@ -20,7 +25,7 @@ const calcHours = (attendanceRecords, today) => {
     let currTime = Math.min(element.date.getTime(), upperBound)
     //  console.log(currTime);
     currTime = Math.max(currTime, lowerBound)
-    console.log(element.type)
+    // console.log(element.type)
     if (element.type === 'signin') {
       if (lastState == 1) {
         lastState = 0
@@ -37,8 +42,8 @@ const calcHours = (attendanceRecords, today) => {
   })
   return ans
 }
-const checkDayInRange = (Request, day) => {
-  let ans = Request.findOne({
+const checkDayInRange = async (Request, day, memberId) => {
+  let ans = await Request.findOne({
     member: memberId,
     from: {
       $lte: day,
@@ -46,18 +51,20 @@ const checkDayInRange = (Request, day) => {
     to: {
       $gte: day,
     },
+    status: requestType.ACCEPT,
   })
+  console.log('annual', ans)
   return ans
 }
-const checkDay = (Request, day) => {
+const checkDay = async (Request, day, memberId) => {
   let nextDay = new Date(day + 24 * 60 * 60 * 1000)
-  let ans = Request.findOne({
+  let ans = await Request.findOne({
     member: memberId,
     absentDate: {
       $gte: day,
-      $lt,
-      nextDay,
+      $lt: nextDay,
     },
+    status: requestType.ACCEPT,
   })
   return ans
 }
@@ -68,23 +75,30 @@ const checkDay = (Request, day) => {
 // const annualLeaveRequest = require('../models/annualLeaveRequest')
 // const replacementRequest = require('../models/replacementRequest')
 const checkRequestedDay = async (day, memberId) => {
-  let hasARequest = 0
-  hasARequest |= await checkDayInRange(sickRequest, day)
-  hasARequest |= await checkDayInRange(maternityRequest, day)
-  hasARequest |= await checkDayInRange(annualLeaveRequest, day)
-  hasARequest |= await checkDay(AccidentalLeaveRequest, day)
-
+  let hasARequest = false
+  const checkSick = await checkDayInRange(sickRequest, day, memberId)
+  const checkMaternity = await checkDayInRange(maternityRequest, day, memberId)
+  const checkAnnual = await checkDayInRange(annualLeaveRequest, day, memberId)
+  const checkAccidental = await checkDay(AccidentalLeaveRequest, day, memberId)
+  if (checkSick || checkMaternity || checkAnnual || checkAccidental)
+    hasARequest = true
   return hasARequest
 }
-const attendanceRecordsCheck = (attendanceRecords, today, dayoff, memberId) => {
+const attendanceRecordsCheck = async (attendanceRecords, today, member) => {
   // check friday
   let missingDays = 0
+  const memberId = member._id
+  const dayoff = member.dayoff
   let time = calcHours(attendanceRecords, today)
+  //   console.log(time)
+  let compancated = await checkDay(compensationLeaveRequest, today, memberId)
   if (today.getDay() === 5) return { missingDays, time: 0 }
 
-  if (today.getDay() === dayoff && !compancated) return { missingDays, time }
-
-  if (checkRequestedDay(today, memberId)) return { missingDays, time: 0 }
+  if (weekDaysNumbers[today.getDay()] === dayoff && !compancated)
+    return { missingDays, time }
+  let hasVacancy = await checkRequestedDay(today, memberId)
+  console.log('hasVacancy', hasVacancy)
+  if (hasVacancy) return { missingDays, time: 0 }
   if (compancated || time !== 0) {
     time -= convertTomilli(8, 25, 0)
     return { missingDays, time }
@@ -98,8 +112,14 @@ const attendanceRecordsCheck = (attendanceRecords, today, dayoff, memberId) => {
 const convertTomilli = (hours, min, sec) => {
   return (hours * 60 * 60 + min * 60 + sec) * 1000
 }
-const convertTohours = (hours, min, sec) => {
-  return (hours * 60 * 60 + min * 60 + sec) * 1000
+const convertToHours_min_sec = (milli) => {
+  let sec = 1000
+  let min = 1000 * 60
+  let hour = 1000 * 60 * 60
+  let hours = Math.floor(milli / hour)
+  let mins = Math.floor((milli % hour) / min)
+  let secs = ((milli % hour) % min) / sec
+  return { hours, mins, secs }
 }
 const calcMemberanualLeavesLeft = (member) => {
   //Get Available days for member
@@ -118,7 +138,7 @@ const calcMemberanualLeavesLeft = (member) => {
 }
 module.exports = {
   calcMemberanualLeavesLeft,
-  convertTohours,
   attendanceRecordsCheck,
   convertTomilli,
+  convertToHours_min_sec,
 }
