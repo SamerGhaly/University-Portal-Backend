@@ -24,9 +24,9 @@ password: "admin"
 Functionality: login to the system
 Route: /member/login
 Request type: POST
-Request Body: {
-    "email":"john@guc.com",
-    "password":"1234"
+Request Body: {  
+    "email":"john@guc.com",  
+    "password":"1234"  
 }
 
 
@@ -39,13 +39,13 @@ Request Body: {
 #### Update My Profile
 
 ##### Request
-Functionality: update my profile
-Route: /member/updateMyProfile
-Request type: PUT
-Request Body: {
-    "email":"samer@guc.com", (optional)
-    "birthdate":"1998-9-9" (optional)
-}
+Functionality: update my profile  
+Route: /member/updateMyProfile  
+Request type: PUT  
+Request Body: {  
+    "email":"samer@guc.com", (optional)  
+    "birthdate":"1998-9-9" (optional)  
+}  
 
 ##### Response
 {
