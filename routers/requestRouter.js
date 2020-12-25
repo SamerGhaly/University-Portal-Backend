@@ -9,15 +9,19 @@ const {
 } = require('../authorizations/memberAuthorization')
 
 const {
-  validateAccidentalLeave,
+  validateAcceptAccidentalLeave,
   validateChangeDayOffRequest,
   validateViewSlotLinkingRequest,
   validateSendAnnualLeaveRequest,
   validateAcceptRejectAnnualLeaveRequest,
   validateCancelAnnualLeaveRequest,
   validateAcceptCompensationLeavesRequest,
+  validateViewRequest,
 } = require('../validations/requestValidation')
 const {
+  accidentalCancelRequest,
+  accidentalRejectRequest,
+  accidentalAcceptRequest,
   sendAnnualLeave,
   acceptAnnualLeaveRequest,
   rejectAnnualLeaveRequest,
@@ -25,6 +29,12 @@ const {
   accidentalLeaveRequest,
   changeDayOffRequest,
   acceptCompensationLeaveRequest,
+  viewAnnualRequests,
+  viewAccidentalRequests,
+  viewChangeDayOffRequests,
+  viewSickRequests,
+  viewMaternityRequests,
+  viewCompensationRequests,
 } = require('../controllers/requestController')
 const {
   validateAcceptDayOffRequest,
@@ -44,6 +54,7 @@ const {
 const { maternityLeaveRequest } = require('../controllers/requestController')
 
 const {
+  validateAccidentalLeave,
   validateAcceptSickLeavesRequest,
 } = require('../validations/requestValidation')
 const { acceptSickLeaveRequest } = require('../controllers/requestController')
@@ -105,7 +116,7 @@ router.post(
   '/sendReplacementRequest',
   validateReplcamentRequest,
   verifyToken,
-  verifyAcademic,
+  verifyInstructorTA,
   sendReplacementRequest
 )
 
@@ -235,11 +246,28 @@ router.post(
   verifyAcademic,
   cancelChangeDayOffRequest
 )
+
 router.post(
-  '/accidentalLeaveRequest',
-  validateAccidentalLeave,
+  '/accidentalAcceptRequest',
+  validateAcceptAccidentalLeave,
   verifyToken,
-  accidentalLeaveRequest
+  verifyHOD,
+  accidentalAcceptRequest
+)
+accidentalRejectRequest
+router.post(
+  '/accidentalRejectRequest',
+  validateAcceptAccidentalLeave,
+  verifyToken,
+  verifyHOD,
+  accidentalRejectRequest
+)
+router.post(
+  '/accidentalCancelRequest',
+  validateAcceptAccidentalLeave,
+  verifyToken,
+  verifyAcademic,
+  accidentalCancelRequest
 )
 
 router.post(
@@ -250,6 +278,14 @@ router.post(
   sendAnnualLeave
 )
 
+// router.post(
+//   '/acceptcompensationLeaveRequest',
+//   validat,
+//   verifyToken,
+//   verifyHOD,
+//   acceptAnnualLeaveRequest
+// )
+
 router.post(
   '/acceptAnnualLeaveRequest',
   validateAcceptRejectAnnualLeaveRequest,
@@ -257,7 +293,6 @@ router.post(
   verifyHOD,
   acceptAnnualLeaveRequest
 )
-
 router.post(
   '/rejectAnnualLeaveRequest',
   validateAcceptRejectAnnualLeaveRequest,
@@ -278,12 +313,14 @@ router.post(
   '/accidentalLeaveRequest',
   validateAccidentalLeave,
   verifyToken,
+  verifyAcademic,
   accidentalLeaveRequest
 )
 router.post(
   '/compensationLeaveRequest',
   validateCompensationLeavesRequest,
   verifyToken,
+  verifyAcademic,
   compensationLeaveRequest
 )
 
@@ -302,4 +339,100 @@ router.post(
   verifyHOD,
   rejectCompensationLeaveRequest
 )
+
+router.post(
+  '/viewChangeDayOffRequestsInDep',
+  validateViewRequest,
+  verifyToken,
+  verifyHOD,
+  viewChangeDayOffRequests
+)
+
+router.post(
+  '/viewAnnualRequestsInDep',
+  validateViewRequest,
+  verifyToken,
+  verifyHOD,
+  viewAnnualRequests
+)
+
+router.post(
+  '/viewAccidentalRequestsInDep',
+  validateViewRequest,
+  verifyToken,
+  verifyHOD,
+  viewAccidentalRequests
+)
+
+router.post(
+  '/viewSickRequestsInDep',
+  validateViewRequest,
+  verifyToken,
+  verifyHOD,
+  viewSickRequests
+)
+
+router.post(
+  '/viewMaternityRequestsInDep',
+  validateViewRequest,
+  verifyToken,
+  verifyHOD,
+  viewMaternityRequests
+)
+
+router.post(
+  '/viewCompensationRequestsInDep',
+  validateViewRequest,
+  verifyToken,
+  verifyHOD,
+  viewCompensationRequests
+)
+
+router.post(
+  '/viewChangeDayOffRequestsInDep',
+  validateViewRequest,
+  verifyToken,
+  verifyHOD,
+  viewChangeDayOffRequests
+)
+
+router.post(
+  '/viewMyAnnualRequests',
+  verifyToken,
+  verifyAcademic,
+  viewAnnualRequests
+)
+
+router.post(
+  '/viewMyAccidentalRequests',
+  validateViewRequest,
+  verifyToken,
+  verifyHOD,
+  viewAccidentalRequests
+)
+
+router.post(
+  '/viewMySickRequests',
+  validateViewRequest,
+  verifyToken,
+  verifyHOD,
+  viewSickRequests
+)
+
+router.post(
+  '/viewMyMaternityRequests',
+  validateViewRequest,
+  verifyToken,
+  verifyHOD,
+  viewMaternityRequests
+)
+
+router.post(
+  '/viewMyCompensationRequests',
+  validateViewRequest,
+  verifyToken,
+  verifyHOD,
+  viewCompensationRequests
+)
+
 module.exports = router

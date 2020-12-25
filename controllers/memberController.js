@@ -9,7 +9,6 @@ const RoomModel = require('../models/roomModel')
 const DepartmentModel = require('../models/departmentModel')
 const CourseModel = require('../models/courseModel')
 const courseAssignmentModel = require('../models/courseAssignment')
-const { attendanceRecordsCheck } = require('../helpers/calculateTime')
 const {
   attendanceRecordsCheck,
   convertToHours_min_sec,

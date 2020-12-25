@@ -305,6 +305,7 @@ const viewSlotLinkning = async (req, res) => {
   }
 }
 const Compensation = require('../models/compensationLeaveRequest')
+const { findById } = require('../models/courseModel')
 
 const changeDayOffRequest = (req, res) => {
   if (
@@ -1060,22 +1061,18 @@ const sendReplacementRequest = async (req, res) => {
 const accidentalLeaveRequest = async (req, res) => {
   try {
     const obj = {}
-    obj.memberId = req.member.memberId
+    obj.member = req.member.memberId
     obj.status = requestType.PENDING
     obj.dateSubmitted = new Date()
     const reason = req.body.reason
     if (reason) obj.reason = reason
     let dateArr = req.body.absentDate.split('-')
     obj.absentDate = new Date(dateArr[0], dateArr[1] - 1, dateArr[2])
-    const member = await Member.findById(obj.memberId)
+    const member = await Member.findById(obj.member)
     let accidentalDaysTaken = member.accidentalDaysTaken
     let annualBalance = calcMemberanualLeavesLeft(member)
     console.log(annualBalance)
     if (accidentalDaysTaken < 6 && annualBalance >= 1) {
-      // Member.findOneAndUpdate(obj.memberId, {
-      //   accidentalDaysTaken: accidentalDaysTaken + 1,
-      //   annualBalanceTaken: annualBalanceTaken + 1,
-      // })
       AccidentalLeaveRequest.create(obj)
     } else {
       if (accidentalDaysTaken > 5)
@@ -1091,6 +1088,171 @@ const accidentalLeaveRequest = async (req, res) => {
     }
     res.json({
       message: 'succefully make a request',
+    })
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+const accidentalCancelRequest = async (req, res) => {
+  try {
+    const memberId = req.member.memberId
+    const requestId = req.body.requestId
+    const request = await AccidentalLeaveRequest.findById(requestId)
+    if (!request)
+      return res.status(404).json({
+        message: 'Request doesnot exist',
+        code: requestDoesNotExist,
+      })
+    console.log(request.member)
+    if (request.member.toString() !== memberId)
+      return res.status(403).json({
+        code: notYourRequest,
+        message: 'You are not allowed to cancel others requests',
+      })
+    if (request.status === requestType.CANCELLED)
+      return res.status(404).json({
+        message: 'this request is alrweady cancelled',
+        code: requestNotPending,
+      })
+    // mongoose.set('useFindAndModify', false)
+    if (request.status === requestType.ACCEPT) {
+      const member = await Member.findById(memberId)
+      const mem = await Member.findByIdAndUpdate(
+        memberId,
+        {
+          //  $inc: { accidentalDaysTaken: 1 } /*,'annualBalanceTaken':-1}*/,
+          accidentalDaysTaken: member.accidentalDaysTaken - 1,
+          annualBalanceTaken: member.annualBalanceTaken - 1,
+        },
+        { new: true }
+      )
+    }
+
+    await AccidentalLeaveRequest.findByIdAndUpdate(requestId, {
+      status: requestType.CANCELLED,
+    })
+
+    res.json({
+      message: 'succefully Cancel the request',
+    })
+  } catch (err) {
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+const accidentalRejectRequest = async (req, res) => {
+  try {
+    const requestId = req.body.requestId
+    const request = await AccidentalLeaveRequest.findById(requestId).populate(
+      'member'
+    )
+    const memberId = req.member.memberId
+    // const isOuthoraized=await
+    if (!request) {
+      return res.status(404).json({
+        code: requestDoesNotExist,
+        message: 'Accidental Leave Request Does Not Exist',
+      })
+    }
+
+    const hod = await MemberModel.findById(memberId)
+    //  console.log(hod.department)
+    if (request.member.department.toString() !== hod.department.toString())
+      return res.status(403).json({
+        code: differentDepartments,
+        message: 'Member belongs to different department',
+      })
+
+    if (request.status !== requestType.PENDING)
+      return res.status(404).json({
+        message: 'this request is not pending anymore',
+        code: requestNotPending,
+      })
+
+    await AccidentalLeaveRequest.findByIdAndUpdate(requestId, {
+      status: requestType.REJECT,
+    })
+
+    res.json({
+      message: 'succefully reject the request',
+    })
+  } catch (err) {
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+const accidentalAcceptRequest = async (req, res) => {
+  try {
+    const requestId = req.body.requestId
+    const request = await AccidentalLeaveRequest.findById(requestId).populate(
+      'member'
+    )
+    const memberId = req.member.memberId
+    // const isOuthoraized=await
+    if (!request) {
+      return res.status(404).json({
+        code: requestDoesNotExist,
+        message: 'Accidental Leave Request Does Not Exist',
+      })
+    }
+
+    const hod = await MemberModel.findById(memberId)
+    console.log(hod.department)
+    console.log(request.member.department)
+    if (request.member.department.toString() !== hod.department.toString())
+      return res.status(403).json({
+        code: differentDepartments,
+        message: 'Member belongs to different department',
+      })
+    if (request.status !== requestType.PENDING)
+      return res.status(404).json({
+        message: 'this request is not pending anymore',
+        code: requestNotPending,
+      })
+
+    const member = await Member.findById(request.member)
+    let accidentalDaysTaken = member.accidentalDaysTaken
+    let annualBalance = calcMemberanualLeavesLeft(member)
+    console.log(annualBalance, 'annualBalance')
+    console.log(member.annualBalanceTaken, 'annualBalanceTaken')
+
+    if (accidentalDaysTaken < 6 && annualBalance >= 1) {
+      await Member.findByIdAndUpdate(memberId, {
+        //    $set: {
+        accidentalDaysTaken: accidentalDaysTaken + 1,
+        annualBalanceTaken: member.annualBalanceTaken + 1,
+        //    },
+      })
+    } else {
+      if (accidentalDaysTaken > 5)
+        return res.status(404).json({
+          message: 'you used the whole 6 accidental Days leaves',
+          code: zeroAccidentalLeaves,
+        })
+      else
+        return res.status(404).json({
+          message: 'you have not enough AnnualLeaves ',
+          annualBalance: annualBalance,
+          code: zeroAnnualLeaves,
+        })
+    }
+
+    await AccidentalLeaveRequest.findByIdAndUpdate(requestId, {
+      status: requestType.ACCEPT,
+    })
+
+    res.json({
+      message: 'succefully Accept the request',
+      accidentalLeavesYouUsed: accidentalDaysTaken + 1,
+      annualBalance: annualBalance - 1,
     })
   } catch (err) {
     console.log(err)
@@ -1378,10 +1540,10 @@ const cancelAnnualLeaveRequest = async (req, res) => {
         code: notYourRequest,
         message: 'You are not allowed to cancel others requests',
       })
-    if (requestFound.status !== requestType.PENDING)
+    if (requestFound.status === requestType.CANCELLED)
       return res.status(400).json({
-        code: requestNotPending,
-        message: 'Request is not pending',
+        code: cannotCancel,
+        message: 'already cancelled',
       })
     if (requestFound.from < new Date())
       return res.status(400).json({
@@ -1428,8 +1590,6 @@ const compensationLeaveRequest = async (req, res) => {
     const absentDate = new Date(dateArr1[0], dateArr1[1] - 1, dateArr1[2])
     const memberCompdayoff = memberComp.dayoff
 
-    console.log(req.body.compensationDate)
-    console.log(memberComp.dayoff)
     if (weekDaysNumbers[compensationDateobject.getDay()] != memberCompdayoff) {
       return res.json({
         message: 'Compensation day must be your DayOff',
@@ -1461,7 +1621,6 @@ const compensationLeaveRequest = async (req, res) => {
       startDate = new Date(currentYear, currentMonth, 11)
       endDate = new Date(currentYear, currentMonth + 1, 11)
     }
-
     if (
       compensationDateobject >= startDate &&
       compensationDateobject < endDate
@@ -1600,6 +1759,222 @@ const rejectCompensationLeaveRequest = async (req, res) => {
   }
 }
 
+const viewAnnualRequests = async (req, res) => {
+  try {
+    const tokenId = req.member.memberId
+    const checkDep = await MemberModel.findById(tokenId)
+    const filterObj = {}
+    if (req.body.status) filterObj['status'] = req.body.status
+    if (checkDep.type === memberRoles.HOD) {
+      const records = await annualLeaveRequest.find(filterObj).populate({
+        path: 'member',
+        match: {
+          department: checkDep.department,
+        },
+      })
+      let out = []
+      for (let i = 0; i < records.length; i++) {
+        if (records[i].member !== null) out.push(records[i])
+      }
+      return res.json({
+        data: out,
+      })
+    } else {
+      filterObj.member = tokenId
+      const records = await annualLeaveRequest.find(filterObj)
+      return res.json({
+        data: records,
+      })
+    }
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
+const viewAccidentalRequests = async (req, res) => {
+  try {
+    const tokenId = req.member.memberId
+    const checkDep = await MemberModel.findById(tokenId)
+    const filterObj = {}
+    if (req.body.status) filterObj['status'] = req.body.status
+    if (checkDep.type === memberRoles.HOD) {
+      const records = await annualLeaveRequest.find(filterObj).populate({
+        path: 'member',
+        match: {
+          department: checkDep.department,
+        },
+      })
+      let out = []
+      for (let i = 0; i < records.length; i++) {
+        if (records[i].member !== null) out.push(records[i])
+      }
+      return res.json({
+        data: out,
+      })
+    } else {
+      filterObj.member = tokenId
+      const records = await annualLeaveRequest.find(filterObj)
+      return res.json({
+        data: records,
+      })
+    }
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
+const viewCompensationRequests = async (req, res) => {
+  try {
+    const tokenId = req.member.memberId
+    const checkDep = await MemberModel.findById(tokenId)
+    const filterObj = {}
+    if (req.body.status) filterObj['status'] = req.body.status
+    if (checkDep.type === memberRoles.HOD) {
+      const records = await annualLeaveRequest.find(filterObj).populate({
+        path: 'member',
+        match: {
+          department: checkDep.department,
+        },
+      })
+      let out = []
+      for (let i = 0; i < records.length; i++) {
+        if (records[i].member !== null) out.push(records[i])
+      }
+      return res.json({
+        data: out,
+      })
+    } else {
+      filterObj.member = tokenId
+      const records = await annualLeaveRequest.find(filterObj)
+      return res.json({
+        data: records,
+      })
+    }
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
+const viewChangeDayOffRequests = async (req, res) => {
+  try {
+    const tokenId = req.member.memberId
+    const checkDep = await MemberModel.findById(tokenId)
+    const filterObj = {}
+    if (req.body.status) filterObj['status'] = req.body.status
+    if (checkDep.type === memberRoles.HOD) {
+      const records = await annualLeaveRequest.find(filterObj).populate({
+        path: 'member',
+        match: {
+          department: checkDep.department,
+        },
+      })
+      let out = []
+      for (let i = 0; i < records.length; i++) {
+        if (records[i].member !== null) out.push(records[i])
+      }
+      return res.json({
+        data: out,
+      })
+    } else {
+      filterObj.member = tokenId
+      const records = await annualLeaveRequest.find(filterObj)
+      return res.json({
+        data: records,
+      })
+    }
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
+const viewSickRequests = async (req, res) => {
+  try {
+    const tokenId = req.member.memberId
+    const checkDep = await MemberModel.findById(tokenId)
+    const filterObj = {}
+    if (req.body.status) filterObj['status'] = req.body.status
+    if (checkDep.type === memberRoles.HOD) {
+      const records = await annualLeaveRequest.find(filterObj).populate({
+        path: 'member',
+        match: {
+          department: checkDep.department,
+        },
+      })
+      let out = []
+      for (let i = 0; i < records.length; i++) {
+        if (records[i].member !== null) out.push(records[i])
+      }
+      return res.json({
+        data: out,
+      })
+    } else {
+      filterObj.member = tokenId
+      const records = await annualLeaveRequest.find(filterObj)
+      return res.json({
+        data: records,
+      })
+    }
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
+const viewMaternityRequests = async (req, res) => {
+  try {
+    const tokenId = req.member.memberId
+    const checkDep = await MemberModel.findById(tokenId)
+    const filterObj = {}
+    if (req.body.status) filterObj['status'] = req.body.status
+    if (checkDep.type === memberRoles.HOD) {
+      const records = await annualLeaveRequest.find(filterObj).populate({
+        path: 'member',
+        match: {
+          department: checkDep.department,
+        },
+      })
+      let out = []
+      for (let i = 0; i < records.length; i++) {
+        if (records[i].member !== null) out.push(records[i])
+      }
+      return res.json({
+        data: out,
+      })
+    } else {
+      filterObj.member = tokenId
+      const records = await annualLeaveRequest.find(filterObj)
+      return res.json({
+        data: records,
+      })
+    }
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
 module.exports = {
   changeDayOffRequest,
   acceptDayOffRequest,
@@ -1627,4 +2002,13 @@ module.exports = {
   compensationLeaveRequest,
   acceptCompensationLeaveRequest,
   rejectCompensationLeaveRequest,
+  accidentalAcceptRequest,
+  accidentalRejectRequest,
+  accidentalCancelRequest,
+  viewAnnualRequests,
+  viewAccidentalRequests,
+  viewChangeDayOffRequests,
+  viewSickRequests,
+  viewMaternityRequests,
+  viewCompensationRequests,
 }

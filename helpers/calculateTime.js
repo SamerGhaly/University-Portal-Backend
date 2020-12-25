@@ -131,11 +131,12 @@ const calcMemberanualLeavesLeft = (member) => {
   const diffInMonths = today.getMonth() - memberStartDate.getMonth()
   const diffInYears = today.getFullYear() - memberStartDate.getFullYear()
   let availableDays = (diffInMonths + 12 * diffInYears) * 2.5
-  if (today.getDate() <= memberStartDate.getDate()) availableDays += 2.5
+  if (today.getDate() >= memberStartDate.getDate()) availableDays += 2.5
 
   availableDays -= member.annualBalanceTaken
   return availableDays
 }
+
 module.exports = {
   calcMemberanualLeavesLeft,
   attendanceRecordsCheck,
