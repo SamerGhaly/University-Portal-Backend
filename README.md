@@ -12,13 +12,19 @@ email: "admin@guc.com"
 password: "admin"
 
 2. We created customized error codes for us to use in the frontend and they do not represnt HTTP status codes. 
-3. For any request, in case of failure, there will be an error code and a descriptive message in the response body
+3. For any request, in case of failure, there will be an error code and a descriptive message in the response body  
+4. We are using environment variables, so please make sure to add a .env file with these variables and corresponding values  
+MONGODB_URI  
+SIGNING_KEY  
 
-## Routes
+5. Kindly find below the link to the UML :
+https://drive.google.com/file/d/1m0H27HB1s1gr2yOPDQOu7QU2izioXRZg/view
 
-### 2 GUC Staff Members Functionalities
+## Routes  
 
-#### Log in with a unique email and a password
+### 2 GUC Staff Members Functionalities  
+
+#### Log in with a unique email and a password  
 
 ##### Request
 Functionality: login to the system  
@@ -214,9 +220,84 @@ Request Body:
 }  
 
 
+#### View Missing Days
+
+##### Request  
+Functionality: view missing days  
+Route: /member/viewMissingDays  
+Request type: GET  
+
+##### Response  
+{
+    "MissingDays": 10
+} 
+
+
+#### View Missing or Extra Hours 
+
+##### Request  
+Functionality: view missing or extra hours 
+Route: /member/viewMissingExtraHours  
+Request type: GET   
+
+##### Response  
+{
+    "result": {  
+        "MissingHours_minutes": {  
+            "hours": 2,  
+            "mins": 32,  
+            "secs": 0  
+        }  
+    }  
+}  
+
+
+#### View Updated Salary of a certain member (in case of HR or of myself in case no memberId provided in the request body)  
+
+##### Request  
+Functionality: get updated salary  
+Route: /member/getUpdatedSalary  
+Request type: POST     
+Request Body: 
+{  
+    "memberId":"5fe58ff75bcf4b2480d87e14"  (optional)  
+}  
+
+##### Response  
+{  
+    "Salary": 5000,  
+    "salaryDeducted": 0,  
+    "result": 5000  
+}  
+  
+
 
 
 ### 3 HR Functionalities
+
+#### View Missing Hours or days of a staff Member  
+
+##### Request  
+Functionality:#### View Missing Hours or days of a staff Member    
+Route: /member/viewMissingDaysHoursHR      
+Request type: POST     
+{  
+    "memberId":"5fe58ff75bcf4b2480d87e14"  
+}  
+
+##### Response  
+{
+    "result": {
+        "MissingHours_minutes": {
+            "hours": 0,
+            "mins": 0,
+            "secs": 0
+        },
+        "MissingDays": 10
+    }
+}
+
+
 
 #### Add location
 
