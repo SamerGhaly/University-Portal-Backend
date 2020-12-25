@@ -1049,6 +1049,82 @@ Request Body:
     "message": "succefully reject the request"  
 }  
 
+
+
+#### View All Requests In Department
+
+#### Routes to test: (ALL Routes are POST)
+Route: /request/viewChangeDayOffRequestsInDep   
+
+
+
+##### Example Request  
+Functionality: view all requests 
+Route: /request/viewChangeDayOffRequestsInDep  
+Request type: POST   
+
+Route: /request/viewChangeDayOffRequestsInDep  
+Request type: POST   
+
+
+Route: /request/viewAnnualRequestsInDep  
+Request type: POST   
+
+
+Route: /request/viewAccidentalRequestsInDep  
+Request type: POST   
+
+
+Route: /request/viewSickRequestsInDep  
+Request type: POST   
+
+Route: /request/viewMaternityRequestsInDep  
+Request type: POST   
+
+
+
+Request Body: 
+
+{  
+    "status":"accept"  
+}  
+
+##### Example Response    
+{
+    "data": [  
+        {  
+            "_id": "5fe64cad8ca860c2ec8e936a",  
+            "from": "2020-12-26T00:00:00.000Z",  
+            "to": "2020-12-28T00:00:00.000Z",  
+            "status": "accept",  
+            "dateSubmitted": "2020-12-25T18:07:11.685Z",  
+            "member": {  
+                "_id": "5fe585d21612f542b0c115b1",  
+                "name": "john",  
+                "email": "hod2@guc.com",  
+                "salary": 5000,  
+                "office": "5fe5262a4a96390450b26520",  
+                "department": "5fe521c2118e283b186235c6",  
+                "dayoff": "monday",  
+                "type": "head of department",  
+                "birthdate": "1999-05-08T21:00:00.000Z",  
+                "gender": "male",  
+                "password": "$2a$10$HoiS6yWHVEhcW/Bup1kqK.LQxFnJ8R8O8/wPeOPbFwrjEqHp6nKfu",  
+                "activated": true,  
+                "customId": "ac-5",  
+                "dateCreated": "2020-12-25T08:25:22.242Z",  
+                "annualBalanceTaken": 0,  
+                "accidentalDaysTaken": 0,  
+                "__v": 0,  
+                "id": "5fe585d21612f542b0c115b1"  
+            },  
+            "__v": 0  
+        }  
+    ]  
+}  
+
+
+
 ### 4.2 Instructor Functionalities
 
 #### Assign Academic Member To Course
@@ -1798,3 +1874,72 @@ Request Body:
 }     
 
  
+
+#### View All My Requests
+
+#### Routes to test: (ALL Routes are POST)
+Route: /request/viewMyAnnualRequests   
+
+
+
+##### Example Request  
+Functionality: view all requests 
+
+Route: /request/viewMyAnnualRequests  
+Request type: POST   
+
+Route: /request/viewMyAccidentalRequests  
+Request type: POST   
+
+
+Route: /request/viewMySickRequests  
+Request type: POST   
+
+
+Route: /request/viewMyMaternityRequests  
+Request type: POST   
+
+
+Route: /request/viewMyCompensationRequests    
+Request type: POST   
+
+Request Body: 
+
+{  
+    "status":"accept"  
+}  
+
+##### Example Response    
+{
+    "data": [  
+        {  
+            "_id": "5fe64cad8ca860c2ec8e936a",  
+            "from": "2020-12-26T00:00:00.000Z",  
+            "to": "2020-12-28T00:00:00.000Z",  
+            "status": "accept",  
+            "dateSubmitted": "2020-12-25T18:07:11.685Z",  
+            "member": {  
+                "_id": "5fe585d21612f542b0c115b1",  
+                "name": "john",  
+                "email": "hod2@guc.com",  
+                "salary": 5000,  
+                "office": "5fe5262a4a96390450b26520",  
+                "department": "5fe521c2118e283b186235c6",  
+                "dayoff": "monday",  
+                "type": "head of department",  
+                "birthdate": "1999-05-08T21:00:00.000Z",  
+                "gender": "male",  
+                "password": "$2a$10$HoiS6yWHVEhcW/Bup1kqK.LQxFnJ8R8O8/wPeOPbFwrjEqHp6nKfu",  
+                "activated": true,  
+                "customId": "ac-5",  
+                "dateCreated": "2020-12-25T08:25:22.242Z",  
+                "annualBalanceTaken": 0,  
+                "accidentalDaysTaken": 0,  
+                "__v": 0,  
+                "id": "5fe585d21612f542b0c115b1"  
+            },  
+            "__v": 0  
+        }  
+    ]  
+}  
+
