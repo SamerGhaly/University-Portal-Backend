@@ -762,6 +762,19 @@ Request body:
 }  
 
 
+#### View Coverage of courses In Department  
+
+##### Request  
+Functionality: view coverage of courses in his/her department    
+Route: /course/viewCourseCoverageHOD  
+Request type: GET      
+
+##### Response    
+{  
+    "_id": "5fe58ff75bcf4b2480d87e14",  
+    "name": "john",  
+    "dayoff": "monday"  
+}  
 
 
 
@@ -769,6 +782,226 @@ Request body:
 
 
 
+### 4.2 Instructor Functionalities
+
+#### Assign Academic Member To Course
+
+##### Request  
+Functionality: add teaching assistants to courses (not to slots)
+Route: /member/assignTaToCourse  
+Request type: POST  
+Request Body:
+{
+    "member":"5fe590435bcf4b2480d87e15",
+    "course":"5fe520f663ac6d27acba1f3c"
+}
+
+##### Response    
+{
+    "message": "Course Assignment created successfully"
+}
+
+
+#### Update TA Assignment To Course
+
+##### Request  
+Functionality: update teaching assistants to courses (not to slots)
+Route: /member/updateTaAssignment   
+Request type: PUT  
+Request Body:
+{  
+    "assignmentId": "5fe59a35d845793440cc82a8",  (From CourseAssignment Model)  
+    "newMemberId":"5fe58ff75bcf4b2480d87e14"  
+}  
+
+##### Response    
+{  
+    "message": "Course Assignment Updated Successfully"  
+}  
+
+
+#### Remove TA Assignment From Course
+
+##### Request  
+Functionality: remove teaching assistants from courses (not to slots)
+Route: /member/removeTaAssignment    
+Request type: DELETE    
+Request Body:
+{
+    "assignmentId": "5fe59a35d845793440cc82a8"
+}
+
+##### Response    
+{
+    "message": "Assignment Removed Successfully"
+}
+
+#### Assign Coordinator To Course  
+
+##### Request  
+Functionality: asign coordinator to course  
+Route: /member/assignCoordinatorToCourse  
+Request type: POST    
+Request Body:
+{  
+    "member":"5fe590435bcf4b2480d87e15",  
+    "course":"5fe520f663ac6d27acba1f3c"  
+}  
+
+##### Response    
+{  
+    "message": "Course Assignment created successfully"  
+}  
+
+
+
+
+### 4.3 Coordinator Functionalities
+
+#### Add Course Slots  
+
+##### Request  
+Functionality: add course slots    
+Route: /slotAssignment/addSlot  
+Request type: POST  
+Request Body:
+{
+    "room":"5fe526244a96390450b2651f",
+    "slot":"1",
+    "course":"5fe520f663ac6d27acba1f3c",
+    "day":"saturday",
+    "type":"lab"
+}
+
+##### Response    
+{  
+    "message": "Slot Added Successfully to Course"  
+}  
+  
+  
+  
+#### Update Course Slots  
+
+##### Request  
+Functionality: update course slots    
+Route: /slotAssignment/updateSlot    
+Request type: PUT  
+Request Body:
+{
+    "assignmentId":"5fe5a346bd77723f8003fb8c",  (slot assignment id in slotAssignment Model)  
+    "room":"5fe526244a96390450b2651f",  
+    "slot":"3",  
+    "course":"5fe520f663ac6d27acba1f3c",  
+    "day":"saturday",  
+    "type":"lab"  
+}  
+
+##### Response    
+{  
+    "message": "Slot Updated Successfully"  
+}  
+
+
+#### Delete Course Slots  
+
+##### Request  
+Functionality: delete course slots    
+Route: /slotAssignment/deleteSlot   
+Request type: DELETE    
+Request Body:  
+{  
+    "assignmentId":"5fe5a346bd77723f8003fb8c"  (slot assignment id from slotAssignment model)
+}  
+
+##### Response    
+{  
+    "message": "Assignment Deleted successfully"  
+}  
+
+#### AssignMember to Slots  
+
+##### Request  
+Functionality: assign member to created slots    
+Route: /slotAssignment/assignSlotToMember   
+Request type: POST      
+Request Body:  
+{  
+    "assignmentId":"5fe5a63a5374372c6c4f2465",  (slot assignment id from slotAssignment model)  
+    "memberId":"5fe582d3b0c0e32214dd0c0b"  
+}  
+
+##### Response    
+{  
+    "message": "Member Assigned Successfully"  
+}   
+  
+
+
+#### Update Members Assignments to Slots  
+
+##### Request  
+Functionality: update member to slots      
+Route: /slotAssignment/updateSlotMemberAssign     
+Request type: PUT      
+Request Body:  
+{  
+    "assignmentId":"5fe5a6495374372c6c4f2466",  
+    "newMemberId":"5fe582d3b0c0e32214dd0c0b"  
+}  
+
+##### Response    
+{  
+    "message": "Slot Assignment Updated Successfully"  
+}   
+ 
+ #### Delete Members Assignments from Slots  
+
+##### Request  
+Functionality: delete member from slots      
+Route: /slotAssignment/deleteSlotMemberAssign      
+Request type: DELETE        
+Request Body:  
+{
+    "assignmentId":"5fe5a6495374372c6c4f2466"
+} 
+
+##### Response    
+{
+    "message": "Member removed from slot"
+}
+
+ #### ChangeDayOff Request   
+
+##### Request  
+Functionality: Change Day Off Request
+Route: /request/changeDayOff  
+Request type: POST          
+Request Body:  
+{  
+    "newDayOff":"wednesday",  
+    "reason":"reason"  (Optional)  
+}  
+
+##### Response    
+{  
+    "message": "Change DayOff Request sent successfully"  
+}  
+
+ #### Accept ChangeDayOff Request   
+
+##### Request  
+Functionality: Accept Change Day Off Request
+Route: /request/acceptDayOff  
+Request type: POST          
+Request Body:  
+{  
+    "requestId":"5fe5bbfe6076e031402cf891"  
+}    
+
+##### Response    
+{  
+    "message": "Request accepted anad DayOff updated successfully"  
+}  
 
 
 
