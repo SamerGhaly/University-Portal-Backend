@@ -229,7 +229,8 @@ Request Body: {
     "type":"office"  
 }  
   
-Response: {  
+##### Response  
+ {  
     "message": "Room added"  
 }  
 
@@ -244,7 +245,7 @@ Request Body: {
     "type":"office" (optional)  
 }  
   
-Response:  
+##### Response  
 {  
     "message": "Room updated"  
 }  
@@ -271,7 +272,8 @@ Request Body: {
     "name":"fac 5"  
 }  
 
-Response: {  
+##### Response  
+{  
     "message": "faculty added successfully"  
 }  
 
@@ -284,7 +286,7 @@ Request Body: {
     "name":"fac 5"  
 }  
 
-Response:
+##### Response  
 {  
     "message": "faculty updated successfully"  
 }  
@@ -297,7 +299,7 @@ Request Body:{
     "id":"5fe512b25883fe25184a1e52"  
 }  
 
-Response:
+##### Response  
  {  
     "message": "faculty deleted successfully"  
 }  
@@ -313,7 +315,8 @@ Request Body: {
     "faculty":"5fe511b3b50be6254400e78d"  
 }  
 
-Response: {  
+##### Response  
+ {  
     "message": "Department added successfully"  
 }  
 
@@ -327,7 +330,7 @@ Request Body: {
     "faculty":"5fe511b3b50be6254400e78d" (optional)  
 }  
 
-Response:
+##### Response  
 {  
     "message": "Department updated"  
 }  
@@ -340,7 +343,7 @@ Request Body:{
     "id":"5fe512b25883fe25184a1e52"  
 }  
 
-Response:
+##### Response  
  {  
     "message": "Department deleted successfully"  
 }  
@@ -357,7 +360,8 @@ Request Body: {
     "departmentId":"5fe520c563ac6d27acba1f3b"  
 }  
 
-Response: {  
+##### Response  
+ {  
     "message": "Course added"  
 }  
 
@@ -373,7 +377,7 @@ Request Body: {
     "departmentIdAdded":"5fe521c2118e283b186235c6" (optional)  
 }  
 
-Response:
+##### Response  
 {  
     "message": "Course updated"  
 }  
@@ -386,7 +390,7 @@ Request Body:{
     "courseId":"5fe5244c7f51e606f4923d63"  
 }  
 
-Response:
+##### Response  
 {  
     "message": "Course deleted"  
 }  
@@ -409,7 +413,8 @@ Request Body: {
     "gender":"male"  
 }  
 
-Response: {  
+##### Response  
+ {  
     "message": "Member Added",  
     "data": {  
         "_id": "5fe52bee97f660228041b3d1",  
@@ -448,7 +453,7 @@ Request Body: {
     "birthdate":"1998-9-9"  (optional)  
 } 
 
-Response:
+##### Response  
 {  
     "message": "Member Updated Successfully"  
 }  
@@ -462,7 +467,7 @@ Request Body:
     "memberId":"5fe527204a96390450b26525"  
 }  
 
-Response:
+##### Response  
 {  
     "message": "Member Deleted Successfully"  
 }  
@@ -479,7 +484,7 @@ Request Body:  {
     "year":"2020"  (optional)
 }   
 
-Response:
+##### Response  
 {  
     "data": [  
         {  
@@ -509,7 +514,8 @@ Request Body:
     "salary":6000  
 }
 
-Response:  
+##### Response   
+  
 {  
     "message": "Member Updated Successfully"  
 }  
@@ -527,10 +533,243 @@ Request Body:
     "type":"signin"  
 }  
   
-Response:  
+##### Response  
 {  
     "message": "Missing sign added successfully"  
 }  
+
+
+
+
+### 4.1 HOD Functionalities  
+
+#### Assign Instructor To Course
+
+##### Request
+Functionality: Assign Instructor to course in his/her department  
+Route: /course/assignCourseInstructor  
+Request type: POST  
+Request Body: {
+    "courseId":"5fe520f663ac6d27acba1f3c",
+    "instructorId":"5fe582d3b0c0e32214dd0c0b"
+}
+
+  
+##### Response  
+{
+    "message": "Instuctor Assigned To Course Successfully"
+}
+
+
+#### Update Assign Instructor TO Course
+
+##### Request
+Functionality: Update Instructor Assignment to course in his/her department    
+Route:/course/updateCourseInstructor  
+Request type: PUT  
+Request Body: {  
+    "courseAssignmentId":"5fe584f81612f542b0c115b0",  
+    "newInstructorId":"5fe582d3b0c0e32214dd0c0b"  
+}  
+
+  
+##### Response  
+{  
+    "message": "Instuctor updated from Course Successfully"  
+}  
+
+
+#### Delete Instructor From Course
+
+##### Request
+Functionality: Delete Instructor Assignment from course in his/her department    
+Route: /course/deleteCourseInstructor
+Request type: DELETE   
+Request Body:{  
+    "courseAssignmentId":"5fe584f81612f542b0c115b0"  
+}  
+
+  
+##### Response    
+{  
+    "message": "Instuctor removed from Course Successfully"  
+}  
+
+
+#### View All Staff Per Course
+
+##### Request
+Functionality: view staff members per course in his/her department    
+Route: /course/viewMemberInCourseHOD  
+Request type: POST   
+Request Body: {  
+    "courseId":"5fe520f663ac6d27acba1f3c"  
+}  
+
+  
+##### Response    
+[
+    {  
+        "_id": "5fe58fb85bcf4b2480d87e13",  
+        "member": {  
+            "_id": "5fe582d3b0c0e32214dd0c0b",  
+            "name": "john",  
+            "email": "instructor@guc.com",  
+            "salary": 5000,  
+            "office": "5fe5262a4a96390450b26520",  
+            "department": "5fe520c563ac6d27acba1f3b",  
+            "dayoff": "monday",  
+            "type": "instructor",  
+            "birthdate": "1999-05-08T21:00:00.000Z",  
+            "gender": "male",  
+            "password": "$2a$10$yYGPeH89hTyAbZI0boOBh.HQ8pn/S6EqmSqp0Ul8yfAEhzKFgfYL.",  
+            "activated": true,  
+            "customId": "ac-4",  
+            "dateCreated": "2020-12-25T08:12:35.247Z",  
+            "annualBalanceTaken": 0,  
+            "accidentalDaysTaken": 0,  
+            "__v": 0,  
+            "id": "5fe582d3b0c0e32214dd0c0b"  
+        }  
+    },  
+    {  
+        "_id": "5fe5907c5bcf4b2480d87e18",  
+        "member": {  
+            "_id": "5fe5906a5bcf4b2480d87e17",  
+            "name": "john",  
+            "email": "instructor3@guc.com",  
+            "salary": 5000,  
+            "office": "5fe5262a4a96390450b26520",  
+            "department": "5fe520c563ac6d27acba1f3b",  
+            "dayoff": "monday",  
+            "type": "instructor",  
+            "birthdate": "1999-05-08T21:00:00.000Z",  
+            "gender": "male",  
+            "password": "$2a$10$eIcVt/I5vhxo2g0K6.o9tedgTM/zNBH/YlUU9Oal.sgINUxw.hyaO",  
+            "activated": true,  
+            "customId": "ac-9",  
+            "dateCreated": "2020-12-25T09:10:34.992Z",  
+            "annualBalanceTaken": 0,  
+            "accidentalDaysTaken": 0,  
+            "__v": 0,  
+            "id": "5fe5906a5bcf4b2480d87e17"  
+        }  
+    }  
+]  
+
+
+
+#### View All Staff In Department  
+
+##### Request  
+Functionality: view staff members in his/her department    
+Route: /department/viewMemberInDepartment   
+Request type: GET  
+  
+##### Response    
+
+{
+    "_id": "5fe58294b0c0e32214dd0c0a",  
+    "department": {  
+        "_id": "5fe520c563ac6d27acba1f3b",  
+        "membersPerDepartment": [  
+            {  
+                "_id": "5fe582d3b0c0e32214dd0c0b",  
+                "name": "john",  
+                "email": "instructor@guc.com",  
+                "salary": 5000,  
+                "office": "5fe5262a4a96390450b26520",  
+                "department": "5fe520c563ac6d27acba1f3b",  
+                "dayoff": "monday",  
+                "type": "instructor",  
+                "birthdate": "1999-05-08T21:00:00.000Z",  
+                "gender": "male",  
+                "password": "$2a$10$yYGPeH89hTyAbZI0boOBh.HQ8pn/S6EqmSqp0Ul8yfAEhzKFgfYL.",  
+                "activated": true,  
+                "customId": "ac-4",  
+                "dateCreated": "2020-12-25T08:12:35.247Z",  
+                "annualBalanceTaken": 0,  
+                "accidentalDaysTaken": 0,  
+                "__v": 0,  
+                "id": "5fe582d3b0c0e32214dd0c0b"  
+            },  
+            {  
+                "_id": "5fe5906a5bcf4b2480d87e17",  
+                "name": "john",  
+                "email": "instructor3@guc.com",  
+                "salary": 5000,  
+                "office": "5fe5262a4a96390450b26520",  
+                "department": "5fe520c563ac6d27acba1f3b",  
+                "dayoff": "monday",  
+                "type": "instructor",  
+                "birthdate": "1999-05-08T21:00:00.000Z",  
+                "gender": "male",  
+                "password": "$2a$10$eIcVt/I5vhxo2g0K6.o9tedgTM/zNBH/YlUU9Oal.sgINUxw.hyaO",  
+                "activated": true,  
+                "customId": "ac-9",  
+                "dateCreated": "2020-12-25T09:10:34.992Z",  
+                "annualBalanceTaken": 0,  
+                "accidentalDaysTaken": 0,  
+                "__v": 0,  
+                "id": "5fe5906a5bcf4b2480d87e17"  
+            }  
+        ],  
+        "id": "5fe520c563ac6d27acba1f3b"  
+    },  
+    "id": "5fe58294b0c0e32214dd0c0a"  
+}  
+
+
+#### View All Staff Dayoff In Department  
+
+##### Request  
+Functionality: view staff members dayoff in his/her department    
+Route: /department/viewAllMember_dayoff_InDepartment  
+Request type: GET  
+  
+##### Response    
+[  
+    {  
+        "_id": "5fe582d3b0c0e32214dd0c0b",  
+        "name": "john",  
+        "dayoff": "monday"  
+    },  
+    {  
+        "_id": "5fe5906a5bcf4b2480d87e17",  
+        "name": "john",  
+        "dayoff": "monday"  
+    }  
+]  
+
+
+
+#### View Single Member Dayoff In Department  
+
+##### Request  
+Functionality: view one member dayoff in his/her department    
+Route: /department/viewMember_dayoff_InDepartment  
+Request type: POST    
+Request body: 
+{  
+    "memberId":"5fe58ff75bcf4b2480d87e14"  
+}  
+
+##### Response    
+{  
+    "_id": "5fe58ff75bcf4b2480d87e14",  
+    "name": "john",  
+    "dayoff": "monday"  
+}  
+
+
+
+
+
+
+
+
+
+
 
 
 
