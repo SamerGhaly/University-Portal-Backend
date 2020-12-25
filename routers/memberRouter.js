@@ -33,7 +33,8 @@ const {
   viewMissingDaysHoursHR,
   viewTime,
   viewMissingDays,
-  getUpdatedSalary
+  getUpdatedSalary,
+  ViewScadule
 
 } = require('../controllers/memberController')
 
@@ -98,5 +99,7 @@ router.post('/viewMissingDaysHoursHR',validateViewMember, verifyToken,verifyHR, 
 router.get('/viewMissingDays', verifyToken, viewMissingDays)
 router.get('/viewMissingExtraHours', verifyToken, viewTime)
 router.post('/getUpdatedSalary', verifyToken, getUpdatedSalary)//member is optional
+
+router.get('/ViewScadule', verifyToken, ViewScadule)
 
 module.exports = router
