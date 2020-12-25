@@ -941,6 +941,47 @@ Request Body:
 
 ### 4.3 Coordinator Functionalities
 
+{
+    "courseId":"5fe520f663ac6d27acba1f3c"
+}
+
+
+#### View Slot Linking Requests  
+
+##### Request  
+Functionality: view slot linking requests
+Route: /request/viewSlotLinking    
+Request type: POST  
+Request Body:
+{  
+    "courseId":"5fe520f663ac6d27acba1f3c"  
+}  
+
+##### Response    
+{  
+    "data": [  
+        {  
+            "_id": "5fe5cb64f7c75030509afe30",  
+            "slot": {  
+                "_id": "5fe5a6495374372c6c4f2466",  
+                "slot": 1,  
+                "day": "sunday",  
+                "id": "5fe5a6495374372c6c4f2466"  
+            },  
+            "member": {  
+                "_id": "5fe582d3b0c0e32214dd0c0b",  
+                "name": "john",  
+                "email": "instructor@guc.com",  
+                "type": "instructor",  
+                "id": "5fe582d3b0c0e32214dd0c0b"  
+            },  
+            "status": "pending",  
+            "__v": 0,  
+            "id": "5fe5cb64f7c75030509afe30"  
+        }  
+    ]  
+}    
+
 #### Add Course Slots  
 
 ##### Request  
@@ -960,6 +1001,7 @@ Request Body:
 {  
     "message": "Slot Added Successfully to Course"  
 }  
+  
   
   
   
