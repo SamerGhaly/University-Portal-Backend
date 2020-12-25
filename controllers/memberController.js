@@ -48,6 +48,7 @@ const {
 } = require('../constants/constants')
 const attendanceRecordModel = require('../models/attendanceRecordModel')
 const departmentModel = require('../models/departmentModel')
+const replacementRequest = require('../models/replacementRequest')
 
 const login = async (req, res) => {
   try {
@@ -891,10 +892,78 @@ const removeTaAssignment = async (req, res) => {
     })
   }
 }
+const getUpdatedSalary = async (req, res) => {
+  let tokenId
+  if (req.body.memberId) tokenId = req.body.memberId
+  else tokenId = req.member.memberId
+  const member = await MemberModel.findById(tokenId)
+  if (!member)
+    return res.json({
+      message: ' member DoesnotExist',
+      code: memberDoesnotExist,
+    })
+  let Salary = member.salary
+  let salaryDeducted = 0
+  let ans = await viewMissingDaysHours(req, res)
+  if (-ans.time <= 10800000 - 59 * 1000) {
+    console.log('hhay')
+    return res.json({
+      Salary,
+      salaryDeducted: 0,
+      result: Salary - salaryDeducted,
+    })
+  }
+  let time = convertToHours_min_sec(-ans.time)
+  //console.log((Salary / 180),ans.MissingDays);
+  salaryDeducted +=
+    time['hours'] * (Salary / 180) + time['mins'] * (Salary / (180 * 60))
+
+  salaryDeducted += ans.missingDays * (Salary / 60)
+  return res.json({
+    Salary,
+    salaryDeducted,
+    result: Salary - salaryDeducted,
+  })
+}
+const viewMissingDaysHoursHR = async (req, res) => {
+  let ans = await viewMissingDaysHours(req, res)
+  let result = {}
+  let time = convertToHours_min_sec(ans.time)
+  if (ans.time > 0) {
+    result.ExtraHours_minutes = convertToHours_min_sec(ans.time)
+  } else {
+    result.MissingHours_minutes = convertToHours_min_sec(-ans.time)
+  }
+  result.MissingDays = ans.missingDays
+  return res.json({
+    result,
+  })
+}
+const viewTime = async (req, res) => {
+  let ans = await viewMissingDaysHours(req, res)
+  let result = {}
+  let time = convertToHours_min_sec(ans.time)
+  if (ans.time > 0) {
+    result.ExtraHours_minutes = convertToHours_min_sec(ans.time)
+  } else {
+    result.MissingHours_minutes = convertToHours_min_sec(-ans.time)
+  }
+  return res.json({
+    result,
+  })
+}
+const viewMissingDays = async (req, res) => {
+  let ans = await viewMissingDaysHours(req, res)
+  return res.json({
+    MissingDays: ans.missingDays,
+  })
+}
 
 const viewMissingDaysHours = async (req, res) => {
   try {
-    const tokenId = req.member.memberId
+    let tokenId
+    if (req.body.memberId) tokenId = req.body.memberId
+    else tokenId = req.member.memberId
     let currentYear = new Date().getFullYear()
     let currentMonth
     let startDate
@@ -936,13 +1005,12 @@ const viewMissingDaysHours = async (req, res) => {
     let member = await MemberModel.findById(tokenId)
     for (
       let DayTime = startDay + stepTime;
-      DayTime <= endDay+stepTime;
+      DayTime <= endDay + stepTime;
       DayTime += stepTime
     ) {
       DayRecords = []
       for (let i = lastIdx; i < attendanceRecords.length; i++) {
         if (
-          
           attendanceRecords[i].date > DayTime - stepTime &&
           attendanceRecords[i].date < DayTime
         ) {
@@ -962,19 +1030,36 @@ const viewMissingDaysHours = async (req, res) => {
       ans.time += x.time
 
       console.log(
-        new Date(DayTime - stepTime-1000).toDateString(),
-        new Date(DayTime).toDateString(),
-       // attendanceRecords
+        new Date(DayTime - stepTime - 1000).toDateString(),
+        new Date(DayTime).toDateString()
+        // attendanceRecords
       )
     }
-    ans.time = convertToHours_min_sec(ans.time)
-    res.json({
-      ans,
-    })
+    return ans
     //  console.log(currentMonth, currentYear, startDate, endDate)
   } catch (err) {
     console.log(err)
     return res.json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+const ViewScadule = async (req, res) => {
+  try {
+    const me = await MemberModel.findById(req.member.memberId)
+      .select('schedule')
+      .populate('schedule')
+    let result = {}
+    result.Member = me
+    const ReplacmentRecords = await replacementRequest.find({
+      member: req.member.memberId,
+    })
+    result.ScaduleReplacment = ReplacmentRecords
+    return res.json(result)
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({
       message: 'catch error',
       code: catchError,
     })
@@ -997,4 +1082,9 @@ module.exports = {
   removeTaAssignment,
   assignCoorinatorToCourse,
   viewMissingDaysHours,
+  viewMissingDays,
+  viewTime,
+  viewMissingDaysHoursHR,
+  getUpdatedSalary,
+  ViewScadule,
 }
