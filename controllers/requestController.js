@@ -15,6 +15,8 @@ const {
   cannotSendReplacementOnFriday,
   memberNotFree,
   courseDoesNotExist,
+  zeroAnnualLeaves,
+  zeroAccidentalLeaves,
   mustBeBeforeTargetDay,
   FromDayAfterToDay,
   userNotFound,
@@ -23,8 +25,6 @@ const {
   noReplacementFound,
   requestNotAccepted,
   differentDepartments,
-  zeroAnnualLeaves,
-  zeroAccidentalLeaves,
 } = require('../constants/errorCodes')
 
 const {
@@ -44,10 +44,11 @@ const MemberModel = require('../models/memberModel')
 const CourseAssignmentModel = require('../models/courseAssignment')
 const slotAssignmentModel = require('../models/slotAssignmentModel')
 const courseModel = require('../models/courseModel')
+const AccidentalLeaveRequest = require('../models/accidentalLeaveRequest')
 const annualLeaveRequest = require('../models/annualLeaveRequest')
 const replacementRequest = require('../models/replacementRequest')
-
-const AccidentalLeaveRequest = require('../models/accidentalLeaveRequest')
+const CompensationModel = require('../models/compensationLeaveRequest')
+const { calcMemberanualLeavesLeft } = require('../helpers/calculateTime')
 const sendSlotLinking = async (req, res) => {
   try {
     const tokenId = req.member.memberId //from token
@@ -1065,18 +1066,19 @@ const accidentalLeaveRequest = async (req, res) => {
     const reason = req.body.reason
     if (reason) obj.reason = reason
     let dateArr = req.body.absentDate.split('-')
-    obj.absentDate = new Date(dateArr[0], dateArr[1], dateArr[2])
-    const member = await Member.findById(memberId)
+    obj.absentDate = new Date(dateArr[0], dateArr[1] - 1, dateArr[2])
+    const member = await Member.findById(obj.memberId)
     let accidentalDaysTaken = member.accidentalDaysTaken
-    let annualBalanceTaken = member.annualBalanceTaken
-    if (accidentalDaysTaken < 7 && annualBalanceTaken > 0) {
-      Member.findOneAndUpdate(memberId, {
-        accidentalDaysTaken: accidentalDaysTaken + 1,
-        annualBalanceTaken: annualBalanceTaken - 1,
-      })
+    let annualBalance = calcMemberanualLeavesLeft(member)
+    console.log(annualBalance)
+    if (accidentalDaysTaken < 6 && annualBalance >= 1) {
+      // Member.findOneAndUpdate(obj.memberId, {
+      //   accidentalDaysTaken: accidentalDaysTaken + 1,
+      //   annualBalanceTaken: annualBalanceTaken + 1,
+      // })
       AccidentalLeaveRequest.create(obj)
     } else {
-      if (accidentalDaysTaken > 6)
+      if (accidentalDaysTaken > 5)
         return res.status(404).json({
           message: 'you used the whole 6 accidental Days leaves',
           code: zeroAccidentalLeaves,
@@ -1087,6 +1089,9 @@ const accidentalLeaveRequest = async (req, res) => {
           code: zeroAnnualLeaves,
         })
     }
+    res.json({
+      message: 'succefully make a request',
+    })
   } catch (err) {
     console.log(err)
     return res.status(500).json({
@@ -1240,9 +1245,9 @@ const acceptAnnualLeaveRequest = async (req, res) => {
         code: requestNotPending,
         message: 'The request is not pending',
       })
-    console.log(requestFound.member.department)
+    // console.log(requestFound.member.department)
     const hod = await MemberModel.findById(tokenId)
-    console.log(hod.department)
+    //  console.log(hod.department)
     if (requestFound.member.department.toString() !== hod.department.toString())
       return res.status(403).json({
         code: differentDepartments,
@@ -1267,7 +1272,7 @@ const acceptAnnualLeaveRequest = async (req, res) => {
       )
         diffDays -= 1
     }
-    console.log(diffDays)
+    //  console.log(diffDays)
 
     //Get Available days for member
     const today = new Date()
@@ -1399,62 +1404,82 @@ const cancelAnnualLeaveRequest = async (req, res) => {
     })
   }
 }
+const checkday = (date1, date2) => {
+  if (date1.getDate() === date2.getDate()) {
+    if (date1.getMonth() === date2.getMonth()) {
+      if (date1.getFullYear() === date2.getFullYear()) {
+        return 1
+      }
+    }
+  }
+  return 0
+}
 const compensationLeaveRequest = async (req, res) => {
   try {
     const memberComp = await Member.findById(req.member.memberId)
     let dateArr = req.body.compensationDate.split('-')
-    const compensationDateobject = new Date(dateArr[0], dateArr[1], dateArr[2])
-    let dateArr1 = memberComp.dayoff.split('-')
-    const memberCompdayoff = new Date(dateArr1[0], dateArr1[1], dateArr1[2])
+    const compensationDateobject = new Date(
+      dateArr[0],
+      dateArr[1] - 1,
+      dateArr[2]
+    )
+    const absent = req.body.absentDate
+    let dateArr1 = absent.split('-')
+    const absentDate = new Date(dateArr1[0], dateArr1[1] - 1, dateArr1[2])
+    const memberCompdayoff = memberComp.dayoff
 
     console.log(req.body.compensationDate)
     console.log(memberComp.dayoff)
-    if (compensationDateobject.getDay() !== memberCompdayoff.getDay()) {
+    if (weekDaysNumbers[compensationDateobject.getDay()] != memberCompdayoff) {
       return res.json({
         message: 'Compensation day must be your DayOff',
       })
     }
     if (
-      req.body.absentDate === memberComp.dayoff ||
-      req.body.absentDate === weekDays.FRIDAY
+      weekDaysNumbers[absentDate.getDay()] === memberComp.dayoff ||
+      weekDaysNumbers[absentDate.getDay()] === weekDays.FRIDAY
     ) {
       return res.json({
-        message: 'Absent day should not be FRIDDAY OR YOUR DAYOFF',
+        message: 'Absent day should not be FRIDAY OR YOUR DAYOFF',
       })
     }
 
-    let currentYear = new Date(req.body.absentDate).getFullYear()
+    let currentYear = absentDate.getFullYear()
     let currentMonth
     let startDate
     let endDate
     currentMonth =
-      new Date(req.body.absentDate).getDate() >= 11
-        ? new Date(req.body.absentDate).getMonth()
-        : new Date(req.body.absentDate).getMonth() - 1
+      absentDate.getDate() >= 11
+        ? absentDate.getMonth()
+        : absentDate.getMonth() - 1
     if (currentMonth === -1) {
       currentMonth = 11
       currentYear = currentYear - 1
       startDate = new Date(currentYear, currentMonth, 11)
       endDate = new Date(currentYear + 1, 0, 11)
     } else {
-      if (currentMonth === 11) {
-        currentMonth = 0
-        currentYear = currentYear - 1
-        startDate = new Date(currentYear, 11, 11)
-        endDate = new Date(currentYear + 1, currentMonth, 11)
-      } else {
-        startDate = new Date(currentYear, currentMonth, 11)
-        endDate = new Date(currentYear, currentMonth + 1, 11)
-      }
+      startDate = new Date(currentYear, currentMonth, 11)
+      endDate = new Date(currentYear, currentMonth + 1, 11)
     }
+
     if (
-      req.body.compensationDate > startDate &&
-      req.body.compensationDate < endDate
+      compensationDateobject >= startDate &&
+      compensationDateobject < endDate
     ) {
-      const newrequest = req.body
+      // absentDate: Date,
+      // compensationDate: Date,
+      // comment: String,
+      // status: String,
+      // dateSubmitted: Date,
+      // member:
+      const newrequest = {}
+      newrequest.absentDate = absentDate
+      newrequest.compensationDate = compensationDateobject
       newrequest.member = req.member.memberId
       newrequest.status = requestType.PENDING
+      newrequest.reason = req.body.reason
       newrequest.dateSubmitted = new Date()
+
       Compensation.create(newrequest)
       return res.json({
         message: 'Compensation Leave Sent Successfuly',
@@ -1466,6 +1491,108 @@ const compensationLeaveRequest = async (req, res) => {
     }
   } catch (err) {
     console.log(err)
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
+const acceptCompensationLeaveRequest = async (req, res) => {
+  try {
+    const hod = await Member.findById(req.member.memberId)
+    const compensationRequest = await CompensationModel.findById(
+      req.body.requestId
+    )
+    console.log(hod)
+    console.log(compensationRequest)
+
+    if (!compensationRequest) {
+      return res.json({
+        message: 'No Compensation Request Found By this ID',
+      })
+    }
+
+    if (hod.type !== memberRoles.HOD) {
+      return res.json({
+        message: 'Must be head of Department to accept the request',
+      })
+    }
+
+    if (compensationRequest.status !== requestType.PENDING) {
+      return res.json({
+        message: 'Request Status must be Pending',
+      })
+    }
+
+    CompensationModel.findByIdAndUpdate(
+      req.body.requestId,
+      { status: requestType.ACCEPT },
+      function (err) {
+        if (err) {
+          return res.json({
+            code: databaseerror,
+            message: 'database error',
+          })
+        } else {
+          return res.json({
+            message: 'Compensation Request accepetd',
+          })
+        }
+      }
+    )
+  } catch (err) {
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
+
+const rejectCompensationLeaveRequest = async (req, res) => {
+  try {
+    const hod = await Member.findById(req.member.memberId)
+    const compensationRequest = await CompensationModel.findById(
+      req.body.requestId
+    )
+    console.log(hod)
+    console.log(compensationRequest)
+
+    if (!compensationRequest) {
+      return res.json({
+        message: 'No Compensation Request Found By this ID',
+      })
+    }
+
+    if (hod.type !== memberRoles.HOD) {
+      return res.json({
+        message: 'Must be head of Department to accept the request',
+      })
+    }
+
+    if (compensationRequest.status !== requestType.PENDING) {
+      return res.json({
+        message: 'Request Status must be Pending',
+      })
+    }
+
+    CompensationModel.findByIdAndUpdate(
+      req.body.requestId,
+      { status: requestType.REJECT, comment: req.body.comment },
+      function (err) {
+        if (err) {
+          return res.json({
+            code: databaseerror,
+            message: 'database error',
+          })
+        } else {
+          return res.json({
+            message: 'Compensation Request rejected',
+          })
+        }
+      }
+    )
+  } catch (err) {
     return res.status(500).json({
       message: 'catch error',
       code: catchError,
@@ -1498,4 +1625,6 @@ module.exports = {
   cancelAnnualLeaveRequest,
   accidentalLeaveRequest,
   compensationLeaveRequest,
+  acceptCompensationLeaveRequest,
+  rejectCompensationLeaveRequest,
 }

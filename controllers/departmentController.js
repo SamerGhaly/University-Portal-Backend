@@ -121,6 +121,42 @@ const viewMemberInDepartment = async (req, res) => {
     })
   }
 }
+const viewAllMemberInDepartment = async (req, res) => {
+  try {
+    const memberId = req.member.memberId
+    const out = await Member.findById(memberId)
+      .select('department')
+      .populate({
+        path: 'department',
+        select: 'membersPerDepartment',
+        populate: {
+          path: 'membersPerDepartment',
+        },
+      })
+    // let array = []
+    // out.department.membersPerDepartment.forEach((element) => {
+    //   array.push({
+    //     _id: element._id.toString(),
+    //     name: element.name,
+    //     dayoff: element.dayoff,
+    //   })
+    // })
+
+    if (!out.department)
+      return res.json({
+        code: noDepartment,
+        message: 'you have no Department ',
+      })
+
+    res.json(out.department.membersPerDepartment)
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({
+      message: 'catch error',
+      code: catchError,
+    })
+  }
+}
 const viewAllMember_dayoff_InDepartment = async (req, res) => {
   try {
     const memberId = req.member.memberId

@@ -29,6 +29,7 @@ app.use('/faculty', facultyRoutes)
 app.use('/department', departmentRoutes)
 app.use('/course', courseRoutes)
 app.use('/attendance', attendanceRoutes)
+app.use('/room', roomRoutes)
 app.use('/slotAssignment', slotAssignmentRoutes)
 app.use('/room', roomRoutes)
 

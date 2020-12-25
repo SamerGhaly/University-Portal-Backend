@@ -241,6 +241,21 @@ const validateReplcamentRequest = (req, res, next) => {
   next()
 }
 
+const validateAccidentalLeave = (req, res, next) => {
+  const validateAccidentalLeaveSchema = Joi.object({
+    absentDate: Joi.date().required(),
+    reason: Joi.string(),
+  })
+  const checkSchema = validateAccidentalLeaveSchema.validate(req.body)
+  if (checkSchema.error) {
+    return res.json({
+      code: validationError,
+      message: checkSchema.error.details[0],
+    })
+  }
+  next()
+}
+
 const validateSendAnnualLeaveRequest = (req, res, next) => {
   const annualLeaveSchema = Joi.object({
     from: Joi.string().required(),
@@ -250,6 +265,7 @@ const validateSendAnnualLeaveRequest = (req, res, next) => {
   })
 
   const checkSchema = annualLeaveSchema.validate(req.body)
+
   if (checkSchema.error) {
     return res.json({
       code: validationError,
@@ -310,9 +326,38 @@ const validateCompensationLeavesRequest = (req, rees, next) => {
     absentDate: Joi.string().required(),
     compensationDate: Joi.string().required(),
     comment: Joi.string(),
+    reason: Joi.string().required(),
   })
 
   const checkSchema = compensationLeavesRequestSchema.validate(req.body)
+  if (checkSchema.error) {
+    return res.json({
+      code: validationError,
+      message: checkSchema.error.details[0],
+    })
+  }
+  next()
+}
+const validateAcceptCompensationLeavesRequest = (req, res, next) => {
+  const accpetCompensationLeavesRequestSchema = Joi.object({
+    requestId: Joi.string().length(24).required(),
+  })
+  const checkSchema = accpetCompensationLeavesRequestSchema.validate(req.body)
+  if (checkSchema.error) {
+    return res.json({
+      code: validationError,
+      message: checkSchema.error.details[0],
+    })
+  }
+  next()
+}
+
+const validateRejectCompensationLeavesRequest = (req, res, next) => {
+  const rejectCompensationLeavesRequestSchema = Joi.object({
+    requestId: Joi.string().length(24).required(),
+    comment: Joi.string(),
+  })
+  const checkSchema = rejectCompensationLeavesRequestSchema.validate(req.body)
   if (checkSchema.error) {
     return res.json({
       code: validationError,
@@ -339,9 +384,11 @@ module.exports = {
   validateAcceptRejectLinkingRequest,
   validateReplcamentRequest,
   validateViewSlotLinkingRequest,
+  validateAccidentalLeave,
   validateSendAnnualLeaveRequest,
   validateAcceptRejectAnnualLeaveRequest,
   validateCancelAnnualLeaveRequest,
-  validateAccidentalLeave,
   validateCompensationLeavesRequest,
+  validateAcceptCompensationLeavesRequest,
+  validateRejectCompensationLeavesRequest,
 }

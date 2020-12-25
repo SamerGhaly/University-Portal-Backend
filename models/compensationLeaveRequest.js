@@ -4,6 +4,7 @@ const compensationLeaveRequestSchema = new mongoose.Schema({
   absentDate: Date,
   compensationDate: Date,
   comment: String,
+  reason: String,
   status: String,
   dateSubmitted: Date,
   member: {

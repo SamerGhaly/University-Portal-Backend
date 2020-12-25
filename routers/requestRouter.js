@@ -15,6 +15,7 @@ const {
   validateSendAnnualLeaveRequest,
   validateAcceptRejectAnnualLeaveRequest,
   validateCancelAnnualLeaveRequest,
+  validateAcceptCompensationLeavesRequest,
 } = require('../validations/requestValidation')
 const {
   sendAnnualLeave,
@@ -23,6 +24,7 @@ const {
   cancelAnnualLeaveRequest,
   accidentalLeaveRequest,
   changeDayOffRequest,
+  acceptCompensationLeaveRequest,
 } = require('../controllers/requestController')
 const {
   validateAcceptDayOffRequest,
@@ -87,6 +89,7 @@ const {
   validateSlotLinkingRequest,
   validateAcceptRejectLinkingRequest,
   validateReplcamentRequest,
+  validateRejectCompensationLeavesRequest,
 } = require('../validations/requestValidation')
 const {
   sendSlotLinking,
@@ -95,6 +98,7 @@ const {
   cancelSlotLinkingRequest,
   viewSlotLinkning,
   sendReplacementRequest,
+  rejectCompensationLeaveRequest,
 } = require('../controllers/requestController')
 
 router.post(
@@ -231,6 +235,12 @@ router.post(
   verifyAcademic,
   cancelChangeDayOffRequest
 )
+router.post(
+  '/accidentalLeaveRequest',
+  validateAccidentalLeave,
+  verifyToken,
+  accidentalLeaveRequest
+)
 
 router.post(
   '/sendAnnualLeaveRequest',
@@ -270,11 +280,26 @@ router.post(
   verifyToken,
   accidentalLeaveRequest
 )
-
 router.post(
   '/compensationLeaveRequest',
   validateCompensationLeavesRequest,
   verifyToken,
   compensationLeaveRequest
+)
+
+router.post(
+  '/acceptCompensationLeaveRequest',
+  validateAcceptCompensationLeavesRequest,
+  verifyToken,
+  verifyHOD,
+  acceptCompensationLeaveRequest
+)
+
+router.post(
+  '/rejectCompensationLeaveRequest',
+  validateRejectCompensationLeavesRequest,
+  verifyToken,
+  verifyHOD,
+  rejectCompensationLeaveRequest
 )
 module.exports = router
