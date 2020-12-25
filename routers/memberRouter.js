@@ -30,7 +30,11 @@ const {
   assignCoorinatorToCourse,
   updateTaAssignment,
   removeTaAssignment,
-  viewMissingDaysHours,
+  viewMissingDaysHoursHR,
+  viewTime,
+  viewMissingDays,
+  getUpdatedSalary
+
 } = require('../controllers/memberController')
 
 const verifyToken = require('../authorizations/verifyToken')
@@ -90,5 +94,9 @@ router.delete(
 router.put('/updateMember', validateUpdateMember, verifyToken, updateMember)
 router.post('/viewMember', validateViewMember, verifyToken, viewMember)
 router.post('/resetPassword', validateResetPassword, resetPassword)
-router.get('/viewMissingDaysHours', verifyToken, viewMissingDaysHours)
+router.post('/viewMissingDaysHoursHR',validateViewMember, verifyToken,verifyHR, viewMissingDaysHoursHR)
+router.get('/viewMissingDays', verifyToken, viewMissingDays)
+router.get('/viewMissingExtraHours', verifyToken, viewTime)
+router.post('/getUpdatedSalary', verifyToken, getUpdatedSalary)//member is optional
+
 module.exports = router
