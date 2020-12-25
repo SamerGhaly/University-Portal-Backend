@@ -171,6 +171,7 @@ Request Body:
     "year":"2020"  
 }  
 ###### NOTE: If you want to filter, both month and year are required  
+
 ##### Response    
 {
     "data": [  
@@ -318,7 +319,7 @@ Response: {
 
 #### Update Department
 Functionality: update Department to the system  
-Route: /faculty/updateFaculty  
+Route: /department/updateDepartment    
 Request type: PUT  
 Request Body: {  
     "id":"5fe511b3b50be6254400e78d",  
@@ -333,7 +334,7 @@ Response:
 
 #### Delete Department
 Functionality: delete Department from the system  
-Route: /faculty/deleteFaculty  
+Route: /department/deleteDepartment  
 Request type: DELETE  
 Request Body:{  
     "id":"5fe512b25883fe25184a1e52"  
@@ -343,8 +344,6 @@ Response:
  {  
     "message": "Department deleted successfully"  
 }  
-
-
 
 
 #### Add Course
@@ -391,9 +390,6 @@ Response:
 {  
     "message": "Course deleted"  
 }  
-
-
-
 
 
 #### Add Member
@@ -513,7 +509,7 @@ Request Body:
     "salary":6000  
 }
 
-Response:
+Response:  
 {  
     "message": "Member Updated Successfully"  
 }  
