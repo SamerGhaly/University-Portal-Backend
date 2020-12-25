@@ -1698,6 +1698,44 @@ Request Body:
 
 ### 4.4 Academic Member Functionalities
 
+#### View My Schedule (BOth arrays will appear and arranging them in A WEEK IS left to the FRONTEND )  
+
+##### Request   
+Functionality: view my schedule and replacements     
+Route: /member/ViewScadule
+Request type: GET   
+
+##### Response    
+{
+    "Member": {
+        "_id": "5fe590435bcf4b2480d87e15",  
+        "schedule": [  
+            {  
+                "_id": "5fe5a6575374372c6c4f2467",  
+                "course": "5fe520f663ac6d27acba1f3c",  
+                "slot": 3,  
+                "day": "monday",  
+                "room": "5fe526244a96390450b2651f",  
+                "__v": 0,  
+                "member": "5fe590435bcf4b2480d87e15",  
+                "id": "5fe5a6575374372c6c4f2467"  
+            }  
+        ],  
+        "id": "5fe590435bcf4b2480d87e15"  
+    },  
+    "ScaduleReplacment": [  
+        {  
+            "_id": "5fe64840238dc45024133b6d",  
+            "replacementMember": "5fe58ff75bcf4b2480d87e14",  
+            "slot": "5fe5a6575374372c6c4f2467",  
+            "dateOfReplacement": "2020-12-28T00:00:00.000Z",  
+            "member": "5fe590435bcf4b2480d87e15",  
+            "status": "accept",  
+            "__v": 0  
+        }  
+    ]  
+}  
+  
 #### ChangeDayOff Request   
 
 ##### Request  
