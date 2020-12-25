@@ -884,6 +884,104 @@ Request Body:
     "message": "Request rejected"
 }
 
+ #### Accept Annual Leave Request   
+
+##### Request  
+Functionality: Accept Annual Leave Request  
+Route: /request/acceptAnnualLeaveRequest  
+Request type: POST          
+Request Body:  
+{  
+    "requestId":"5fe5bbfe6076e031402cf891"  (annual leave request Id from annualLeaveRequets collection)  
+}     
+
+##### Response     
+{  
+    "message": "Request Accepted Successfully"  
+}  
+
+
+ #### Reject Annual Leave Request    
+
+##### Request  
+Functionality: Reject Annual Leave Request  
+Route: /request/rejectAnnualLeaveRequest  
+Request type: POST          
+Request Body:  
+    {  
+        "requestId":"5fe62a4fa79c9234fc5b3013"  
+    }  
+##### Response      
+{  
+    "message": "Request is Rejected Successfully"  
+}  
+
+ #### Accept Sick Leave Request   
+
+##### Request  
+Functionality: Accept Sick Leave Request  
+Route: /request/acceptSickLeave  
+Request type: POST          
+Request Body:  
+{  
+    "requestId":"5fe5bbfe6076e031402cf891"  (sick leave request Id from sickLeaveRequests collection)  
+}     
+
+##### Response     
+{
+    "message": "Request accepetd"
+} 
+
+
+ #### Reject Sick Leave Request    
+
+##### Request  
+Functionality: Reject Sick Leave Request  
+Route: /request/rejectSickLeave  
+Request type: POST      
+Request Body:  
+      {
+        "requestId":"5fe62e5c7a5f973d7c72e70d" (sick leave request Id from sickLeaveRequests collection)    
+    }
+##### Response        
+{  
+    "message": "Request rejected"  
+}  
+
+
+ #### Accept Maternity Leave Request   
+
+##### Request  
+Functionality: Accept Sick Leave Request   
+Route: /request/acceptMaternityLeave   
+Request type: POST          
+Request Body:  
+{  
+    "requestId":"5fe5bbfe6076e031402cf891"  (maternity leave request Id from maternityLeaveRequests collection)  
+}     
+
+##### Response     
+{
+    "message": "Request accepetd"
+} 
+
+
+ #### Reject Maternity Leave Request    
+
+##### Request  
+Functionality: Reject Maternity Leave Request  
+Route: /request/rejectMaternityLeave  
+Request type: POST      
+Request Body:  
+      {
+        "requestId":"5fe62e5c7a5f973d7c72e70d" (maternity leave request Id from maternityLeaveRequests collection)    
+    }
+##### Response        
+{  
+    "message": "Request rejected"  
+}  
+
+
 
 
 ### 4.2 Instructor Functionalities
@@ -1397,6 +1495,24 @@ Request Body:
 
 
 
+#### Cancel ChangeDayOff Request   
+
+##### Request  
+Functionality: Cancel Change Day Off Request  
+Route: /request/cancelChangeDayOffRequest  
+Request type: POST          
+Request Body:  
+{  
+    "requestId":"5fe5bb37ccd9c22214b21717"  
+}    
+
+##### Response    
+{  
+    "message": "Request Cancelled"  
+}  
+
+
+
 #### Send SLotLinking    
 
 ##### Request  
@@ -1432,5 +1548,112 @@ Request Body:
     "message": "Slot Linking Request is cancelled successfully"  
 }   
 
+#### Send Annual Leave Request  
+
+##### Request  
+Functionality: Send annual leave request  
+Route: /request/sendAnnualLeaveRequest  
+Request type: POST   
+Request Body:  
+    {  
+        "from":"2020-12-26",  
+        "to":"2020-12-28"  
+    }   
+
+##### Response   
+{  
+    "message": "Request Created Successfully"  
+}  
 
 
+
+#### Cancel Annual Leave Request  
+
+##### Request  
+Functionality: Cancel annual leave request  
+Route: /request/cancelAnnualLeaveRequest  
+Request type: POST   
+Request Body:    
+       {  
+        "requestId":"5fe62ac8a79c9234fc5b3014"  (Annual Leave Request from annualLeaveRequests collection)  
+    }   
+
+##### Response   
+{  
+    "message": "Request Cancelled Successfully"  
+}  
+
+
+#### Send Sick Leave Request  
+
+##### Request  
+Functionality: Send sick leave request  
+Route: /request/sickLeave  
+Request type: POST   
+Request Body:    
+        {  
+        "from":"2020-12-27",  
+        "to":"2020-12-31",  
+        "document":["googledriveURL","googledriveURL"]  
+    }   
+    
+##### Response    
+{  
+    "message": "Sick Leave Request sent successfully"  
+}   
+
+
+
+#### Cancel Sick Leave Request  
+
+##### Request  
+Functionality: Cancel sick leave request    
+Route: /request/cancelSickLeaveRequest  
+Request type: POST   
+Request Body:    
+       {  
+        "requestId":"5fe62ac8a79c9234fc5b3014"  (Sick Leave Request from sickLeaveRequests collection)  
+    }   
+
+##### Response   
+{  
+    "message": "Request Cancelled Successfully"  
+}  
+
+
+#### Send Maternity Leave Request  
+
+##### Request  
+Functionality: Send maternity leave request  
+Route: /request/maternityLeave  
+Request type: POST   
+Request Body:    
+        {  
+        "from":"2020-12-27",  
+        "to":"2020-12-31",  
+        "document":["googledriveURL","googledriveURL"]  
+    }   
+    
+##### Response    
+{
+    "message": "Maternity Leave Request sent successfully"
+}  
+
+
+
+#### Cancel Maternity Leave Request  
+
+##### Request  
+Functionality: Cancel maternity leave request    
+Route: /request/cancelMaternityLeaveRequest  
+Request type: POST   
+Request Body:    
+       {  
+        "requestId":"5fe62ac8a79c9234fc5b3014"  (Maternity Leave Request from maternityLeaveRequests collection)  
+    }   
+
+##### Response    
+{  
+    "message": "Request Cancelled"  
+}  
+    
