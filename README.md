@@ -1779,5 +1779,22 @@ Request Body:
 }   
 
 
+#### Send Replacement Request   
 
+##### Request  
+Functionality: Send Replacement leave request  
+Route: /request/sendReplacementRequest  
+Request type: POST   
+Request Body:    
+{  
+        "replacementMemberId":"5fe58ff75bcf4b2480d87e14",  
+        "slotId":"5fe5a6575374372c6c4f2467",  
+        "dateOfReplacement":"2020-12-28"  
+}  
+    
+##### Response    
+{  
+    "message": "Request sent successfully"  
+}     
 
+ 
