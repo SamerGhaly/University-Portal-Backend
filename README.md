@@ -27,16 +27,80 @@ Request type: POST
 Request Body: {   
     "email":"john@guc.com",  
     "password":"1234"  
-}
+}  
 
-
-##### Response
+  
+##### Response  
 {  
     "message": "Logged in successfully"  
 }  
 ###### The token is in the auth-token response Header
 
-#### Update My Profile
+#### Log out from the system
+
+##### Request
+Functionality: log out from the system  
+Route: /member/logout  
+Request type: GET    
+
+###### NOTE: LOGOUT invalidates the token in the header in auth-token field.  
+
+##### Response    
+{  
+    "message": "Logged out successfully"  
+}  
+
+
+#### View My Profile  
+
+##### Request  
+Functionality: view my profile on the system    
+Route: /member/viewMember  
+Request type: GET    
+
+
+##### Response    
+{  
+    "data": {  
+        "_id": "5fe526cc4a96390450b26521",  
+        "name": "Mark",  
+        "email": "mark@guc.com",  
+        "type": "instructor",  
+        "office": {  
+            "_id": "5fe5262a4a96390450b26520",  
+            "name": "c6 123",  
+            "type": "office",  
+            "capacity": 5,  
+            "__v": 0,  
+            "id": "5fe5262a4a96390450b26520"  
+        },  
+        "department": {  
+            "_id": "5fe520c563ac6d27acba1f3b",  
+            "name": "dep 1",  
+            "faculty": {  
+                "_id": "5fe51fe963ac6d27acba1f3a",  
+                "name": "fac 1",  
+                "__v": 0,  
+                "id": "5fe51fe963ac6d27acba1f3a"  
+            },  
+            "__v": 0,  
+            "id": "5fe520c563ac6d27acba1f3b"  
+        },  
+        "birthdate": "2000-05-08T21:00:00.000Z",  
+        "gender": "male",  
+        "dayoff": "tuesday",  
+        "salary": 10000,  
+        "activated": true,  
+        "customId": "ac-2",  
+        "dateCreated": "2020-12-25T01:39:56.416Z",  
+        "annualBalanceTaken": 0,  
+        "accidentalDaysTaken": 0,  
+        "__v": 0,  
+        "id": "5fe526cc4a96390450b26521"  
+    }  
+}  
+  
+#### Update My Profile  
 
 ##### Request
 Functionality: update my profile  
