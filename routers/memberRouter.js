@@ -118,6 +118,7 @@ router.put(
 )
 router.get('/viewMember', verifyToken, viewMember)
 router.post('/resetPassword', validateResetPassword, resetPassword)
+
 router.post('/viewMissingDaysHoursHR',validateViewMember, verifyToken,verifyHR, viewMissingDaysHoursHR)
 router.get('/viewMissingDays', verifyToken, viewMissingDays)
 router.get('/viewMissingExtraHours', verifyToken, viewTime)
