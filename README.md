@@ -770,11 +770,85 @@ Route: /course/viewCourseCoverageHOD
 Request type: GET      
 
 ##### Response    
+[  
+    {  
+        "courseName": "csen606",  
+        "Id": "5fe520f663ac6d27acba1f3c",  
+        "Coverage": 0.125  
+    }  
+] 
+
+
+#### View Coverage of one course In Department  
+
+##### Request  
+Functionality: view coverage of one course in his/her department    
+Route: /course/viewOneCourseCoverageHOD    
+Request type: POST  
+Request body: 
 {  
-    "_id": "5fe58ff75bcf4b2480d87e14",  
-    "name": "john",  
-    "dayoff": "monday"  
+    "courseId":"5fe596ddd845793440cc82a5"  
 }  
+
+##### Response    
+
+0.25 
+
+
+
+#### View Teaching Assignment of one course in Department  
+
+##### Request  
+Functionality: view teaching assignments of one course in his/her department    
+Route: /course/viewMemberSlotsInCourse  
+Request type: POST  
+Request body: 
+{  
+    "courseId":"5fe596ddd845793440cc82a5"  
+}  
+
+##### Response    
+
+[  
+    {  
+        "_id": "5fe606e8f7c75030509afe32",  
+        "member": {  
+            "_id": "5fe599d3d845793440cc82a6",  
+            "schedule": [],  
+            "id": "5fe599d3d845793440cc82a6"  
+        }  
+    },  
+    {  
+        "_id": "5fe60772f7c75030509afe33",  
+        "member": {  
+            "_id": "5fe59aaed845793440cc82a9",  
+            "schedule": [  
+                {  
+                    "_id": "5fe5a6575374372c6c4f2467",  
+                    "course": "5fe596ddd845793440cc82a5",  
+                    "slot": 3,  
+                    "day": "monday",  
+                    "room": "5fe526244a96390450b2651f",  
+                    "__v": 0,  
+                    "member": "5fe59aaed845793440cc82a9",  
+                    "id": "5fe5a6575374372c6c4f2467"  
+                },  
+                {  
+                    "_id": "5fe61150d9e78af967a2757d",  
+                    "course": "5fe596ddd845793440cc82a5",  
+                    "slot": 2,  
+                    "day": "monday",  
+                    "room": "5fe526244a96390450b2651f",  
+                    "__v": 0,  
+                    "member": "5fe59aaed845793440cc82a9",  
+                    "id": "5fe61150d9e78af967a2757d"  
+                }  
+            ],  
+            "id": "5fe59aaed845793440cc82a9"  
+        }  
+    }  
+]  
+
 
 
  #### Accept ChangeDayOff Request   
@@ -936,8 +1010,129 @@ Request Body:
     "message": "Course Assignment created successfully"  
 }  
 
+#### View Course Coverage of courses
+
+##### Request  
+Functionality: view course coverage he/she is assigned to  
+Route: /course/viewCourseCoverageInstructor  
+Request type: GET       
+
+##### Response    
+[  
+    {  
+        "courseName": "csen dep 3",  
+        "Id": "5fe596ddd845793440cc82a5",  
+        "Coverage": 0.25  
+    }  
+]  
 
 
+#### View ths slot assignments
+
+##### Request  
+Functionality: view course coverage he/she is assigned to and it can be filtered by a course id  
+Route: /course/viewInstructorSlotsInCourse  
+Request type: POST  
+Request Body:  
+{  
+    "courseId":"5fe596ddd845793440cc82a5"   (optional)  
+}  
+
+##### Response    
+[  
+    {  
+        "_id": "5fe606e8f7c75030509afe32",  
+        "course": {  
+            "_id": "5fe596ddd845793440cc82a5",  
+            "name": "csen dep 3",  
+            "slotsAssignments": [  
+                {  
+                    "_id": "5fe5a6575374372c6c4f2467",  
+                    "course": "5fe596ddd845793440cc82a5",  
+                    "slot": 3,  
+                    "day": "monday",  
+                    "room": "5fe526244a96390450b2651f",  
+                    "__v": 0,  
+                    "member": "5fe59aaed845793440cc82a9",  
+                    "id": "5fe5a6575374372c6c4f2467"  
+                },  
+                {  
+                    "_id": "5fe61150d9e78af967a2757d",  
+                    "course": "5fe596ddd845793440cc82a5",  
+                    "slot": 2,  
+                    "day": "monday",  
+                    "room": "5fe526244a96390450b2651f",  
+                    "__v": 0,  
+                    "member": "5fe59aaed845793440cc82a9",  
+                    "id": "5fe61150d9e78af967a2757d"  
+                }  
+            ],  
+            "id": "5fe596ddd845793440cc82a5"  
+        }  
+    }  
+]   
+
+
+#### View ths slot assignments
+
+##### Request  
+Functionality: view course coverage he/she is assigned to and it can be filtered by a course id  
+Route: /course/viewInstructorSlotsInCourse  
+Request type: POST  
+Request Body:  
+{  
+    "courseId":"5fe596ddd845793440cc82a5"  
+}   
+
+##### Response    
+[  
+    {  
+        "_id": "5fe606e8f7c75030509afe32",  
+        "member": {  
+            "_id": "5fe599d3d845793440cc82a6",  
+            "name": "john",  
+            "email": "i2@guc.com",  
+            "salary": 5000,  
+            "office": "5fe5262a4a96390450b26520",  
+            "department": "5fe521c2118e283b186235c6",  
+            "dayoff": "monday",  
+            "type": "instructor",  
+            "birthdate": "1999-05-08T21:00:00.000Z",  
+            "gender": "male",  
+            "password": "$2a$10$gLJfGBqBkqXFQaOtHtY37e2ZhxTt09oz/WjFlHmlAly1yszSvOUFW",   
+            "activated": true,   
+            "customId": "ac-10",  
+            "dateCreated": "2020-12-25T09:50:43.128Z",  
+            "annualBalanceTaken": 0,  
+            "accidentalDaysTaken": 0,  
+            "__v": 0,  
+            "id": "5fe599d3d845793440cc82a6"  
+        }  
+    },  
+    {  
+        "_id": "5fe60772f7c75030509afe33",  
+        "member": {  
+            "_id": "5fe59aaed845793440cc82a9",  
+            "name": "john",  
+            "email": "t3@guc.com",  
+            "salary": 5000,  
+            "office": "5fe5262a4a96390450b26520",  
+            "department": "5fe521c2118e283b186235c6",  
+            "dayoff": "monday",  
+            "type": "teaching assistant",  
+            "birthdate": "1999-05-08T21:00:00.000Z",  
+            "gender": "male",  
+            "password": "$2a$10$k6Ka46XG2NTvIGceyrhs0.LS/S0npMb4Krbti6aOhgeHJbu0kvR/q",  
+            "activated": true,  
+            "customId": "ac-10",  
+            "dateCreated": "2020-12-25T09:54:22.251Z",  
+            "annualBalanceTaken": 0,  
+            "accidentalDaysTaken": 0,  
+            "__v": 0,  
+            "id": "5fe59aaed845793440cc82a9"  
+        }  
+    }  
+]  
 
 ### 4.3 Coordinator Functionalities
 
@@ -981,6 +1176,39 @@ Request Body:
         }  
     ]  
 }    
+
+
+#### Accept Slot Linking Requests  
+
+##### Request  
+Functionality: Accept slot linking requests
+Route: /request/acceptSlotLinking  
+Request type: POST  
+Request Body:  
+{  
+    "requestId":"5fe6094df7c75030509afe35"  (slot linkning request Id from slotLinkningRequestModel)  
+}  
+
+##### Response      
+{  
+    "message": "Request was accepted successfully"  
+}  
+
+#### Reject Slot Linking Requests  
+
+##### Request  
+Functionality: Reject slot linking requests  
+Route: /request/rejectSlotLinking  
+Request type: POST  
+Request Body:  
+{  
+    "message": "Request is rejected successfully"  
+}  
+
+##### Response      
+{  
+    "message": "Request was accepted successfully"  
+}  
 
 #### Add Course Slots  
 
@@ -1087,3 +1315,21 @@ Request Body:
 
 
   
+#### Cancel Slot Linking Requests  
+
+##### Request  
+Functionality: Cancel slot linking requests
+Route: /request/cancelSlotLinking  
+Request type: POST  
+Request Body:  
+{  
+    "requestId":"5fe6094df7c75030509afe35"  (slot linkning request Id from slotLinkningRequestModel)  
+}  
+
+##### Response      
+{  
+    "message": "Slot Linking Request is cancelled successfully"  
+}   
+
+
+
